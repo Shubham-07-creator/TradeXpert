@@ -1,0 +1,11 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 40px;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-links span {
+  margin-left: 20px;
+  cursor: pointer;
+}

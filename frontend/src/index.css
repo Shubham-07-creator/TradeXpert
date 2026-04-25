@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.nav-link {
+  margin-left: 40px;
+
+  /* 🔥 NEW ADD */
+  font-size: 17px;        /* thoda bada */
+  font-weight: 600;       /* bold */
+  color: #000000 !important; /* dark */
+}
+
+.nav-link:hover {
+  color: #3A77CF !important; /* hover pe blue (optional but sexy) */
+}
+
+.col a {
+  text-decoration: none;
+  color: black;
+}
+
+.col2 a {
+  text-decoration: none;
+}
+
+/* Universe section */
+.partner-logo {
+  width: 180px;  
+  height: 80px;   
+  object-fit: contain;
+  margin-bottom: 15px;
+}
+
+#supportHero{
+  background:#387ed1;
+  color:white;
+  padding:70px 0;
+}
+
+#supportHero a{
+  color:white;
+}
+
+#supportWrapper{
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:60px;
+}
+
+.supportRow{
+  align-items:flex-start;
+}
+
+.leftHero h1{
+  font-size:28px;
+  line-height:1.5;
+  margin-bottom:30px;
+}
+
+#supportHero input{
+  width:80%;
+  padding:18px;
+  border:none;
+  border-radius:6px;
+  font-size:18px;
+  margin-bottom:25px;
+}
+
+.heroLinks a{
+  margin-right:25px;
+}
+
+.rightHero h4{
+  margin-bottom:25px;
+  margin-left: 80px;
+  font-size: 30px;
+}
+
+.rightHero li{
+  margin-bottom:20px;
+  margin-left: 80px;
+  font-size: 18px;
+}

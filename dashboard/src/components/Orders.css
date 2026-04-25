@@ -1,0 +1,20 @@
+.order-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.order-table th {
+  background: #111;
+  color: #fff;
+  padding: 10px;
+}
+
+.order-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.order-table tr:hover {
+  background: #f5f5f5;
+  transition: 0.2s;
+}

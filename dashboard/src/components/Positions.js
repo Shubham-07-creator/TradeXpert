@@ -1,9 +1,3 @@
-// ==========================================
-// dashboard/src/Positions.jsx
-// FULL UPDATED COPY-PASTE READY
-// deploy safe + api safe
-// ==========================================
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";

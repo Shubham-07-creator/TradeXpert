@@ -1,9 +1,3 @@
-// ==========================================
-// dashboard/src/Menu.js
-// FULL UPDATED COPY-PASTE READY
-// redirect safe + logout safe
-// ==========================================
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 

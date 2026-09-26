@@ -2,16 +2,36 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getAuthHeader } from "../utils/auth";
+import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+
+const buildLiveMap = (snapshot) => {
+  const map = {};
+  snapshot.forEach((s) => {
+    map[s.name] = s;
+  });
+  return map;
+};
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const [allPositions, setAllPositions] = useState([]);
 
+  // Live-updating price map — see utils/liveMarket.js. Positions whose
+  // name matches a watchlist stock get a moving LTP/P&L automatically.
+  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+
   const [hover, setHover] = useState(null);
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) => {
+      setLiveMap(buildLiveMap(snapshot));
+    });
+    return unsubscribe;
   }, []);
 
   const fetchData = async () => {
@@ -27,13 +47,16 @@ const Positions = () => {
   };
 
   const handleSell = async (stock) => {
+    const live = liveMap[stock.name];
+    const sellPrice = live ? live.price : stock.price;
+
     try {
       await axios.post(
         `${API}/newOrder`,
         {
           name: stock.name,
           qty: stock.qty,
-          price: stock.price,
+          price: sellPrice,
           mode: "SELL",
         },
         { headers: getAuthHeader() },
@@ -72,9 +95,14 @@ const Positions = () => {
 
           <tbody>
             {allPositions.map((stock, i) => {
-              const pnl = (stock.price - stock.avg) * stock.qty;
+              const live = liveMap[stock.name];
+              const price = live ? live.price : stock.price;
+
+              const pnl = (price - stock.avg) * stock.qty;
 
               const cls = pnl >= 0 ? "profit" : "loss";
+
+              const chgLabel = live ? live.percent : stock.chg;
 
               return (
                 <tr
@@ -109,11 +137,11 @@ const Positions = () => {
 
                   <td>{stock.avg.toFixed(2)}</td>
 
-                  <td>{stock.price.toFixed(2)}</td>
+                  <td>{price.toFixed(2)}</td>
 
                   <td className={cls}>{pnl.toFixed(2)}</td>
 
-                  <td>{stock.chg}</td>
+                  <td>{chgLabel}</td>
                 </tr>
               );
             })}

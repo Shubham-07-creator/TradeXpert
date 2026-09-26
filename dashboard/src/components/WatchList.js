@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 
 import axios from "axios";
 import GeneralContext from "./GeneralContext";
@@ -12,26 +12,36 @@ import {
   MoreHoriz,
 } from "@mui/icons-material";
 
-import { watchlist } from "../data/data";
 import { DoughnutChart } from "./DoughnoutChart";
-
-const labels = watchlist.map((subArray) => subArray["name"]);
+import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 
 const WatchList = () => {
   const [search, setSearch] = useState("");
 
+  // Live-updating snapshot of the "market" — see utils/liveMarket.js.
+  // Ticks every ~2.5s so prices/percent move on their own like a real
+  // exchange, without needing a real market-data API.
+  const [liveStocks, setLiveStocks] = useState(getSnapshot());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket(setLiveStocks);
+    return unsubscribe;
+  }, []);
+
   // Search bar used to be decorative — typing in it did nothing.
   // Now it actually filters the visible list.
-  const filteredWatchlist = watchlist.filter((stock) =>
+  const filteredWatchlist = liveStocks.filter((stock) =>
     stock.name.toLowerCase().includes(search.toLowerCase()),
   );
+
+  const labels = liveStocks.map((stock) => stock.name);
 
   const data = {
     labels,
     datasets: [
       {
         label: "Price",
-        data: watchlist.map((stock) => stock.price),
+        data: liveStocks.map((stock) => stock.price),
         backgroundColor: [
           "rgba(255, 99, 132, 0.5)",
           "rgba(54, 162, 235, 0.5)",
@@ -67,7 +77,7 @@ const WatchList = () => {
         />
         <span className="counts">
           {" "}
-          {filteredWatchlist.length} / {watchlist.length}
+          {filteredWatchlist.length} / {liveStocks.length}
         </span>
       </div>
 
@@ -95,13 +105,15 @@ const WatchListItem = ({ stock }) => {
       <div className="item">
         <p className={stock.isDown ? "down" : "up"}>{stock.name}</p>
         <div className="itemInfo">
-          <span className="percent">{stock.percent}</span>
+          <span className={`percent ${stock.isDown ? "down" : "up"}`}>
+            {stock.percent}
+          </span>
           {stock.isDown ? (
             <KeyboardArrowDown className="down" />
           ) : (
             <KeyboardArrowUp className="down" />
           )}
-          <span className="price">{stock.price}</span>
+          <span className="price">{stock.price.toFixed(2)}</span>
         </div>
       </div>
 

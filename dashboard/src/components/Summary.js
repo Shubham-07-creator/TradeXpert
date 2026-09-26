@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
+import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+
+const buildLiveMap = (snapshot) => {
+  const map = {};
+  snapshot.forEach((s) => {
+    map[s.name] = s;
+  });
+  return map;
+};
 
 const Summary = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -8,10 +17,21 @@ const Summary = () => {
   const [holdings, setHoldings] = useState([]);
   const [wallet, setWallet] = useState(0);
 
+  // Live-updating price map so the overall P&L here moves in sync
+  // with Holdings/Positions instead of only refreshing on order.
+  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+
   const user = getCurrentUser();
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) => {
+      setLiveMap(buildLiveMap(snapshot));
+    });
+    return unsubscribe;
   }, []);
 
   const fetchData = async () => {
@@ -29,7 +49,11 @@ const Summary = () => {
   };
 
   const investment = holdings.reduce((sum, h) => sum + h.avg * h.qty, 0);
-  const currentValue = holdings.reduce((sum, h) => sum + h.price * h.qty, 0);
+  const currentValue = holdings.reduce((sum, h) => {
+    const live = liveMap[h.name];
+    const price = live ? live.price : h.price;
+    return sum + price * h.qty;
+  }, 0);
   const pnl = currentValue - investment;
   const pnlPercent = investment ? ((pnl / investment) * 100).toFixed(2) : "0.00";
   const pnlClass = pnl >= 0 ? "profit" : "loss";

@@ -3,16 +3,39 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { VerticalGraph } from "./VerticalGraph";
 import { getAuthHeader } from "../utils/auth";
+import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+
+// Turns the live market snapshot array into a name -> stock lookup map.
+const buildLiveMap = (snapshot) => {
+  const map = {};
+  snapshot.forEach((s) => {
+    map[s.name] = s;
+  });
+  return map;
+};
 
 const Holdings = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const [allHoldings, setAllHoldings] = useState([]);
 
+  // Live-updating price map (ticks every ~2.5s) — see utils/liveMarket.js.
+  // A holding's LTP/P&L now moves on its own instead of only changing
+  // after a manual buy/sell, as long as its name matches a watchlist
+  // stock. Holdings not on the watchlist just keep their stored price.
+  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+
   const [hover, setHover] = useState(null);
 
   useEffect(() => {
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) => {
+      setLiveMap(buildLiveMap(snapshot));
+    });
+    return unsubscribe;
   }, []);
 
   const fetchData = async () => {
@@ -28,13 +51,16 @@ const Holdings = () => {
   };
 
   const handleSell = async (stock) => {
+    const live = liveMap[stock.name];
+    const sellPrice = live ? live.price : stock.price;
+
     try {
       await axios.post(
         `${API}/newOrder`,
         {
           name: stock.name,
           qty: stock.qty,
-          price: stock.price,
+          price: sellPrice,
           mode: "SELL",
         },
         { headers: getAuthHeader() },
@@ -74,11 +100,18 @@ const Holdings = () => {
 
           <tbody>
             {allHoldings.map((stock, i) => {
-              const value = stock.price * stock.qty;
+              const live = liveMap[stock.name];
+              const price = live ? live.price : stock.price;
+
+              const value = price * stock.qty;
 
               const pnl = value - stock.avg * stock.qty;
 
               const cls = pnl >= 0 ? "profit" : "loss";
+
+              const netPercent = ((price - stock.avg) / stock.avg) * 100;
+
+              const dayLabel = live ? live.percent : stock.day;
 
               return (
                 <tr
@@ -111,15 +144,18 @@ const Holdings = () => {
 
                   <td>{stock.avg.toFixed(2)}</td>
 
-                  <td>{stock.price.toFixed(2)}</td>
+                  <td>{price.toFixed(2)}</td>
 
                   <td>{value.toFixed(2)}</td>
 
                   <td className={cls}>{pnl.toFixed(2)}</td>
 
-                  <td>{stock.net}</td>
+                  <td className={netPercent >= 0 ? "profit" : "loss"}>
+                    {netPercent >= 0 ? "+" : ""}
+                    {netPercent.toFixed(2)}%
+                  </td>
 
-                  <td>{stock.day}</td>
+                  <td>{dayLabel}</td>
                 </tr>
               );
             })}
@@ -133,7 +169,9 @@ const Holdings = () => {
           datasets: [
             {
               label: "Price",
-              data: allHoldings.map((s) => s.price),
+              data: allHoldings.map((s) =>
+                liveMap[s.name] ? liveMap[s.name].price : s.price,
+              ),
               backgroundColor: "rgba(255,99,132,0.5)",
             },
           ],

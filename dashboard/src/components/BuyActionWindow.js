@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import GeneralContext from "./GeneralContext";
 import "./BuyActionWindow.css";
-import { watchlist } from "../data/data";
+import { getLivePrice } from "../utils/liveMarket";
 import { getAuthHeader } from "../utils/auth";
 
 const BuyActionWindow = ({ uid, type }) => {
@@ -28,10 +28,10 @@ const BuyActionWindow = ({ uid, type }) => {
         if (stock) {
           setPrice(stock.price);
         } else {
-          const wl = watchlist.find((s) => s.name === uid);
+          const livePrice = getLivePrice(uid);
 
-          if (wl) {
-            setPrice(wl.price);
+          if (livePrice) {
+            setPrice(livePrice);
           }
         }
       } catch (error) {

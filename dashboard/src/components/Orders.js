@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./Orders.css";
+import { getAuthHeader } from "../utils/auth";
 
 const Orders = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -13,7 +14,9 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${API}/orders`);
+      const res = await axios.get(`${API}/orders`, {
+        headers: getAuthHeader(),
+      });
 
       setOrders(res.data);
     } catch (err) {

@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import GeneralContext from "./GeneralContext";
 import "./BuyActionWindow.css";
 import { watchlist } from "../data/data";
+import { getAuthHeader } from "../utils/auth";
 
 const BuyActionWindow = ({ uid, type }) => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -18,7 +19,9 @@ const BuyActionWindow = ({ uid, type }) => {
   useEffect(() => {
     const loadPrice = async () => {
       try {
-        const res = await axios.get(`${API}/allHoldings`);
+        const res = await axios.get(`${API}/allHoldings`, {
+          headers: getAuthHeader(),
+        });
 
         const stock = res.data.find((s) => s.name === uid);
 
@@ -41,12 +44,16 @@ const BuyActionWindow = ({ uid, type }) => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post(`${API}/newOrder`, {
-        name: uid,
-        qty: Number(qty),
-        price: Number(price),
-        mode: type,
-      });
+      await axios.post(
+        `${API}/newOrder`,
+        {
+          name: uid,
+          qty: Number(qty),
+          price: Number(price),
+          mode: type,
+        },
+        { headers: getAuthHeader() },
+      );
 
       toast.success(
         type === "BUY" ? "Buy Successfully ✅" : "Sell Successfully ✅",
@@ -93,7 +100,9 @@ const BuyActionWindow = ({ uid, type }) => {
       </div>
 
       <div className="buttons">
-        <span>Margin required ₹140.65</span>
+        <span>
+          Margin required ₹{(Number(qty) * Number(price) || 0).toFixed(2)}
+        </span>
 
         <div>
           <Link
@@ -113,4 +122,3 @@ const BuyActionWindow = ({ uid, type }) => {
 };
 
 export default BuyActionWindow;
-  

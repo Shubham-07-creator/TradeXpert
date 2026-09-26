@@ -11,6 +11,7 @@ const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
 const { UserModel } = require("./model/UserModel");
+const authMiddleware = require("./middleware/authMiddleware");
 
 const app = express();
 
@@ -24,15 +25,23 @@ const FRONTEND = process.env.FRONTEND_URL || "*";
 // MIDDLEWARE
 // ==========================================
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.DASHBOARD_URL,
+  "http://localhost:3000",
+  "http://localhost:3001",
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: true,
+    origin: allowedOrigins,
     credentials: true,
   }),
 );
 
 app.use(bodyParser.json());
 app.use(express.json());
+
 
 // ==========================================
 // DB CONNECT
@@ -85,6 +94,7 @@ app.post("/signup", async (req, res) => {
       state,
       address,
       password: hashed,
+      wallet: 100000, // every new user starts with a virtual ₹1,00,000
     });
 
     res.json({
@@ -127,6 +137,7 @@ app.post("/login", async (req, res) => {
         id: user._id,
       },
       process.env.JWT_SECRET || "secret123",
+      { expiresIn: "7d" },
     );
 
     res.json({
@@ -142,22 +153,16 @@ app.post("/login", async (req, res) => {
 });
 
 // ==========================================
-// PROFILE
+// PROFILE (protected)
 // ==========================================
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", authMiddleware, async (req, res) => {
   try {
-    const token = req.headers.authorization;
+    const user = await UserModel.findById(req.userId).select("-password");
 
-    if (!token) {
-      return res.status(401).json({
-        message: "No token ❌",
-      });
+    if (!user) {
+      return res.status(404).json({ message: "User not found ❌" });
     }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret123");
-
-    const user = await UserModel.findById(decoded.id);
 
     res.json(user);
   } catch (err) {
@@ -168,15 +173,15 @@ app.get("/profile", async (req, res) => {
 });
 
 // ==========================================
-// UPDATE PROFILE
+// UPDATE PROFILE (protected)
 // ==========================================
 
-app.put("/updateProfile", async (req, res) => {
+app.put("/updateProfile", authMiddleware, async (req, res) => {
   try {
-    const { id, phone, dob, city, state, address } = req.body;
+    const { phone, dob, city, state, address } = req.body;
 
     const updatedUser = await UserModel.findByIdAndUpdate(
-      id,
+      req.userId,
       {
         phone,
         dob,
@@ -187,7 +192,7 @@ app.put("/updateProfile", async (req, res) => {
       {
         new: true,
       },
-    );
+    ).select("-password");
 
     res.json({
       message: "Profile updated ✅",
@@ -201,21 +206,67 @@ app.put("/updateProfile", async (req, res) => {
 });
 
 // ==========================================
-// GET DATA
+// WALLET (protected) — add / withdraw virtual funds
 // ==========================================
 
-app.get("/allHoldings", async (req, res) => {
-  const data = await HoldingsModel.find({});
+app.post("/wallet/add", authMiddleware, async (req, res) => {
+  try {
+    const amount = Number(req.body.amount);
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Enter a valid amount ❌" });
+    }
+
+    const user = await UserModel.findByIdAndUpdate(
+      req.userId,
+      { $inc: { wallet: amount } },
+      { new: true },
+    ).select("-password");
+
+    res.json({ message: "Funds added ✅", user });
+  } catch (err) {
+    res.status(500).json({ message: "Add funds failed ❌" });
+  }
+});
+
+app.post("/wallet/withdraw", authMiddleware, async (req, res) => {
+  try {
+    const amount = Number(req.body.amount);
+    const user = await UserModel.findById(req.userId);
+
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Enter a valid amount ❌" });
+    }
+
+    if (amount > user.wallet) {
+      return res.status(400).json({ message: "Insufficient balance ❌" });
+    }
+
+    user.wallet -= amount;
+    await user.save();
+
+    res.json({ message: "Withdrawal successful ✅", user });
+  } catch (err) {
+    res.status(500).json({ message: "Withdraw failed ❌" });
+  }
+});
+
+// ==========================================
+// GET DATA (protected, scoped to logged-in user)
+// ==========================================
+
+app.get("/allHoldings", authMiddleware, async (req, res) => {
+  const data = await HoldingsModel.find({ user: req.userId });
   res.json(data);
 });
 
-app.get("/allPositions", async (req, res) => {
-  const data = await PositionsModel.find({});
+app.get("/allPositions", authMiddleware, async (req, res) => {
+  const data = await PositionsModel.find({ user: req.userId });
   res.json(data);
 });
 
-app.get("/orders", async (req, res) => {
-  const data = await OrdersModel.find({}).sort({
+app.get("/orders", authMiddleware, async (req, res) => {
+  const data = await OrdersModel.find({ user: req.userId }).sort({
     createdAt: -1,
   });
 
@@ -223,50 +274,98 @@ app.get("/orders", async (req, res) => {
 });
 
 // ==========================================
-// ORDER SYSTEM
+// ORDER SYSTEM (protected, wallet-checked, per-user)
 // ==========================================
 
-app.post("/newOrder", async (req, res) => {
+app.post("/newOrder", authMiddleware, async (req, res) => {
   try {
     const { name, qty, price, mode } = req.body;
 
     const quantity = Number(qty);
+    const orderPrice = Number(price);
 
-    let holdings = await HoldingsModel.find({ name });
+    if (!name || !quantity || quantity <= 0 || !orderPrice || orderPrice <= 0) {
+      return res.status(400).json({ message: "Invalid order details ❌" });
+    }
 
-    let positions = await PositionsModel.find({ name });
+    const user = await UserModel.findById(req.userId);
 
-    // BUY
+    let holdings = await HoldingsModel.find({ user: req.userId, name });
+    let positions = await PositionsModel.find({ user: req.userId, name });
+
+    // ==================== BUY ====================
     if (mode === "BUY") {
-      await HoldingsModel.create({
-        name,
-        qty: quantity,
-        avg: price,
-        price,
-        net: "+0.00%",
-        day: "+0.00%",
-      });
+      const cost = quantity * orderPrice;
 
-      await PositionsModel.create({
-        product: "CNC",
-        name,
-        qty: quantity,
-        avg: price,
-        price,
-        chg: "+0.00%",
-      });
+      if (cost > user.wallet) {
+        return res.status(400).json({
+          message: "Insufficient funds ❌",
+        });
+      }
+
+      // If this stock is already held, merge into it with a new average
+      // price instead of creating a duplicate row every time.
+      let holding = holdings[0];
+
+      if (holding) {
+        const totalQty = holding.qty + quantity;
+        const newAvg =
+          (holding.qty * holding.avg + quantity * orderPrice) / totalQty;
+
+        holding.qty = totalQty;
+        holding.avg = newAvg;
+        holding.price = orderPrice;
+        await holding.save();
+      } else {
+        await HoldingsModel.create({
+          user: req.userId,
+          name,
+          qty: quantity,
+          avg: orderPrice,
+          price: orderPrice,
+          net: "+0.00%",
+          day: "+0.00%",
+        });
+      }
+
+      let position = positions[0];
+
+      if (position) {
+        const totalQty = position.qty + quantity;
+        const newAvg =
+          (position.qty * position.avg + quantity * orderPrice) / totalQty;
+
+        position.qty = totalQty;
+        position.avg = newAvg;
+        position.price = orderPrice;
+        await position.save();
+      } else {
+        await PositionsModel.create({
+          user: req.userId,
+          product: "CNC",
+          name,
+          qty: quantity,
+          avg: orderPrice,
+          price: orderPrice,
+          chg: "+0.00%",
+        });
+      }
+
+      user.wallet -= cost;
+      await user.save();
 
       await OrdersModel.create({
+        user: req.userId,
         name,
         qty: quantity,
-        price,
+        price: orderPrice,
         mode,
       });
 
-      return res.send("Buy success");
+      return res.json({ message: "Buy success ✅", wallet: user.wallet });
     }
 
-    // SELL
+    // ==================== SELL ====================
     if (mode === "SELL") {
       if (!holdings.length) {
         return res.status(400).json({
@@ -322,19 +421,25 @@ app.post("/newOrder", async (req, res) => {
         }
       }
 
+      const proceeds = quantity * orderPrice;
+      user.wallet += proceeds;
+      await user.save();
+
       await OrdersModel.create({
+        user: req.userId,
         name,
         qty: quantity,
-        price,
+        price: orderPrice,
         mode,
       });
 
-      return res.send("Sell success");
+      return res.json({ message: "Sell success ✅", wallet: user.wallet });
     }
 
-    res.status(400).send("Invalid order");
+    res.status(400).json({ message: "Invalid order ❌" });
   } catch (err) {
-    res.status(500).send("Server error");
+    console.log(err);
+    res.status(500).json({ message: "Server error ❌" });
   }
 });
 

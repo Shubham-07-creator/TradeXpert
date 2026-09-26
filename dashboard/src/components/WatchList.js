@@ -18,6 +18,14 @@ import { DoughnutChart } from "./DoughnoutChart";
 const labels = watchlist.map((subArray) => subArray["name"]);
 
 const WatchList = () => {
+  const [search, setSearch] = useState("");
+
+  // Search bar used to be decorative — typing in it did nothing.
+  // Now it actually filters the visible list.
+  const filteredWatchlist = watchlist.filter((stock) =>
+    stock.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
   const data = {
     labels,
     datasets: [
@@ -54,12 +62,17 @@ const WatchList = () => {
           id="search"
           placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
           className="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
-        <span className="counts"> {watchlist.length} / 50</span>
+        <span className="counts">
+          {" "}
+          {filteredWatchlist.length} / {watchlist.length}
+        </span>
       </div>
 
       <ul className="list">
-        {watchlist.map((stock, index) => {
+        {filteredWatchlist.map((stock, index) => {
           return <WatchListItem stock={stock} key={index} />;
         })}
       </ul>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { VerticalGraph } from "./VerticalGraph";
+import { getAuthHeader } from "../utils/auth";
 
 const Holdings = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -16,7 +17,9 @@ const Holdings = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/allHoldings`);
+      const res = await axios.get(`${API}/allHoldings`, {
+        headers: getAuthHeader(),
+      });
 
       setAllHoldings(res.data);
     } catch (err) {
@@ -26,12 +29,16 @@ const Holdings = () => {
 
   const handleSell = async (stock) => {
     try {
-      await axios.post(`${API}/newOrder`, {
-        name: stock.name,
-        qty: stock.qty,
-        price: stock.price,
-        mode: "SELL",
-      });
+      await axios.post(
+        `${API}/newOrder`,
+        {
+          name: stock.name,
+          qty: stock.qty,
+          price: stock.price,
+          mode: "SELL",
+        },
+        { headers: getAuthHeader() },
+      );
 
       toast.success("Sell Stock ✅", {
         style: {

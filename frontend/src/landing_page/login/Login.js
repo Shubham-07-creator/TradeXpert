@@ -27,15 +27,23 @@ function Login() {
         password,
       });
 
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const token = res.data.token;
+      const userStr = JSON.stringify(res.data.user);
+
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", userStr);
 
       window.dispatchEvent(new Event("userChanged"));
 
       toast.success("Welcome back 🚀");
 
-      // ✅ redirect to dashboard
-      window.location.href = DASHBOARD;
+      // Dashboard runs on a different port (different origin), so its
+      // localStorage can't see what we just saved above. Pass the
+      // token/user through the URL — the dashboard picks them up and
+      // saves them into its own localStorage on load.
+      window.location.href = `${DASHBOARD}?token=${encodeURIComponent(
+        token,
+      )}&user=${encodeURIComponent(userStr)}`;
 
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed ❌");

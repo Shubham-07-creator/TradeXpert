@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { getAuthHeader } from "../utils/auth";
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -15,7 +16,9 @@ const Positions = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${API}/allPositions`);
+      const res = await axios.get(`${API}/allPositions`, {
+        headers: getAuthHeader(),
+      });
 
       setAllPositions(res.data);
     } catch (err) {
@@ -25,12 +28,16 @@ const Positions = () => {
 
   const handleSell = async (stock) => {
     try {
-      await axios.post(`${API}/newOrder`, {
-        name: stock.name,
-        qty: stock.qty,
-        price: stock.price,
-        mode: "SELL",
-      });
+      await axios.post(
+        `${API}/newOrder`,
+        {
+          name: stock.name,
+          qty: stock.qty,
+          price: stock.price,
+          mode: "SELL",
+        },
+        { headers: getAuthHeader() },
+      );
 
       toast.success("Sell Order Executed 🚀", {
         style: {

@@ -17,6 +17,14 @@ export const getCurrentUser = () => {
 
 export const isLoggedIn = () => !!localStorage.getItem("token");
 
+// UI-only convenience to show/hide the Admin nav link. The backend's
+// adminMiddleware is what actually enforces this — even if someone
+// bypasses this check in the browser, /admin/* routes reject any
+// email other than this one.
+const ADMIN_EMAIL = "shubhamkumar979883@gmail.com";
+
+export const isAdmin = () => getCurrentUser()?.email === ADMIN_EMAIL;
+
 // Frontend (localhost:3000) and Dashboard (localhost:3001) are two
 // different origins, so localStorage set on one is invisible on the
 // other. The frontend passes the token/user as URL query params on

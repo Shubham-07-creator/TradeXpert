@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { isAdmin } from "../utils/auth";
 
 const Menu = () => {
   const location = useLocation();
@@ -44,7 +45,7 @@ const Menu = () => {
         <ul>
           {/* HOME */}
           <li>
-            <a
+            
               href={FRONTEND}
               style={{
                 background: "linear-gradient(135deg,#387ed1,#2f6bc2)",
@@ -96,6 +97,23 @@ const Menu = () => {
             </Link>
           </li>
 
+          {/* LEADERBOARD */}
+          <li>
+            <Link to="/leaderboard" onClick={() => handleMenuClick(5)}>
+              <p className={isActive("/leaderboard", 5)}>Leaderboard</p>
+            </Link>
+          </li>
+
+          {/* ADMIN — only visible to the admin account; the backend
+              also enforces this independently via adminMiddleware */}
+          {isAdmin() && (
+            <li>
+              <Link to="/admin" onClick={() => handleMenuClick(6)}>
+                <p className={isActive("/admin", 6)}>Admin</p>
+              </Link>
+            </li>
+          )}
+
           {/* LOGOUT */}
           <li>
             <button
@@ -122,4 +140,3 @@ const Menu = () => {
 };
 
 export default Menu;
- 

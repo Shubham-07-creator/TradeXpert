@@ -1,16 +1,23 @@
 import { watchlist as baseWatchlist } from "../data/data";
+import { socket } from "./socket";
 
-// A lightweight in-memory "market simulator" — NOT a real price feed.
-// It nudges each stock's price up/down by a small random amount every
-// couple of seconds so the watchlist feels alive (like a real
-// exchange ticking). Swap this for a real market-data API later.
+// Live market data now comes from the backend over Socket.io (see
+// backend/liveMarket.js + backend/index.js) instead of being
+// simulated separately in every browser tab. This file keeps the
+// same public API it always had (getSnapshot, getLivePrice,
+// subscribeToLiveMarket) so Holdings/Positions/Summary/WatchList/
+// BuyActionWindow don't need any changes — only the data source
+// underneath changed.
 
-const state = {};
+let stocksState = {};
+let niftyState = { price: 0, percent: "+0.00%", changePercent: 0 };
 
+// Seed with the static list so the UI has something to render before
+// the first "market:update" event arrives from the server.
 baseWatchlist.forEach((stock) => {
-  state[stock.name] = {
+  stocksState[stock.name] = {
     name: stock.name,
-    basePrice: stock.price,
+    sector: stock.sector || "Other",
     price: stock.price,
     percent: stock.percent,
     isDown: stock.isDown,
@@ -19,41 +26,31 @@ baseWatchlist.forEach((stock) => {
 
 const listeners = new Set();
 
-const tick = () => {
-  Object.values(state).forEach((stock) => {
-    // random wiggle of roughly ±0.6% per tick
-    const changePercent = (Math.random() - 0.5) * 1.2;
-    const newPrice = Math.max(stock.price * (1 + changePercent / 100), 0.05);
-
-    const totalChangePercent =
-      ((newPrice - stock.basePrice) / stock.basePrice) * 100;
-
-    stock.price = Number(newPrice.toFixed(2));
-    stock.isDown = totalChangePercent < 0;
-    stock.percent = `${
-      totalChangePercent >= 0 ? "+" : ""
-    }${totalChangePercent.toFixed(2)}%`;
+socket.on("market:update", (snapshot) => {
+  const map = {};
+  snapshot.stocks.forEach((s) => {
+    map[s.name] = s;
   });
+  stocksState = map;
+  niftyState = snapshot.nifty;
 
-  const snapshot = getSnapshot();
-  listeners.forEach((cb) => cb(snapshot));
-};
+  const out = getSnapshot();
+  listeners.forEach((cb) => cb(out));
+});
 
-export const getSnapshot = () => Object.values(state);
+export const getSnapshot = () => Object.values(stocksState);
 
-export const getLivePrice = (name) => state[name]?.price;
+export const getNifty = () => niftyState;
+
+export const getLivePrice = (name) => stocksState[name]?.price;
 
 export const subscribeToLiveMarket = (callback) => {
   listeners.add(callback);
   return () => listeners.delete(callback);
 };
 
-let intervalStarted = false;
-
-export const startLiveMarket = () => {
-  if (intervalStarted) return;
-  intervalStarted = true;
-  setInterval(tick, 2500);
+export const subscribeToNifty = (callback) => {
+  const wrapped = () => callback(getNifty());
+  listeners.add(wrapped);
+  return () => listeners.delete(wrapped);
 };
-
-startLiveMarket();

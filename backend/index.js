@@ -1,6 +1,8 @@
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -12,6 +14,8 @@ const { PositionsModel } = require("./model/PositionsModel");
 const { OrdersModel } = require("./model/OrdersModel");
 const { UserModel } = require("./model/UserModel");
 const authMiddleware = require("./middleware/authMiddleware");
+const adminMiddleware = require("./middleware/adminMiddleware");
+const liveMarket = require("./liveMarket");
 
 const app = express();
 
@@ -41,7 +45,6 @@ app.use(
 
 app.use(bodyParser.json());
 app.use(express.json());
-
 
 // ==========================================
 // DB CONNECT
@@ -444,9 +447,124 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 });
 
 // ==========================================
-// SERVER
+// LEADERBOARD (protected — any logged-in user can view)
 // ==========================================
 
-app.listen(PORT, () => {
+app.get("/leaderboard", authMiddleware, async (req, res) => {
+  try {
+    const users = await UserModel.find().select("name wallet _id");
+    const holdings = await HoldingsModel.find();
+
+    const board = users.map((u) => {
+      const userHoldings = holdings.filter(
+        (h) => String(h.user) === String(u._id),
+      );
+
+      const holdingsValue = userHoldings.reduce((sum, h) => {
+        const live = liveMarket.getLivePrice(h.name);
+        const price = live || h.price;
+        return sum + price * h.qty;
+      }, 0);
+
+      return {
+        name: u.name,
+        portfolioValue: Number((u.wallet + holdingsValue).toFixed(2)),
+      };
+    });
+
+    board.sort((a, b) => b.portfolioValue - a.portfolioValue);
+
+    res.json(board.slice(0, 20));
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load leaderboard ❌" });
+  }
+});
+
+// ==========================================
+// ADMIN (protected — only the admin email can access)
+// ==========================================
+
+app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const users = await UserModel.find().select("-password");
+    const holdings = await HoldingsModel.find();
+
+    const data = users.map((u) => {
+      const userHoldings = holdings.filter(
+        (h) => String(h.user) === String(u._id),
+      );
+
+      const investment = userHoldings.reduce(
+        (sum, h) => sum + h.avg * h.qty,
+        0,
+      );
+
+      const holdingsValue = userHoldings.reduce((sum, h) => {
+        const live = liveMarket.getLivePrice(h.name);
+        return sum + (live || h.price) * h.qty;
+      }, 0);
+
+      return {
+        id: u._id,
+        name: u.name,
+        email: u.email,
+        wallet: u.wallet,
+        investment: Number(investment.toFixed(2)),
+        holdingsValue: Number(holdingsValue.toFixed(2)),
+        holdingsCount: userHoldings.length,
+      };
+    });
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load admin data ❌" });
+  }
+});
+
+app.get("/admin/stats", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const totalUsers = await UserModel.countDocuments();
+    const totalOrders = await OrdersModel.countDocuments();
+    const users = await UserModel.find().select("wallet");
+    const totalWallet = users.reduce((sum, u) => sum + u.wallet, 0);
+
+    res.json({
+      totalUsers,
+      totalOrders,
+      totalWallet: Number(totalWallet.toFixed(2)),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load stats ❌" });
+  }
+});
+
+// ==========================================
+// SERVER + SOCKET.IO (real-time market broadcast)
+// ==========================================
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+io.on("connection", (socket) => {
+  // send the current snapshot immediately so a new tab isn't blank
+  // until the next tick
+  socket.emit("market:update", liveMarket.getSnapshot());
+});
+
+// Single shared ticker — updates prices and pushes them to every
+// connected dashboard every 2.5s. This replaces per-browser random
+// simulation with one server-side source of truth all clients share.
+setInterval(() => {
+  const snapshot = liveMarket.tick();
+  io.emit("market:update", snapshot);
+}, 2500);
+
+server.listen(PORT, () => {
   console.log(`Server running on ${PORT} 🚀`);
 });

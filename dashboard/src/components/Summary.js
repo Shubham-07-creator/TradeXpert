@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import BenchmarkChart from "./BenchmarkChart";
+import SectorAllocation from "./SectorAllocation";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -115,6 +117,10 @@ const Summary = () => {
         </div>
         <hr className="divider" />
       </div>
+
+      <BenchmarkChart portfolioValue={wallet + currentValue} />
+
+      <SectorAllocation />
     </>
   );
 };

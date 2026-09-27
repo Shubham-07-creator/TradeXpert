@@ -1,5 +1,19 @@
+:root {
+  --color-primary: #2f6bc2;
+  --color-primary-dark: #245494;
+  --color-profit: #1ea672;
+  --color-loss: #e5484d;
+  --color-text-strong: #1a1f27;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9aa1ab;
+  --color-border: #e8eaed;
+  --color-bg-page: #f7f8fa;
+  --color-bg-card: #ffffff;
+}
+
 body {
   margin: 0;
+  background: var(--color-bg-page);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -93,7 +107,9 @@ code {
 }
 
 .table {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-bg-card);
   padding: 5% 8%;
 }
 
@@ -114,11 +130,12 @@ code {
 
 .imp {
   font-size: 1.5rem;
-  color: #313131;
+  font-weight: 700;
+  color: var(--color-text-strong);
 }
 
 .colored {
-  color: #4184f3;
+  color: var(--color-primary);
 }
 
 .table hr {
@@ -194,9 +211,18 @@ code {
 .order-table td {
   padding: 10px 10px;
   text-align: right;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 0.9rem;
-  color: rgb(73, 73, 73);
+  color: var(--color-text-strong);
+}
+
+.order-table tr td:first-child {
+  font-weight: 600;
+}
+
+.order-table td.profit,
+.order-table td.loss {
+  font-weight: 700;
 }
 
 .align-left {
@@ -204,11 +230,11 @@ code {
 }
 
 .order-table td.profit {
-  color: rgb(72, 194, 55);
+  color: var(--color-profit);
 }
 
 .order-table td.loss {
-  color: rgb(250, 118, 78);
+  color: var(--color-loss);
 }
 
 .row {
@@ -241,7 +267,7 @@ code {
 }
 
 .row .col:last-child h5 {
-  color: rgb(72, 194, 55);
+  color: var(--color-profit);
 }
 
 /* sudo selector */
@@ -276,18 +302,22 @@ code {
 
 .menus li {
   display: inline-block;
-  margin-right: 30px;
+  margin-right: 26px;
   text-decoration: none;
 }
 
 .menu {
-  font-size: 1rem;
-  font-weight: 500;
-  color: rgb(0, 0, 0);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: 0.2s;
+  cursor: pointer;
+  letter-spacing: 0.2px;
 }
 
 .menu.selected {
-  color: rgb(245, 104, 52);
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 hr {
@@ -342,6 +372,20 @@ hr {
 .orders {
   width: 100%;
   height: 90vh;
+  padding: 10px 4px;
+}
+
+.orders h3 {
+  color: var(--color-text-strong);
+  font-weight: 700;
+}
+
+.order-table {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 4px 16px;
 }
 
 .no-orders {
@@ -422,9 +466,18 @@ hr {
 .order-table td {
   padding: 10px 10px;
   text-align: right;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 0.9rem;
-  color: rgb(73, 73, 73);
+  color: var(--color-text-strong);
+}
+
+.order-table tr td:first-child {
+  font-weight: 600;
+}
+
+.order-table td.profit,
+.order-table td.loss {
+  font-weight: 700;
 }
 
 .align-left {
@@ -432,11 +485,11 @@ hr {
 }
 
 .order-table td.profit {
-  color: rgb(72, 194, 55);
+  color: var(--color-profit);
 }
 
 .order-table td.loss {
-  color: rgb(250, 118, 78);
+  color: var(--color-loss);
 }
 
 .row {
@@ -469,7 +522,7 @@ hr {
 }
 
 .row .col:last-child h5 {
-  color: rgb(72, 194, 55);
+  color: var(--color-profit);
 }
 
 /* sudo selector */
@@ -493,7 +546,11 @@ hr {
 }
 
 .section {
-  padding-bottom: 2%;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
 }
 
 .section span {
@@ -525,22 +582,27 @@ hr {
 
 .data .first h3 {
   font-size: 2.5rem;
-  font-weight: 300;
-  color: rgb(71, 71, 71);
+  font-weight: 700;
+  color: var(--color-text-strong);
 }
 
 .data .first p {
   font-size: 0.8rem;
-  color: rgb(136, 136, 136);
+  color: var(--color-text-muted);
 }
 
 .data .first small {
-  font-size: 0.8rem;
-  color: rgb(72, 194, 55);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-profit);
 }
 
 .data .first .profit {
-  color: rgb(72, 194, 55);
+  color: var(--color-profit);
+}
+
+.data .first .loss {
+  color: var(--color-loss);
 }
 
 .data hr {
@@ -559,7 +621,8 @@ hr {
   display: inline;
   margin-left: 5%;
   font-size: 0.9rem;
-  color: rgb(100, 100, 100);
+  font-weight: 600;
+  color: var(--color-text-strong);
 }
 
 .section hr {
@@ -609,22 +672,22 @@ hr {
 
 .index {
   font-size: 0.8rem;
-  font-weight: 500;
+  font-weight: 600;
   text-transform: uppercase;
-  color: rgb(97, 97, 97);
+  color: var(--color-text-muted);
   white-space: nowrap;
 }
 
 .index-points {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: rgb(223, 73, 73);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
 }
 
 .percent {
   font-size: 0.8rem;
-  font-weight: 400;
-  color: rgb(146, 146, 146);
+  font-weight: 500;
+  color: var(--color-text-faint);
 }
 
 /* sudo selectors */
@@ -655,8 +718,13 @@ hr {
   padding: 15px 20px;
   font-size: 0.9rem;
   font-weight: 400;
-  color: rgb(241, 241, 241);
-  border-bottom: 0.8px solid rgb(235, 234, 234);
+  color: var(--color-text-strong);
+  background: var(--color-bg-card);
+  border-bottom: 0.8px solid var(--color-border);
+}
+
+.search::placeholder {
+  color: var(--color-text-faint);
 }
 
 .counts {
@@ -682,34 +750,36 @@ hr {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-weight: 300;
-  font-size: 0.8rem;
+  font-weight: 500;
+  font-size: 0.85rem;
   position: relative;
 }
 
-.item-info {
+.itemInfo {
   display: flex;
   justify-content: space-evenly;
   align-items: center;
 }
 
-.item-info > * {
+.itemInfo > * {
   margin-right: 8px;
 }
 
-.item-info span:nth-child(1) {
-  color: rgb(141, 141, 141);
+.itemInfo span:nth-child(1) {
+  color: var(--color-text-muted);
+  font-weight: 600;
   flex: 1;
 }
 
-.item-info span:nth-child(2) {
-  color: rgb(223, 73, 73);
+.itemInfo span:nth-child(2) {
+  color: var(--color-loss);
   margin-right: 12px;
   flex: 2;
 }
 
-.item-info span:nth-child(3) {
-  color: rgb(223, 73, 73);
+.itemInfo span:nth-child(3) {
+  color: var(--color-loss);
+  font-weight: 700;
   flex: 1;
 }
 
@@ -786,15 +856,15 @@ hr {
 }
 
 .watchlist-number ul li:nth-child(1) {
-  color: rgb(223, 73, 73);
+  color: var(--color-loss);
 }
 
 .down {
-  color: rgb(223, 73, 73);
+  color: var(--color-loss);
 }
 
 .up {
-  color: rgb(103, 201, 136);
+  color: var(--color-profit);
 }
 
 .settings {
@@ -845,29 +915,23 @@ hr {
 
 /* Default menu */
 .menu {
-  color: #444;
-  font-weight: 500;
+  color: var(--color-text-muted);
+  font-weight: 600;
   transition: 0.2s;
   cursor: pointer;
 }
 
-/* 🔵 Hover effect (blue) */
+/* Hover effect */
 .menu:hover {
-  color: #387ed1;
+  color: var(--color-primary);
 }
 
-/* 🔥 Active (selected) = Kite style */
+/* Active (selected) tab */
 .menu.selected {
-  color: #ff5722; /* 🔥 Zerodha/Kite type orange */
-  font-weight: 600;
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 a {
   text-decoration: none;
-}
-
-/* Smooth color transition for live-updating watchlist prices */
-.watchlist-container .price,
-.watchlist-container .percent {
-  transition: color 0.3s ease;
 }

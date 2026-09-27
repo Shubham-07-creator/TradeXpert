@@ -15,14 +15,14 @@ const Menu = () => {
   };
 
   const handleLogout = () => {
-    // clear auth data
+    // Clear auth data
     localStorage.removeItem("user");
     localStorage.removeItem("token");
 
-    // notify listeners
+    // Notify listeners
     window.dispatchEvent(new Event("userChanged"));
 
-    // redirect to frontend
+    // Redirect to frontend
     window.location.href = FRONTEND + "?logout=true";
   };
 
@@ -45,7 +45,7 @@ const Menu = () => {
         <ul>
           {/* HOME */}
           <li>
-            
+            <a
               href={FRONTEND}
               style={{
                 background: "linear-gradient(135deg,#387ed1,#2f6bc2)",
@@ -104,8 +104,7 @@ const Menu = () => {
             </Link>
           </li>
 
-          {/* ADMIN — only visible to the admin account; the backend
-              also enforces this independently via adminMiddleware */}
+          {/* ADMIN */}
           {isAdmin() && (
             <li>
               <Link to="/admin" onClick={() => handleMenuClick(6)}>

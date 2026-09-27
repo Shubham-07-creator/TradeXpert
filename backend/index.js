@@ -385,20 +385,25 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
       }
 
       let remaining = quantity;
+      let realizedPnLThisSell = 0;
 
       for (let h of holdings) {
         if (remaining <= 0) break;
 
-        if (h.qty <= remaining) {
-          remaining -= h.qty;
+        const qtyFromThis = Math.min(h.qty, remaining);
 
+        // The actual gain/loss locked in: what you sold this chunk for
+        // vs. what you originally paid for it (its average buy price).
+        realizedPnLThisSell += (orderPrice - h.avg) * qtyFromThis;
+
+        remaining -= qtyFromThis;
+
+        if (h.qty <= qtyFromThis) {
           await HoldingsModel.deleteOne({
             _id: h._id,
           });
         } else {
-          h.qty -= remaining;
-
-          remaining = 0;
+          h.qty -= qtyFromThis;
 
           await h.save();
         }
@@ -426,6 +431,7 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 
       const proceeds = quantity * orderPrice;
       user.wallet += proceeds;
+      user.realizedPnL += realizedPnLThisSell;
       await user.save();
 
       await OrdersModel.create({
@@ -436,7 +442,11 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         mode,
       });
 
-      return res.json({ message: "Sell success ✅", wallet: user.wallet });
+      return res.json({
+        message: "Sell success ✅",
+        wallet: user.wallet,
+        realizedPnL: realizedPnLThisSell,
+      });
     }
 
     res.status(400).json({ message: "Invalid order ❌" });

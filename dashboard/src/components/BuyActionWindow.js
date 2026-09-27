@@ -19,6 +19,21 @@ const BuyActionWindow = ({ uid, type }) => {
   useEffect(() => {
     const loadPrice = async () => {
       try {
+        // Live price first — this is what actually moves, and is what
+        // makes a sell realize real gain/loss against your buy price.
+        // Previously this used the holding's *stored* price (the price
+        // from your last buy), which stayed frozen — so selling right
+        // after a price move showed no profit/loss until you noticed
+        // and manually edited the price field.
+        const livePrice = getLivePrice(uid);
+
+        if (livePrice) {
+          setPrice(livePrice);
+          return;
+        }
+
+        // Fallback for a stock with no live simulator data — use
+        // whatever price is on record for it.
         const res = await axios.get(`${API}/allHoldings`, {
           headers: getAuthHeader(),
         });
@@ -27,12 +42,6 @@ const BuyActionWindow = ({ uid, type }) => {
 
         if (stock) {
           setPrice(stock.price);
-        } else {
-          const livePrice = getLivePrice(uid);
-
-          if (livePrice) {
-            setPrice(livePrice);
-          }
         }
       } catch (error) {
         console.log(error);
@@ -44,7 +53,7 @@ const BuyActionWindow = ({ uid, type }) => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post(
+      const res = await axios.post(
         `${API}/newOrder`,
         {
           name: uid,
@@ -55,15 +64,27 @@ const BuyActionWindow = ({ uid, type }) => {
         { headers: getAuthHeader() },
       );
 
-      toast.success(
-        type === "BUY" ? "Buy Successfully ✅" : "Sell Successfully ✅",
-        {
+      if (type === "SELL") {
+        const gain = res.data.realizedPnL || 0;
+        const gainText =
+          gain >= 0
+            ? `Sold ✅ — Profit ₹${gain.toFixed(2)}`
+            : `Sold ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
+
+        toast.success(gainText, {
           style: {
-            background: type === "SELL" ? "#ff4d4f" : "#4caf50",
+            background: gain >= 0 ? "#1ea672" : "#e5484d",
             color: "#fff",
           },
-        },
-      );
+        });
+      } else {
+        toast.success("Buy Successfully ✅", {
+          style: {
+            background: "#1ea672",
+            color: "#fff",
+          },
+        });
+      }
 
       closeWindow();
     } catch (err) {

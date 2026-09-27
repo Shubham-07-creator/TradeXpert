@@ -629,6 +629,50 @@ hr {
   margin-top: 6%;
 }
 
+.funds-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stat-card {
+  flex: 1 1 220px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  margin: 0;
+}
+
+.stat-value.profit {
+  color: var(--color-profit);
+}
+
+.stat-value.loss {
+  color: var(--color-loss);
+}
+
+.stat-note {
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+  margin-top: 6px;
+}
+
+.total-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  margin: 6px 0 4px;
+}
+
 .topbar-container {
   width: 100%;
   height: 10vh;

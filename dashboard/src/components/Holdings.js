@@ -55,7 +55,7 @@ const Holdings = () => {
     const sellPrice = live ? live.price : stock.price;
 
     try {
-      await axios.post(
+      const res = await axios.post(
         `${API}/newOrder`,
         {
           name: stock.name,
@@ -66,9 +66,15 @@ const Holdings = () => {
         { headers: getAuthHeader() },
       );
 
-      toast.success("Sell Stock ✅", {
+      const gain = res.data.realizedPnL || 0;
+      const gainText =
+        gain >= 0
+          ? `Sold ✅ — Profit ₹${gain.toFixed(2)}`
+          : `Sold ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
+
+      toast.success(gainText, {
         style: {
-          background: "#ff4d4f",
+          background: gain >= 0 ? "#1ea672" : "#e5484d",
           color: "#fff",
         },
       });

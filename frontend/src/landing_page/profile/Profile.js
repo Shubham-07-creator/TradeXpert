@@ -1,64 +1,43 @@
-// ==========================================
-// frontend/src/Profile.js
-// FULL UPDATED COPY-PASTE READY
-// deploy safe + api safe
-// ==========================================
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import "./profile.css";
 
 function Profile() {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
-
   const [editMode, setEditMode] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const loadUser = () => {
       const updatedUser = JSON.parse(localStorage.getItem("user"));
-
       setUser(updatedUser);
     };
 
     window.addEventListener("storage", loadUser);
-
     window.addEventListener("userChanged", loadUser);
 
     return () => {
       window.removeEventListener("storage", loadUser);
-
       window.removeEventListener("userChanged", loadUser);
     };
   }, []);
 
   if (!user) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "100px",
-        }}
-      >
-        <h2>Access Your Profile</h2>
-
-        <p
-          style={{
-            color: "#666",
-          }}
-        >
-          Please sign in to view your profile.
-        </p>
-
-        <button
-          onClick={() => (window.location.href = "/login")}
-          className="btn btn-primary"
-        >
-          Login Now
-        </button>
+      <div className="profile-page">
+        <div className="profile-empty-card">
+          <h2>Access Your Profile</h2>
+          <p>Please sign in to view your profile.</p>
+          <button
+            className="profile-btn primary"
+            onClick={() => (window.location.href = "/login")}
+          >
+            Login Now
+          </button>
+        </div>
       </div>
     );
   }
@@ -74,23 +53,29 @@ function Profile() {
     try {
       setLoading(true);
 
-      const res = await axios.put(`${API}/updateProfile`, {
-        id: user._id,
-        phone: user.phone,
-        dob: user.dob,
-        city: user.city,
-        state: user.state,
-        address: user.address,
-      });
+      // Bug fix: this request was missing the auth token entirely, so
+      // it always failed against the protected /updateProfile route.
+      const token = localStorage.getItem("token");
+
+      const res = await axios.put(
+        `${API}/updateProfile`,
+        {
+          phone: user.phone,
+          dob: user.dob,
+          city: user.city,
+          state: user.state,
+          address: user.address,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
       localStorage.setItem("user", JSON.stringify(res.data.user));
-
       window.dispatchEvent(new Event("userChanged"));
-
       setUser(res.data.user);
 
       toast.success("Profile updated 🚀");
-
       setEditMode(false);
     } catch (err) {
       toast.error(err.response?.data?.message || "Update failed ❌");
@@ -100,102 +85,44 @@ function Profile() {
   };
 
   return (
-    <div
-      style={{
-        background: "#f5f7fa",
-        padding: "40px",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "700px",
-          margin: "auto",
-          background: "#fff",
-          padding: "30px",
-          borderRadius: "16px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "20px",
-          }}
-        >
-          <div
-            style={{
-              width: "70px",
-              height: "70px",
-              borderRadius: "50%",
-              background: "#387ed1",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "28px",
-              fontWeight: "bold",
-            }}
-          >
+    <div className="profile-page">
+      <div className="profile-card">
+        <div className="profile-header">
+          <div className="profile-avatar">
             {user.name?.charAt(0).toUpperCase()}
           </div>
 
           <div>
             <h3>{user.name}</h3>
-            <p
-              style={{
-                color: "#777",
-              }}
-            >
-              {user.email}
-            </p>
+            <p className="profile-email">{user.email}</p>
           </div>
         </div>
 
-        <hr />
+        <hr className="profile-divider" />
 
-        <div
-          style={{
-            display: "grid",
-            gap: "15px",
-          }}
-        >
+        <div className="profile-fields">
           {["phone", "dob", "city", "state", "address"].map((field) => (
-            <div key={field}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  color: "#888",
-                }}
-              >
-                {field.toUpperCase()}
-              </label>
+            <div className="profile-field" key={field}>
+              <label>{field.toUpperCase()}</label>
 
               {editMode ? (
                 <input
                   name={field}
                   value={user[field] || ""}
                   onChange={handleChange}
-                  className="form-control"
                 />
               ) : (
-                <p>{user[field]}</p>
+                <p>{user[field] || "—"}</p>
               )}
             </div>
           ))}
         </div>
 
-        <div
-          style={{
-            marginTop: "25px",
-            textAlign: "center",
-          }}
-        >
+        <div className="profile-actions">
           {editMode ? (
             <>
               <button
-                className="btn btn-success me-2"
+                className="profile-btn primary"
                 onClick={handleSave}
                 disabled={loading}
               >
@@ -203,7 +130,7 @@ function Profile() {
               </button>
 
               <button
-                className="btn btn-secondary"
+                className="profile-btn secondary"
                 onClick={() => setEditMode(false)}
               >
                 Cancel
@@ -211,7 +138,7 @@ function Profile() {
             </>
           ) : (
             <button
-              className="btn btn-primary"
+              className="profile-btn primary"
               onClick={() => setEditMode(true)}
             >
               Edit Profile
@@ -224,4 +151,3 @@ function Profile() {
 }
 
 export default Profile;
- 

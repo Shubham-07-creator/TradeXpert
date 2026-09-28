@@ -1,10 +1,89 @@
 body {
   margin: 0;
+  background: #fbfcfe;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============ Page-change fade transition ============ */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-fade {
+  animation: pageFadeIn 0.35s ease;
+}
+
+/* ============ Global hover / transition polish ============ */
+a,
+.nav-link {
+  transition: color 0.2s ease;
+}
+
+.btn {
+  border-radius: 8px !important;
+  transition: transform 0.15s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(47, 107, 194, 0.18);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.card {
+  border-radius: 12px !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 34px rgba(20, 30, 60, 0.08) !important;
+}
+
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 2px;
+  background: #3a77cf;
+  transition: width 0.25s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.invest-now-btn {
+  display: inline-block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease !important;
+}
+
+.invest-now-btn:hover {
+  background: #2f6bc2 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(47, 107, 194, 0.3);
 }
 
 code {
@@ -91,4 +170,4 @@ code {
   margin-bottom:20px;
   margin-left: 80px;
   font-size: 18px;
-}
+} 

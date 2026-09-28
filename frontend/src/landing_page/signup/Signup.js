@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import "../../auth.css";
 
 function Signup() {
   const navigate = useNavigate();
@@ -45,32 +46,14 @@ function Signup() {
   };
 
   return (
-    <div
-      style={{
-        background: "#f6f8fb",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          width: "420px",
-          background: "#fff",
-          padding: "35px",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2
-          style={{
-            textAlign: "center",
-            marginBottom: "25px",
-          }}
-        >
-          Create Account
-        </h2>
+    <div className="auth-container">
+      <div className="auth-box" style={{ maxWidth: "440px" }}>
+        <div className="auth-logo">
+          <img src="/media/images/logo2.svg" alt="TradeXpert logo" />
+          <span>TradeXpert</span>
+        </div>
+
+        <h2 className="auth-title">Create Account</h2>
 
         {Object.keys(form).map((field) => (
           <input
@@ -86,44 +69,15 @@ function Signup() {
             placeholder={field.toUpperCase()}
             value={form[field]}
             onChange={handleChange}
-            className="form-control my-2"
           />
         ))}
 
-        <button
-          onClick={handleSignup}
-          disabled={loading}
-          style={{
-            width: "100%",
-            background: "#387ed1",
-            color: "#fff",
-            padding: "10px",
-            borderRadius: "6px",
-            border: "none",
-            fontWeight: "600",
-            marginTop: "10px",
-          }}
-        >
+        <button onClick={handleSignup} disabled={loading}>
           {loading ? "Creating..." : "Signup"}
         </button>
 
-        <p
-          style={{
-            textAlign: "center",
-            marginTop: "15px",
-            color: "#777",
-          }}
-        >
-          Already have account?{" "}
-          <span
-            style={{
-              color: "#387ed1",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate("/login")}
-          >
-            Login
-          </span>
+        <p className="auth-footer-text">
+          Already have an account? <span onClick={() => navigate("/login")}>Login</span>
         </p>
       </div>
     </div>

@@ -2,17 +2,15 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import "../../auth.css";
 
 function Login() {
   const navigate = useNavigate();
 
-  const API =
-    process.env.REACT_APP_API_URL ||
-    "http://localhost:3002";
+  const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const DASHBOARD =
-    process.env.REACT_APP_DASHBOARD_URL ||
-    "http://localhost:3001";
+    process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,14 +35,13 @@ function Login() {
 
       toast.success("Welcome back 🚀");
 
-      // Dashboard runs on a different port (different origin), so its
-      // localStorage can't see what we just saved above. Pass the
+      // Dashboard runs on a different port/domain (different origin), so
+      // its localStorage can't see what we just saved above. Pass the
       // token/user through the URL — the dashboard picks them up and
       // saves them into its own localStorage on load.
       window.location.href = `${DASHBOARD}?token=${encodeURIComponent(
         token,
       )}&user=${encodeURIComponent(userStr)}`;
-
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed ❌");
     } finally {
@@ -53,21 +50,35 @@ function Login() {
   };
 
   return (
-    <div style={{ background: "#f6f8fb", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ width: "400px", background: "#fff", padding: "35px", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "25px" }}>
-          Login to Your Account
-        </h2>
+    <div className="auth-container">
+      <div className="auth-box">
+        <div className="auth-logo">
+          <img src="/media/images/logo2.svg" alt="TradeXpert logo" />
+          <span>TradeXpert</span>
+        </div>
 
-        <input type="email" placeholder="Email" className="form-control my-3" onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" className="form-control my-3" onChange={(e) => setPassword(e.target.value)} />
+        <h2 className="auth-title">Login to Your Account</h2>
 
-        <button onClick={handleLogin} disabled={loading} style={{ width: "100%", background: "#387ed1", color: "#fff", padding: "10px", borderRadius: "6px", border: "none", fontWeight: "600" }}>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button onClick={handleLogin} disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
 
-        <p style={{ textAlign: "center", marginTop: "15px", color: "#777" }}>
-          New here? <span style={{ color: "#387ed1", cursor: "pointer" }} onClick={() => navigate("/signup")}>Create account</span>
+        <p className="auth-footer-text">
+          New here?{" "}
+          <span onClick={() => navigate("/signup")}>Create account</span>
         </p>
       </div>
     </div>

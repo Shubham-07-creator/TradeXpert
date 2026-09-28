@@ -8,9 +8,6 @@ function Navbar() {
   const DASHBOARD =
     process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
 
-  const FRONTEND =
-    process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
-
   useEffect(() => {
     const loadUser = () => {
       const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -38,7 +35,11 @@ function Navbar() {
 
     window.dispatchEvent(new Event("userChanged"));
 
-    window.location.href = FRONTEND + "?logout=true";
+    // Redirect to wherever this page is actually running (same origin)
+    // rather than an env var that might not be set at build time on
+    // this deployment — that mismatch was sending people to the wrong
+    // (localhost) URL after logout on the live site.
+    window.location.href = window.location.origin + "/?logout=true";
   };
 
   return (
@@ -92,8 +93,9 @@ function Navbar() {
               </>
             ) : (
               <li className="nav-item me-2">
-                <a
+                
                   href={DASHBOARD}
+                  className="invest-now-btn"
                   style={{
                     background: "#387ed1",
                     color: "#fff",
@@ -102,9 +104,8 @@ function Navbar() {
                     fontWeight: "600",
                     textDecoration: "none",
                   }}
-                >
-                  Invest Now
-                </a>
+                
+                  Invest Now 
               </li>
             )}
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { getStoredUser } from "../utils/storage";
 
 function Navbar() {
   const [user, setUser] = useState(null);
@@ -10,19 +11,16 @@ function Navbar() {
 
   useEffect(() => {
     const loadUser = () => {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      setUser(storedUser);
+      setUser(getStoredUser());
     };
 
     loadUser();
 
     window.addEventListener("storage", loadUser);
-
     window.addEventListener("userChanged", loadUser);
 
     return () => {
       window.removeEventListener("storage", loadUser);
-
       window.removeEventListener("userChanged", loadUser);
     };
   }, []);
@@ -32,13 +30,11 @@ function Navbar() {
     localStorage.removeItem("token");
 
     setUser(null);
+    setOpen(false);
 
     window.dispatchEvent(new Event("userChanged"));
 
-    // Redirect to wherever this page is actually running (same origin)
-    // rather than an env var that might not be set at build time on
-    // this deployment — that mismatch was sending people to the wrong
-    // (localhost) URL after logout on the live site.
+    // Redirect to current website after logout
     window.location.href = window.location.origin + "/?logout=true";
   };
 
@@ -50,6 +46,7 @@ function Navbar() {
       }}
     >
       <div className="container p-2">
+
         {/* LOGO */}
         <Link
           className="navbar-brand d-flex align-items-center text-decoration-none"
@@ -77,6 +74,8 @@ function Navbar() {
         {/* MENU */}
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav ms-auto align-items-center gap-2">
+
+            {/* LOGIN / SIGNUP OR INVEST NOW */}
             {!user ? (
               <>
                 <li className="nav-item">
@@ -93,7 +92,7 @@ function Navbar() {
               </>
             ) : (
               <li className="nav-item me-2">
-                
+                <a
                   href={DASHBOARD}
                   className="invest-now-btn"
                   style={{
@@ -104,12 +103,14 @@ function Navbar() {
                     fontWeight: "600",
                     textDecoration: "none",
                   }}
-                
-                  Invest Now 
+                >
+                  Invest Now
+                </a>
               </li>
             )}
 
             {/* COMMON LINKS */}
+
             <li className="nav-item">
               <Link className="nav-link" to="/about">
                 About
@@ -137,6 +138,7 @@ function Navbar() {
             {/* USER PROFILE */}
             {user && (
               <li className="nav-item position-relative ms-3">
+
                 {/* AVATAR */}
                 <div
                   onClick={() => setOpen(!open)}
@@ -173,6 +175,8 @@ function Navbar() {
                       zIndex: 999,
                     }}
                   >
+
+                    {/* USER NAME */}
                     <div
                       style={{
                         padding: "12px 15px",
@@ -183,6 +187,7 @@ function Navbar() {
                       {user?.name}
                     </div>
 
+                    {/* PROFILE */}
                     <Link
                       to="/profile"
                       style={{
@@ -196,6 +201,7 @@ function Navbar() {
                       👤 Profile
                     </Link>
 
+                    {/* LOGOUT */}
                     <div
                       onClick={handleLogout}
                       style={{
@@ -208,10 +214,13 @@ function Navbar() {
                     >
                       🚪 Logout
                     </div>
+
                   </div>
                 )}
+
               </li>
             )}
+
           </ul>
         </div>
       </div>

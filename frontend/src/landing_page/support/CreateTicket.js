@@ -9,7 +9,7 @@ function CreateTicket() {
         </h1>
         <div className="col-4 p-5 mt-2">
           <h4 className="mb-5">
-            <i class="fa-solid fa-circle-plus"></i> Account Opening
+            <i className="fa-solid fa-circle-plus"></i> Account Opening
           </h4>
           <a
             href=""
@@ -70,7 +70,7 @@ function CreateTicket() {
         </div>
         <div className="col-4 p-5 mt-2 mb-2">
           <h4 className="mb-5">
-            <i class="fa-solid fa-user"></i> Your TradeXpert Account
+            <i className="fa-solid fa-user"></i> Your TradeXpert Account
           </h4>
           <a
             href=""
@@ -115,7 +115,7 @@ function CreateTicket() {
         </div>
         <div className="col-4 p-5 mt-2 mb-2">
           <h4 className="mb-5">
-            <i class="fa-solid fa-chart-column"></i> Your TradeXpert Account
+            <i className="fa-solid fa-chart-column"></i> Your TradeXpert Account
           </h4>
           <a
             href=""
@@ -192,7 +192,7 @@ function CreateTicket() {
         </div>
         <div className="col-4 p-5 mt-2 mb-2">
           <h4 className="mb-5">
-            <i class="fa-regular fa-credit-card"></i> Funds
+            <i className="fa-regular fa-credit-card"></i> Funds
           </h4>
           <a
             href=""
@@ -229,7 +229,7 @@ function CreateTicket() {
         </div>
         <div className="col-4 p-5 mt-2 mb-2">
           <h4 className="mb-5">
-            <i class="fa-solid fa-circle-notch"></i> Console
+            <i className="fa-solid fa-circle-notch"></i> Console
           </h4>
           <a
             href=""
@@ -282,7 +282,7 @@ function CreateTicket() {
         </div>
         <div className="col-4 p-5 mt-2 mb-2">
           <h4 className="mb-5">
-            <i class="fa-solid fa-coins"></i> Coin
+            <i className="fa-solid fa-coins"></i> Coin
           </h4>
           <a
             href=""

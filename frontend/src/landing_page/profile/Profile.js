@@ -1,96 +1,94 @@
-// ==========================================
-// frontend/src/Profile.js
-// FULL UPDATED COPY-PASTE READY
-// deploy safe + api safe
-// ==========================================
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import { API_URL, getStoredUser, goToDashboard } from "../../utils/storage";
+import "./profile.css";
+
+const FIELDS = [
+  { name: "phone", label: "Phone", icon: "fa-solid fa-phone" },
+  { name: "dob", label: "Date of birth", icon: "fa-solid fa-cake-candles" },
+  { name: "city", label: "City", icon: "fa-solid fa-city" },
+  { name: "state", label: "State", icon: "fa-solid fa-map" },
+  {
+    name: "address",
+    label: "Address",
+    icon: "fa-solid fa-location-dot",
+    full: true,
+  },
+];
 
 function Profile() {
-  const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
-
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
-
+  const [user, setUser] = useState(getStoredUser());
   const [editMode, setEditMode] = useState(false);
-
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const loadUser = () => {
-      const updatedUser = JSON.parse(localStorage.getItem("user"));
-
-      setUser(updatedUser);
-    };
+    const loadUser = () => setUser(getStoredUser());
 
     window.addEventListener("storage", loadUser);
-
     window.addEventListener("userChanged", loadUser);
 
     return () => {
       window.removeEventListener("storage", loadUser);
-
       window.removeEventListener("userChanged", loadUser);
     };
   }, []);
 
   if (!user) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "100px",
-        }}
-      >
-        <h2>Access Your Profile</h2>
-
-        <p
-          style={{
-            color: "#666",
-          }}
-        >
-          Please sign in to view your profile.
-        </p>
-
-        <button
-          onClick={() => (window.location.href = "/login")}
-          className="btn btn-primary"
-        >
-          Login Now
-        </button>
+      <div className="profile-page">
+        <div className="empty-card">
+          <div className="empty-icon">
+            <i className="fa-regular fa-user"></i>
+          </div>
+          <h2>Access your profile</h2>
+          <p>Please login to view and edit your profile.</p>
+          <Link to="/login" className="btn btn-primary btn-lg">
+            Login now
+          </Link>
+        </div>
       </div>
     );
   }
 
   const handleChange = (e) => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value,
-    });
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
+
+  const handleCancel = () => {
+    setUser(getStoredUser());
+    setEditMode(false);
   };
 
   const handleSave = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.put(`${API}/updateProfile`, {
-        id: user._id,
-        phone: user.phone,
-        dob: user.dob,
-        city: user.city,
-        state: user.state,
-        address: user.address,
-      });
+      const token = localStorage.getItem("token");
 
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      // the token must be sent — /updateProfile is a protected route
+      const res = await axios.put(
+        `${API_URL}/updateProfile`,
+        {
+          phone: user.phone,
+          dob: user.dob,
+          city: user.city,
+          state: user.state,
+          address: user.address,
+        },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        },
+      );
 
+      const updated = { ...user, ...res.data.user };
+
+      localStorage.setItem("user", JSON.stringify(updated));
       window.dispatchEvent(new Event("userChanged"));
-
-      setUser(res.data.user);
+      setUser(updated);
 
       toast.success("Profile updated 🚀");
-
       setEditMode(false);
     } catch (err) {
       toast.error(err.response?.data?.message || "Update failed ❌");
@@ -100,123 +98,93 @@ function Profile() {
   };
 
   return (
-    <div
-      style={{
-        background: "#f5f7fa",
-        padding: "40px",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "700px",
-          margin: "auto",
-          background: "#fff",
-          padding: "30px",
-          borderRadius: "16px",
-          boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "20px",
-          }}
-        >
-          <div
-            style={{
-              width: "70px",
-              height: "70px",
-              borderRadius: "50%",
-              background: "#387ed1",
-              color: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "28px",
-              fontWeight: "bold",
-            }}
+    <div className="profile-page">
+      <div className="profile-card">
+        <div className="profile-cover"></div>
+
+        <div className="profile-head">
+          <div className="profile-avatar">
+            {user.name?.charAt(0).toUpperCase() || "U"}
+          </div>
+
+          <div className="profile-id">
+            <h1>{user.name}</h1>
+            <p>{user.email}</p>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-outline-primary profile-dash"
+            onClick={() => goToDashboard()}
           >
-            {user.name?.charAt(0).toUpperCase()}
-          </div>
-
-          <div>
-            <h3>{user.name}</h3>
-            <p
-              style={{
-                color: "#777",
-              }}
-            >
-              {user.email}
-            </p>
-          </div>
+            <i className="fa-solid fa-chart-line"></i> Dashboard
+          </button>
         </div>
 
-        <hr />
-
-        <div
-          style={{
-            display: "grid",
-            gap: "15px",
-          }}
-        >
-          {["phone", "dob", "city", "state", "address"].map((field) => (
-            <div key={field}>
-              <label
-                style={{
-                  fontSize: "13px",
-                  color: "#888",
-                }}
+        <div className="profile-body">
+          <div className="info-grid">
+            {FIELDS.map((f) => (
+              <div
+                className={`info-item ${f.full ? "full" : ""} ${
+                  editMode ? "editing" : ""
+                }`}
+                key={f.name}
               >
-                {field.toUpperCase()}
-              </label>
+                <span className="info-icon">
+                  <i className={f.icon}></i>
+                </span>
 
-              {editMode ? (
-                <input
-                  name={field}
-                  value={user[field] || ""}
-                  onChange={handleChange}
-                  className="form-control"
-                />
-              ) : (
-                <p>{user[field]}</p>
-              )}
-            </div>
-          ))}
-        </div>
+                <div className="info-text">
+                  <label htmlFor={`p-${f.name}`}>{f.label}</label>
 
-        <div
-          style={{
-            marginTop: "25px",
-            textAlign: "center",
-          }}
-        >
-          {editMode ? (
-            <>
+                  {editMode ? (
+                    <input
+                      id={`p-${f.name}`}
+                      name={f.name}
+                      type={f.name === "dob" ? "date" : "text"}
+                      value={user[f.name] || ""}
+                      onChange={handleChange}
+                    />
+                  ) : (
+                    <p>{user[f.name] || "—"}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="profile-actions">
+            {editMode ? (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handleSave}
+                  disabled={loading}
+                >
+                  {loading && <span className="btn-spinner"></span>}
+                  {loading ? "Saving..." : "Save changes"}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-light"
+                  onClick={handleCancel}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </>
+            ) : (
               <button
-                className="btn btn-success me-2"
-                onClick={handleSave}
-                disabled={loading}
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setEditMode(true)}
               >
-                {loading ? "Saving..." : "Save"}
+                <i className="fa-regular fa-pen-to-square"></i> Edit profile
               </button>
-
-              <button
-                className="btn btn-secondary"
-                onClick={() => setEditMode(false)}
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              className="btn btn-primary"
-              onClick={() => setEditMode(true)}
-            >
-              Edit Profile
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -224,4 +192,3 @@ function Profile() {
 }
 
 export default Profile;
- 

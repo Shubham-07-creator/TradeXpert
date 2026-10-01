@@ -17,38 +17,50 @@ export const getCurrentUser = () => {
 
 export const isLoggedIn = () => !!localStorage.getItem("token");
 
-// UI-only convenience to show/hide the Admin nav link. The backend's
-// adminMiddleware is what actually enforces this — even if someone
-// bypasses this check in the browser, /admin/* routes reject any
-// email other than this one.
-const ADMIN_EMAIL = "shubhamkumar979883@gmail.com";
-
-export const isAdmin = () => getCurrentUser()?.email === ADMIN_EMAIL;
+// Role-based admin check — the backend's adminMiddleware enforces
+// this server-side; this is only for UI show/hide of the Admin link.
+export const isAdmin = () => getCurrentUser()?.role === "admin";
 
 // Frontend (localhost:3000) and Dashboard (localhost:3001) are two
 // different origins, so localStorage set on one is invisible on the
-// other. The frontend passes the token/user as URL query params on
-// redirect; this pulls them into the dashboard's own localStorage and
-// then cleans the URL so the token isn't left visible/bookmarked.
-export const bootstrapAuthFromUrl = () => {
+// other. The frontend passes a short-lived one-time auth code as a
+// URL query param; this exchanges it with the backend for a real
+// token, saves into localStorage, then cleans the URL.
+const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
+
+export const bootstrapAuthFromUrl = async () => {
   const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-  const user = params.get("user");
+  const code = params.get("code");
 
-  if (!token) return;
+  if (!code) return;
 
-  localStorage.setItem("token", token);
-  if (user) {
-    localStorage.setItem("user", user);
-  }
-
-  params.delete("token");
-  params.delete("user");
-
+  // Clean URL immediately so the code isn't visible / bookmarkable
+  params.delete("code");
   const cleanUrl =
     window.location.pathname +
     (params.toString() ? `?${params.toString()}` : "") +
     window.location.hash;
-
   window.history.replaceState({}, "", cleanUrl);
+
+  try {
+    const res = await fetch(`${API}/auth/exchange`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!res.ok) {
+      // Code expired or invalid — redirect to login
+      const FRONTEND =
+        process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
+      window.location.href = `${FRONTEND}/login`;
+      return;
+    }
+
+    const data = await res.json();
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+  } catch (err) {
+    console.error("Auth exchange failed:", err);
+  }
 };

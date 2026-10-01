@@ -37,14 +37,20 @@ function Login() {
 
       toast.success("Welcome back 🚀");
 
-      // Dashboard runs on a different port (different origin), so its
-      // localStorage can't see what we just saved above. Pass the
-      // token/user through the URL — the dashboard picks them up and
-      // saves them into its own localStorage on load.
-      window.location.href = `${DASHBOARD}?token=${encodeURIComponent(
-        token,
-      )}&user=${encodeURIComponent(userStr)}`;
+      // Get a short-lived one-time code from the backend and pass
+      // only that code in the URL — NOT the raw token/user. The
+      // dashboard will exchange this code for a real token via
+      // /auth/exchange, so nothing sensitive is ever visible in the
+      // browser address bar, history, or server logs.
+      const codeRes = await axios.post(
+        `${API}/auth/code`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
 
+      window.location.href = `${DASHBOARD}?code=${encodeURIComponent(
+        codeRes.data.code,
+      )}`;
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed ❌");
     } finally {

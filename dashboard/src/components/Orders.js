@@ -7,18 +7,27 @@ const Orders = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const [orders, setOrders] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    fetchOrders(page);
+  }, [page]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (p) => {
     try {
-      const res = await axios.get(`${API}/orders`, {
+      const res = await axios.get(`${API}/orders?page=${p}&limit=20`, {
         headers: getAuthHeader(),
       });
 
-      setOrders(res.data);
+      // Support both paginated and legacy response formats
+      if (Array.isArray(res.data)) {
+        setOrders(res.data);
+        setTotalPages(1);
+      } else {
+        setOrders(res.data.orders || []);
+        setTotalPages(res.data.totalPages || 1);
+      }
     } catch (err) {
       console.log(err);
     }
@@ -76,6 +85,36 @@ const Orders = () => {
           )}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            gap: "10px",
+            marginTop: "15px",
+          }}
+        >
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="btn btn-sm btn-outline-primary"
+          >
+            ← Prev
+          </button>
+          <span style={{ alignSelf: "center" }}>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            disabled={page >= totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="btn btn-sm btn-outline-primary"
+          >
+            Next →
+          </button>
+        </div>
+      )}
     </div>
   );
 };

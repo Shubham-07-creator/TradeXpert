@@ -2,12 +2,13 @@ require("dotenv").config();
 
 const express = require("express");
 const http = require("http");
+const crypto = require("crypto");
 const { Server } = require("socket.io");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
@@ -16,6 +17,13 @@ const { UserModel } = require("./model/UserModel");
 const authMiddleware = require("./middleware/authMiddleware");
 const adminMiddleware = require("./middleware/adminMiddleware");
 const liveMarket = require("./liveMarket");
+
+// Fix 2: Crash early if JWT_SECRET is missing
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET environment variable is not set!");
+  process.exit(1);
+}
 
 const app = express();
 
@@ -43,8 +51,19 @@ app.use(
   }),
 );
 
-app.use(bodyParser.json());
 app.use(express.json());
+
+// Fix 5: Rate limiting on auth routes — max 10 requests per 15 minutes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { message: "Too many attempts, try again later ❌" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Fix 1: In-memory store for one-time auth codes (token exchange)
+const authCodes = new Map();
 
 // ==========================================
 // DB CONNECT
@@ -64,10 +83,10 @@ app.get("/", (req, res) => {
 });
 
 // ==========================================
-// SIGNUP
+// SIGNUP (rate-limited)
 // ==========================================
 
-app.post("/signup", async (req, res) => {
+app.post("/signup", authLimiter, async (req, res) => {
   try {
     const { name, email, phone, dob, city, state, address, password } =
       req.body;
@@ -100,9 +119,13 @@ app.post("/signup", async (req, res) => {
       wallet: 100000, // every new user starts with a virtual ₹1,00,000
     });
 
+    // Fix 3: Never send password hash back to the client
+    const safeUser = user.toObject();
+    delete safeUser.password;
+
     res.json({
       message: "Signup success ✅",
-      user,
+      user: safeUser,
     });
   } catch (err) {
     res.status(500).json({
@@ -112,10 +135,10 @@ app.post("/signup", async (req, res) => {
 });
 
 // ==========================================
-// LOGIN
+// LOGIN (rate-limited)
 // ==========================================
 
-app.post("/login", async (req, res) => {
+app.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -139,19 +162,70 @@ app.post("/login", async (req, res) => {
       {
         id: user._id,
       },
-      process.env.JWT_SECRET || "secret123",
+      JWT_SECRET,
       { expiresIn: "7d" },
     );
+
+    // Fix 3: Strip password from login response too
+    const safeUser = user.toObject();
+    delete safeUser.password;
 
     res.json({
       message: "Login success ✅",
       token,
-      user,
+      user: safeUser,
     });
   } catch (err) {
     res.status(500).json({
       message: "Login failed ❌",
     });
+  }
+});
+
+// ==========================================
+// AUTH CODE EXCHANGE (Fix 1 — secure cross-origin auth)
+// ==========================================
+
+// Step 1: Logged-in user requests a short-lived one-time code
+app.post("/auth/code", authMiddleware, async (req, res) => {
+  try {
+    const user = await UserModel.findById(req.userId).select("-password");
+    if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+    const code = crypto.randomBytes(32).toString("hex");
+
+    // Store code → { token, user } mapping; expires in 30 seconds
+    const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    authCodes.set(code, { token, user, expires: Date.now() + 30_000 });
+
+    // Housekeeping: clean up expired codes
+    for (const [k, v] of authCodes) {
+      if (v.expires < Date.now()) authCodes.delete(k);
+    }
+
+    res.json({ code });
+  } catch (err) {
+    res.status(500).json({ message: "Code generation failed ❌" });
+  }
+});
+
+// Step 2: Dashboard exchanges the code for a real token + user
+app.post("/auth/exchange", async (req, res) => {
+  try {
+    const { code } = req.body;
+    const entry = authCodes.get(code);
+
+    if (!entry || entry.expires < Date.now()) {
+      authCodes.delete(code);
+      return res.status(401).json({ message: "Invalid or expired code ❌" });
+    }
+
+    // One-time use: delete immediately after exchange
+    authCodes.delete(code);
+
+    res.json({ token: entry.token, user: entry.user });
+  } catch (err) {
+    res.status(500).json({ message: "Exchange failed ❌" });
   }
 });
 
@@ -269,11 +343,25 @@ app.get("/allPositions", authMiddleware, async (req, res) => {
 });
 
 app.get("/orders", authMiddleware, async (req, res) => {
-  const data = await OrdersModel.find({ user: req.userId }).sort({
-    createdAt: -1,
-  });
+  // Fix 8: Pagination support — ?page=1&limit=20
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+  const skip = (page - 1) * limit;
 
-  res.json(data);
+  const [data, total] = await Promise.all([
+    OrdersModel.find({ user: req.userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    OrdersModel.countDocuments({ user: req.userId }),
+  ]);
+
+  res.json({
+    orders: data,
+    page,
+    totalPages: Math.ceil(total / limit),
+    total,
+  });
 });
 
 // ==========================================

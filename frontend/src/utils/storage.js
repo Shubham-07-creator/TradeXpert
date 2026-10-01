@@ -1,6 +1,9 @@
 export const API_URL =
   process.env.REACT_APP_API_URL || "http://localhost:3002";
 
+export const DASHBOARD_URL =
+  process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
+
 export const getStoredUser = () => {
   try {
     const user = localStorage.getItem("user");
@@ -11,6 +14,6 @@ export const getStoredUser = () => {
   }
 };
 
-export const goToDashboard = () => {
-  window.location.href = "/dashboard";
+export const goToDashboard = (dashboardUrl = DASHBOARD_URL) => {
+  window.location.href = dashboardUrl;
 };

@@ -1,26 +1,31 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import Dashboard from "./Dashboard";
 import TopBar from "./TopBar";
 import { isLoggedIn, bootstrapAuthFromUrl } from "../utils/auth";
 
-// Runs once, as soon as this module loads — before Home's first
-// render — so that a token/user passed via URL query params (from
-// the frontend's login redirect) lands in localStorage before the
-// isLoggedIn() check below runs.
-bootstrapAuthFromUrl();
-
 const Home = () => {
   const FRONTEND =
     process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
 
+  const [ready, setReady] = useState(false);
+
   useEffect(() => {
-    if (!isLoggedIn()) {
-      window.location.href = `${FRONTEND}/login`;
-    }
+    // bootstrapAuthFromUrl is now async — it exchanges a one-time
+    // code with the backend for a real token. Wait for it to finish
+    // before checking isLoggedIn().
+    const init = async () => {
+      await bootstrapAuthFromUrl();
+      setReady(true);
+
+      if (!isLoggedIn()) {
+        window.location.href = `${FRONTEND}/login`;
+      }
+    };
+    init();
   }, [FRONTEND]);
 
-  if (!isLoggedIn()) {
+  if (!ready || !isLoggedIn()) {
     return null;
   }
 

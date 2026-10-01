@@ -65,17 +65,23 @@ function LoadingFallback() {
 
 function AnimatedRoutes() {
   const location = useLocation();
+  const normalizedPath = location.pathname.replace(/\/+/g, "/");
+  const normalizedLocation =
+    normalizedPath !== location.pathname
+      ? { ...location, pathname: normalizedPath }
+      : location;
 
   return (
-    <div className="page-fade main-content-wrapper" key={location.pathname}>
+    <div className="page-fade main-content-wrapper" key={normalizedPath}>
       <Suspense fallback={<LoadingFallback />}>
-        <Routes location={location}>
+        <Routes location={normalizedLocation}>
           <Route path="/" element={<HomePage />} />
 
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/*" element={<ResetPassword />} />
           <Route path="/profile" element={<Profile />} />
 
           <Route path="/about" element={<AboutPage />} />

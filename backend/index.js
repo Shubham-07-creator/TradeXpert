@@ -326,12 +326,19 @@ app.post("/forgot-password", authLimiter, async (req, res) => {
     user.resetPasswordExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
     await user.save();
 
-    // Determine client base URL
-    const originUrl = req.headers.origin || "http://localhost:3000";
-    const clientBaseUrl =
-      process.env.NODE_ENV === "production" && process.env.FRONTEND_URL
-        ? process.env.FRONTEND_URL
-        : originUrl;
+    // Determine client base URL cleanly without trailing slash
+    let clientBaseUrl = "";
+    const origin = req.headers.origin ? req.headers.origin.trim().replace(/\/+$/, "") : "";
+
+    if (origin && origin.includes("localhost")) {
+      clientBaseUrl = origin;
+    } else if (process.env.FRONTEND_URL) {
+      clientBaseUrl = process.env.FRONTEND_URL.trim().replace(/\/+$/, "");
+    } else if (origin) {
+      clientBaseUrl = origin;
+    } else {
+      clientBaseUrl = "https://tradexpert-vq6s.onrender.com";
+    }
 
     const resetUrl = `${clientBaseUrl}/reset-password?token=${rawResetToken}`;
 

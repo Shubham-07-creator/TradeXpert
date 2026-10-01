@@ -7,7 +7,24 @@ import { API_URL } from "../../utils/storage";
 
 function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get("token") || "";
+  const getRawToken = () => {
+    const fromSearch = searchParams.get("token");
+    if (fromSearch) return fromSearch.trim();
+
+    if (window.location.search.includes("token=")) {
+      const match = window.location.search.match(/[?&]token=([^&#]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]).trim();
+    }
+
+    if (window.location.hash.includes("token=")) {
+      const match = window.location.hash.match(/[#&]token=([^&#]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]).trim();
+    }
+
+    return "";
+  };
+
+  const token = getRawToken();
   const navigate = useNavigate();
 
   const [newPassword, setNewPassword] = useState("");

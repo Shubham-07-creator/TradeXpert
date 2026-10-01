@@ -39,18 +39,20 @@ function AuthShell({ title, subtitle, children, footer }) {
 
       <main className="auth-main">
         <div className="auth-card">
-          <Link to="/" className="auth-logo">
-            <img src="/media/images/logo2.svg" alt="TradeXpert logo" />
-            <span>TradeXpert</span>
-          </Link>
-
-          <h1 className="auth-title">{title}</h1>
-
-          {subtitle && <p className="auth-sub">{subtitle}</p>}
+          {title && (
+            <div className="text-center mb-4">
+              <Link to="/" className="auth-logo d-inline-flex align-items-center gap-2 mb-2 text-decoration-none">
+                <img src="/media/images/logo2.svg" alt="TradeXpert logo" style={{ width: "38px" }} />
+                <span className="fw-bold fs-4 text-primary">TradeXpert</span>
+              </Link>
+              <h1 className="auth-title mt-2 fw-bold fs-3">{title}</h1>
+              {subtitle && <p className="auth-sub text-muted small">{subtitle}</p>}
+            </div>
+          )}
 
           {children}
 
-          {footer && <p className="auth-footer">{footer}</p>}
+          {footer && <p className="auth-footer mt-4 text-center text-muted small">{footer}</p>}
         </div>
       </main>
     </div>

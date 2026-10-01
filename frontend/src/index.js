@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import {
   BrowserRouter,
@@ -9,59 +9,101 @@ import {
 import { Toaster } from "react-hot-toast";
 import "./index.css";
 
+import { ThemeProvider } from "./context/ThemeContext";
+import { AuthProvider } from "./context/AuthContext";
+
 import HomePage from "./landing_page/home/HomePage";
-import Login from "./landing_page/login/Login";
-import Signup from "./landing_page/signup/Signup";
-import Profile from "./landing_page/profile/Profile";
-
-import AboutPage from "./landing_page/about/AboutPage";
-import ProductPage from "./landing_page/products/ProductsPage";
-import PricingPage from "./landing_page/pricing/PricingPage";
-import SupportPage from "./landing_page/support/SupportPage";
-
-import NotFound from "./landing_page/NotFound";
 import Navbar from "./landing_page/Navbar";
 import Footer from "./landing_page/Footer";
 
-// Wrapping the routes in a div keyed by pathname forces a fresh
-// mount whenever the page changes, which replays the .page-fade CSS
-// animation — a simple, dependency-free page transition.
+// Lazy-loaded routes for optimal initial page-load speed
+const Login = React.lazy(() => import("./landing_page/login/Login"));
+const Signup = React.lazy(() => import("./landing_page/signup/Signup"));
+const ForgotPassword = React.lazy(() =>
+  import("./landing_page/login/ForgotPassword")
+);
+const ResetPassword = React.lazy(() =>
+  import("./landing_page/login/ResetPassword")
+);
+const Profile = React.lazy(() => import("./landing_page/profile/Profile"));
+const AboutPage = React.lazy(() => import("./landing_page/about/AboutPage"));
+const ProductPage = React.lazy(() =>
+  import("./landing_page/products/ProductsPage")
+);
+const PricingPage = React.lazy(() =>
+  import("./landing_page/pricing/PricingPage")
+);
+const SupportPage = React.lazy(() =>
+  import("./landing_page/support/SupportPage")
+);
+const NotFound = React.lazy(() => import("./landing_page/NotFound"));
+
+// Fallback spinner while lazy routes load
+function LoadingFallback() {
+  return (
+    <div
+      style={{
+        minHeight: "60vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "12px",
+      }}
+    >
+      <div
+        className="spinner-border text-primary"
+        role="status"
+        style={{ width: "2.5rem", height: "2.5rem" }}
+      >
+        <span className="visually-hidden">Loading TradeXpert...</span>
+      </div>
+      <small className="text-muted fw-semibold">Loading TradeXpert...</small>
+    </div>
+  );
+}
+
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
-    <div className="page-fade" key={location.pathname}>
-      <Routes location={location}>
-        <Route path="/" element={<HomePage />} />
+    <div className="page-fade main-content-wrapper" key={location.pathname}>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes location={location}>
+          <Route path="/" element={<HomePage />} />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/profile" element={<Profile />} />
 
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/product" element={<ProductPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/support" element={<SupportPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/product" element={<ProductPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/support" element={<SupportPage />} />
 
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </div>
   );
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
-      <Toaster />
-
-      <AnimatedRoutes />
-
-      <Footer />
-    </BrowserRouter>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Toaster position="top-right" />
+          <AnimatedRoutes />
+          <Footer />
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
-
 root.render(<App />);

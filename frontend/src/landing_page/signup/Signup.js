@@ -2,11 +2,16 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import AuthShell from "../AuthShell";
+import GoogleAuthButton from "../login/GoogleAuthButton";
+import "../../auth.css";
+
+import { API_URL } from "../../utils/storage";
 
 function Signup() {
   const navigate = useNavigate();
 
-  const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
+  const API = API_URL;
 
   const [form, setForm] = useState({
     name: "",
@@ -20,6 +25,7 @@ function Signup() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     setForm({
@@ -28,7 +34,8 @@ function Signup() {
     });
   };
 
-  const handleSignup = async () => {
+  const handleSignup = async (e) => {
+    if (e) e.preventDefault();
     try {
       setLoading(true);
 
@@ -45,88 +52,88 @@ function Signup() {
   };
 
   return (
-    <div
-      style={{
-        background: "#f6f8fb",
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          width: "420px",
-          background: "#fff",
-          padding: "35px",
-          borderRadius: "12px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
-        }}
-      >
-        <h2
-          style={{
-            textAlign: "center",
-            marginBottom: "25px",
-          }}
-        >
-          Create Account
-        </h2>
+    <AuthShell>
+      <div className="auth-form-container fade-up" style={{ width: "100%", maxWidth: "550px" }}>
+        <div className="text-center mb-4">
+          <img src="/media/images/logo2.svg" alt="TradeXpert" style={{ width: "50px" }} className="mb-2" />
+          <h2 className="fw-bold" style={{ color: "var(--primary-darker)" }}>
+            Create Account
+          </h2>
+          <p className="text-muted">Join millions of traders on TradeXpert</p>
+        </div>
 
-        {Object.keys(form).map((field) => (
-          <input
-            key={field}
-            name={field}
-            type={
-              field === "password"
-                ? "password"
-                : field === "dob"
-                  ? "date"
-                  : "text"
-            }
-            placeholder={field.toUpperCase()}
-            value={form[field]}
-            onChange={handleChange}
-            className="form-control my-2"
-          />
-        ))}
+        {/* Google One-Click Sign Up */}
+        <GoogleAuthButton isSignup={true} />
 
-        <button
-          onClick={handleSignup}
-          disabled={loading}
-          style={{
-            width: "100%",
-            background: "#387ed1",
-            color: "#fff",
-            padding: "10px",
-            borderRadius: "6px",
-            border: "none",
-            fontWeight: "600",
-            marginTop: "10px",
-          }}
-        >
-          {loading ? "Creating..." : "Signup"}
-        </button>
+        <form onSubmit={handleSignup}>
+          <div className="form-grid">
+            <div className="field" style={{ gridColumn: "1 / -1" }}>
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Full Name</label>
+              <input name="name" type="text" placeholder="John Doe" value={form.name} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
 
-        <p
-          style={{
-            textAlign: "center",
-            marginTop: "15px",
-            color: "#777",
-          }}
-        >
-          Already have account?{" "}
-          <span
-            style={{
-              color: "#387ed1",
-              cursor: "pointer",
-            }}
-            onClick={() => navigate("/login")}
+            <div className="field" style={{ gridColumn: "1 / -1" }}>
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Email Address</label>
+              <input name="email" type="email" placeholder="john@example.com" value={form.email} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+
+            <div className="field">
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Phone</label>
+              <input name="phone" type="tel" placeholder="+91 9876543210" value={form.phone} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+            <div className="field">
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Date of Birth</label>
+              <input name="dob" type="date" value={form.dob} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+
+            <div className="field">
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>City</label>
+              <input name="city" type="text" placeholder="Mumbai" value={form.city} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+            <div className="field">
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>State</label>
+              <input name="state" type="text" placeholder="Maharashtra" value={form.state} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+
+            <div className="field" style={{ gridColumn: "1 / -1" }}>
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Address</label>
+              <input name="address" type="text" placeholder="123 Street Name" value={form.address} onChange={handleChange} className="form-control shadow-none" required />
+            </div>
+
+            <div className="field" style={{ gridColumn: "1 / -1" }}>
+              <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Password</label>
+              <div className="input-group">
+                <input 
+                  name="password" 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="Create a strong password" 
+                  value={form.password} 
+                  onChange={handleChange} 
+                  className="form-control border-end-0 shadow-none" 
+                  required 
+                />
+                <span className="input-group-text" onClick={() => setShowPassword(!showPassword)} style={{ cursor: "pointer" }}>
+                  <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"} text-muted`}></i>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="btn btn-primary w-100 py-2 fw-bold hover-scale mt-4"
+            style={{ background: "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)", border: "none", borderRadius: "8px" }}
           >
-            Login
-          </span>
+            {loading ? <><i className="fas fa-spinner fa-spin me-2"></i> Creating Account...</> : "Create Account"}
+          </button>
+        </form>
+
+        <p className="text-center mt-4 text-muted">
+          Already have an account? <span className="fw-bold hover-color" style={{ color: "var(--primary)", cursor: "pointer" }} onClick={() => navigate("/login")}>Login</span>
         </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 

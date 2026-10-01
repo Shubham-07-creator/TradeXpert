@@ -12,6 +12,10 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: "user" }, // "user" or "admin"
   wallet: { type: Number, default: 100000 }, // starting virtual balance ₹1,00,000
   realizedPnL: { type: Number, default: 0 }, // all-time locked-in profit/loss from completed sells
+  googleId: { type: String, default: null },
+  avatar: { type: String, default: null },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
 });
 
 const UserModel = mongoose.model("User", userSchema);

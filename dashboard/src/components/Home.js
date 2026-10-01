@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 
 import Dashboard from "./Dashboard";
 import TopBar from "./TopBar";
-import { isLoggedIn, bootstrapAuthFromUrl } from "../utils/auth";
+import { isLoggedIn, bootstrapAuthFromUrl, FRONTEND } from "../utils/auth";
 
 const Home = () => {
-  const FRONTEND =
-    process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
 
   const [ready, setReady] = useState(false);
 

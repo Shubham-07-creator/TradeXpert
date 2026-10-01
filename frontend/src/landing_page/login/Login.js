@@ -1,24 +1,26 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
+import AuthShell from "../AuthShell";
+import GoogleAuthButton from "./GoogleAuthButton";
+import "../../auth.css";
+
+import { API_URL, DASHBOARD_URL } from "../../utils/storage";
 
 function Login() {
   const navigate = useNavigate();
 
-  const API =
-    process.env.REACT_APP_API_URL ||
-    "http://localhost:3002";
-
-  const DASHBOARD =
-    process.env.REACT_APP_DASHBOARD_URL ||
-    "http://localhost:3001";
+  const API = API_URL;
+  const DASHBOARD = DASHBOARD_URL;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e) => {
+    if (e) e.preventDefault();
     try {
       setLoading(true);
 
@@ -37,20 +39,22 @@ function Login() {
 
       toast.success("Welcome back 🚀");
 
-      // Get a short-lived one-time code from the backend and pass
-      // only that code in the URL — NOT the raw token/user. The
-      // dashboard will exchange this code for a real token via
-      // /auth/exchange, so nothing sensitive is ever visible in the
-      // browser address bar, history, or server logs.
-      const codeRes = await axios.post(
-        `${API}/auth/code`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // Try to get a one-time code for secure redirect
+      try {
+        const codeRes = await axios.post(
+          `${API}/auth/code`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
 
-      window.location.href = `${DASHBOARD}?code=${encodeURIComponent(
-        codeRes.data.code,
-      )}`;
+        window.location.href = `${DASHBOARD}?code=${encodeURIComponent(
+          codeRes.data.code,
+        )}`;
+      } catch (codeErr) {
+        // Code generation failed — fallback: redirect without code
+        // Dashboard will see no token and redirect to login again
+        window.location.href = DASHBOARD;
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Login failed ❌");
     } finally {
@@ -59,24 +63,77 @@ function Login() {
   };
 
   return (
-    <div style={{ background: "#f6f8fb", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div style={{ width: "400px", background: "#fff", padding: "35px", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}>
-        <h2 style={{ textAlign: "center", marginBottom: "25px" }}>
-          Login to Your Account
-        </h2>
+    <AuthShell>
+      <div className="auth-form-container fade-up">
+        <div className="text-center mb-4">
+          <img src="/media/images/logo2.svg" alt="TradeXpert" style={{ width: "50px" }} className="mb-2" />
+          <h2 className="fw-bold" style={{ color: "var(--primary-darker)" }}>
+            Welcome Back
+          </h2>
+          <p className="text-muted">Log in to your TradeXpert account</p>
+        </div>
 
-        <input type="email" placeholder="Email" className="form-control my-3" onChange={(e) => setEmail(e.target.value)} />
-        <input type="password" placeholder="Password" className="form-control my-3" onChange={(e) => setPassword(e.target.value)} />
+        {/* Google One-Click Login */}
+        <GoogleAuthButton isSignup={false} />
 
-        <button onClick={handleLogin} disabled={loading} style={{ width: "100%", background: "#387ed1", color: "#fff", padding: "10px", borderRadius: "6px", border: "none", fontWeight: "600" }}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
+        <form onSubmit={handleLogin}>
+          <div className="field mb-3">
+            <label className="fw-semibold text-muted mb-1" style={{ fontSize: "14px" }}>Email Address</label>
+            <div className="input-group">
+              <span className="input-group-text border-end-0"><i className="fas fa-envelope text-muted"></i></span>
+              <input 
+                type="email" 
+                placeholder="name@example.com" 
+                className="form-control border-start-0 ps-0 shadow-none" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} 
+                required
+              />
+            </div>
+          </div>
 
-        <p style={{ textAlign: "center", marginTop: "15px", color: "#777" }}>
-          New here? <span style={{ color: "#387ed1", cursor: "pointer" }} onClick={() => navigate("/signup")}>Create account</span>
+          <div className="field mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-1">
+              <label className="fw-semibold text-muted mb-0" style={{ fontSize: "14px" }}>Password</label>
+              <Link 
+                to="/forgot-password" 
+                className="text-decoration-none fw-semibold" 
+                style={{ color: "var(--primary)", fontSize: "13px" }}
+              >
+                Forgot Password?
+              </Link>
+            </div>
+            <div className="input-group">
+              <span className="input-group-text border-end-0"><i className="fas fa-lock text-muted"></i></span>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                placeholder="Enter your password" 
+                className="form-control border-start-0 border-end-0 px-0 shadow-none" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)} 
+                required
+              />
+              <span className="input-group-text border-start-0" onClick={() => setShowPassword(!showPassword)} style={{ cursor: "pointer" }}>
+                <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"} text-muted`}></i>
+              </span>
+            </div>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="btn btn-primary w-100 py-2 fw-bold hover-scale"
+            style={{ background: "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)", border: "none", borderRadius: "8px" }}
+          >
+            {loading ? <><i className="fas fa-spinner fa-spin me-2"></i> Logging in...</> : "Login"}
+          </button>
+        </form>
+
+        <p className="text-center mt-4 text-muted">
+          New here? <span className="fw-bold hover-color" style={{ color: "var(--primary)", cursor: "pointer" }} onClick={() => navigate("/signup")}>Create account</span>
         </p>
       </div>
-    </div>
+    </AuthShell>
   );
 }
 

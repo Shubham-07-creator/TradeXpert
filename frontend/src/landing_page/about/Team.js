@@ -8,7 +8,7 @@ function Team() {
       </div>
 
       <div
-        className="row p-3 text-muted"
+        className="row p-3"
         style={{ lineHeight: "1.8", fontSize: "1.2em" }}
       >
         <div className="col-6 p-3 text-center">

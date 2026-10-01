@@ -25,8 +25,18 @@ export const isAdmin = () => getCurrentUser()?.role === "admin";
 // different origins, so localStorage set on one is invisible on the
 // other. The frontend passes a short-lived one-time auth code as a
 // URL query param; this exchanges it with the backend for a real
-// token, saves into localStorage, then cleans the URL.
-const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
+const isLocalhost =
+  typeof window !== "undefined" &&
+  (window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1");
+
+export const API = isLocalhost
+  ? "http://localhost:3002"
+  : process.env.REACT_APP_API_URL || "https://tradexpert-backend-q7pf.onrender.com";
+
+export const FRONTEND = isLocalhost
+  ? "http://localhost:3000"
+  : process.env.REACT_APP_FRONTEND_URL || "https://tradexpert-vq6s.onrender.com";
 
 export const bootstrapAuthFromUrl = async () => {
   const params = new URLSearchParams(window.location.search);

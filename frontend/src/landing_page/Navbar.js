@@ -1,220 +1,271 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
+import MarketTicker from "./MarketTicker";
+import { DASHBOARD_URL } from "../utils/storage";
 
 function Navbar() {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
+
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const DASHBOARD =
-    process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001";
-
-  const FRONTEND =
-    process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
+  const DASHBOARD = DASHBOARD_URL;
 
   useEffect(() => {
-    const loadUser = () => {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      setUser(storedUser);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 30);
     };
-
-    loadUser();
-
-    window.addEventListener("storage", loadUser);
-
-    window.addEventListener("userChanged", loadUser);
-
-    return () => {
-      window.removeEventListener("storage", loadUser);
-
-      window.removeEventListener("userChanged", loadUser);
-    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-
-    setUser(null);
-
-    window.dispatchEvent(new Event("userChanged"));
-
-    window.location.href = FRONTEND + "?logout=true";
-  };
-
   return (
-    <nav
-      className="navbar navbar-expand-lg border-bottom"
-      style={{
-        backgroundColor: "#fff",
-      }}
-    >
-      <div className="container p-2">
-        {/* LOGO */}
-        <Link
-          className="navbar-brand d-flex align-items-center text-decoration-none"
-          to="/"
-        >
-          <img
-            src="media/images/logo2.svg"
-            alt="logo"
-            style={{
-              width: "55px",
-            }}
-          />
+    <header className="fixed-top transition-all" style={{ zIndex: 1030 }}>
+      {/* 1. Live Market Ticker Marquee */}
+      <MarketTicker />
 
-          <h1
-            className="ms-3 mb-0"
-            style={{
-              color: "#3A77CF",
-              fontSize: "42px",
-            }}
+      {/* 2. Main Navigation Bar */}
+      <nav
+        className={`navbar navbar-expand-lg transition-all ${
+          scrolled ? "scrolled shadow-sm" : ""
+        }`}
+        style={{
+          background: isDark
+            ? "rgba(15, 23, 42, 0.92)"
+            : scrolled
+            ? "rgba(255, 255, 255, 0.95)"
+            : "#ffffff",
+          backdropFilter: "blur(12px)",
+          borderBottom: isDark ? "1px solid #334155" : "1px solid #E2E8F0",
+          padding: scrolled ? "10px 0" : "16px 0",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <div className="container">
+          {/* LOGO */}
+          <Link
+            className="navbar-brand d-flex align-items-center text-decoration-none"
+            to="/"
           >
-            <b>TradeXpert</b>
-          </h1>
-        </Link>
+            <img
+              src="/media/images/logo2.svg"
+              alt="TradeXpert logo"
+              style={{
+                width: "42px",
+                marginRight: "10px",
+                transition: "transform 0.3s ease",
+              }}
+              className="logo-hover"
+            />
+            <span
+              className="mb-0 fw-bold"
+              style={{
+                color: "var(--primary)",
+                fontSize: "26px",
+                letterSpacing: "-0.5px",
+              }}
+            >
+              TradeXpert
+            </span>
+          </Link>
 
-        {/* MENU */}
-        <div className="collapse navbar-collapse">
-          <ul className="navbar-nav ms-auto align-items-center gap-2">
-            {!user ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/login">
-                    Login
-                  </Link>
-                </li>
+          {/* RIGHT TOOLS (Mobile Theme Toggle + Hamburger) */}
+          <div className="d-flex align-items-center gap-2 d-lg-none">
+            <button
+              type="button"
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {isDark ? (
+                <i className="fa-solid fa-sun" style={{ color: "#FBBF24" }}></i>
+              ) : (
+                <i className="fa-solid fa-moon"></i>
+              )}
+            </button>
 
-                <li className="nav-item">
-                  <Link className="nav-link" to="/signup">
-                    Signup
-                  </Link>
-                </li>
-              </>
-            ) : (
-              <li className="nav-item me-2">
-                <a
-                  href={DASHBOARD}
-                  style={{
-                    background: "#387ed1",
-                    color: "#fff",
-                    padding: "8px 18px",
-                    borderRadius: "8px",
-                    fontWeight: "600",
-                    textDecoration: "none",
-                  }}
-                >
-                  Invest Now
-                </a>
+            <button
+              className="navbar-toggler border-0 shadow-none p-1"
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+          </div>
+
+          {/* MENU */}
+          <div className={`collapse navbar-collapse ${menuOpen ? "show" : ""}`}>
+            <ul className="navbar-nav ms-auto align-items-center gap-2 gap-lg-3">
+              {/* COMMON LINKS */}
+              <li className="nav-item">
+                <Link className="nav-link fw-semibold" to="/about">
+                  About
+                </Link>
               </li>
-            )}
+              <li className="nav-item">
+                <Link className="nav-link fw-semibold" to="/product">
+                  Product
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link fw-semibold" to="/pricing">
+                  Pricing
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link fw-semibold" to="/support">
+                  Support
+                </Link>
+              </li>
 
-            {/* COMMON LINKS */}
-            <li className="nav-item">
-              <Link className="nav-link" to="/about">
-                About
-              </Link>
-            </li>
-
-            <li className="nav-item">
-              <Link className="nav-link" to="/product">
-                Product
-              </Link>
-            </li>
-
-            <li className="nav-item">
-              <Link className="nav-link" to="/pricing">
-                Pricing
-              </Link>
-            </li>
-
-            <li className="nav-item">
-              <Link className="nav-link" to="/support">
-                Support
-              </Link>
-            </li>
-
-            {/* USER PROFILE */}
-            {user && (
-              <li className="nav-item position-relative ms-3">
-                {/* AVATAR */}
-                <div
-                  onClick={() => setOpen(!open)}
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    background: "#fff",
-                    border: "2px solid #387ed1",
-                    color: "#387ed1",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    fontWeight: "700",
-                    boxShadow: "0 0 10px rgba(56,126,209,0.2)",
-                  }}
+              {/* DESKTOP THEME TOGGLE */}
+              <li className="nav-item d-none d-lg-block">
+                <button
+                  type="button"
+                  className="theme-toggle-btn"
+                  onClick={toggleTheme}
+                  title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
                 >
-                  {user?.name?.charAt(0).toUpperCase()}
-                </div>
+                  {isDark ? (
+                    <i
+                      className="fa-solid fa-sun"
+                      style={{ color: "#FBBF24" }}
+                    ></i>
+                  ) : (
+                    <i className="fa-solid fa-moon"></i>
+                  )}
+                </button>
+              </li>
 
-                {/* DROPDOWN */}
-                {open && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: "55px",
-                      right: "0",
-                      background: "#fff",
-                      borderRadius: "12px",
-                      boxShadow: "0 10px 25px rgba(0,0,0,0.12)",
-                      minWidth: "200px",
-                      overflow: "hidden",
-                      zIndex: 999,
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: "12px 15px",
-                        fontWeight: "600",
-                        borderBottom: "1px solid #eee",
-                      }}
-                    >
-                      {user?.name}
-                    </div>
-
+              {!user ? (
+                <div className="d-flex flex-column flex-lg-row gap-2 ms-lg-2 mt-3 mt-lg-0">
+                  <li className="nav-item">
                     <Link
-                      to="/profile"
-                      style={{
-                        padding: "12px 15px",
-                        display: "block",
-                        textDecoration: "none",
-                        color: "#333",
-                      }}
-                      onClick={() => setOpen(false)}
+                      className="btn btn-outline-primary px-3 py-1 fw-semibold rounded-pill"
+                      to="/login"
                     >
-                      👤 Profile
+                      Login
                     </Link>
-
-                    <div
-                      onClick={handleLogout}
+                  </li>
+                  <li className="nav-item">
+                    <Link
+                      className="btn btn-primary px-3 py-1 fw-semibold rounded-pill shadow-sm"
                       style={{
-                        padding: "12px 15px",
-                        cursor: "pointer",
-                        color: "#e53935",
-                        fontWeight: "600",
-                        borderTop: "1px solid #eee",
+                        background:
+                          "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
+                        border: "none",
+                      }}
+                      to="/signup"
+                    >
+                      Sign Up
+                    </Link>
+                  </li>
+                </div>
+              ) : (
+                <div className="d-flex flex-column flex-lg-row align-items-center gap-3 ms-lg-2 mt-3 mt-lg-0">
+                  <li className="nav-item">
+                    <a
+                      href={DASHBOARD}
+                      className="btn btn-primary px-4 py-2 fw-semibold rounded-pill shadow-sm hover-scale"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
+                        border: "none",
+                        fontSize: "0.95rem",
                       }}
                     >
-                      🚪 Logout
+                      <i className="fa-solid fa-chart-line me-1"></i> Invest Now
+                    </a>
+                  </li>
+
+                  {/* USER PROFILE AVATAR & DROPDOWN */}
+                  <li className="nav-item position-relative">
+                    <div
+                      onClick={() => setOpen(!open)}
+                      style={{
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "50%",
+                        background: isDark
+                          ? "linear-gradient(135deg, #1E3A8A 0%, #0F172A 100%)"
+                          : "linear-gradient(135deg, #EBF2FC 0%, #F8FAFD 100%)",
+                        border: "2px solid var(--primary)",
+                        color: "var(--primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        fontWeight: "bold",
+                        fontSize: "17px",
+                        boxShadow: "0 4px 12px rgba(56,126,209,0.18)",
+                        transition: "all 0.3s ease",
+                      }}
+                      className="avatar-hover"
+                    >
+                      {user?.name?.trim()?.charAt(0)?.toUpperCase() || "U"}
                     </div>
-                  </div>
-                )}
-              </li>
-            )}
-          </ul>
+
+                    {/* DROPDOWN */}
+                    <div
+                      className={`dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 p-0 ${
+                        open ? "show d-block" : "d-none"
+                      }`}
+                      style={{
+                        minWidth: "230px",
+                        animation: open
+                          ? "fadeIn 0.2s ease-out forwards"
+                          : "none",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <div
+                        className="p-3 border-bottom"
+                        style={{
+                          background: isDark ? "#0F172A" : "#F8FAFD",
+                        }}
+                      >
+                        <p className="mb-0 fw-bold" style={{ color: "var(--ink)" }}>
+                          {user?.name}
+                        </p>
+                        <small className="text-muted">{user?.email}</small>
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2"
+                        onClick={() => setOpen(false)}
+                      >
+                        <i className="fa-regular fa-user text-muted"></i> View Profile
+                      </Link>
+                      <a
+                        href={DASHBOARD}
+                        className="dropdown-item py-2 fw-semibold d-flex align-items-center gap-2"
+                        onClick={() => setOpen(false)}
+                      >
+                        <i className="fa-solid fa-chart-line text-muted"></i> Trading Dashboard
+                      </a>
+                      <div className="dropdown-divider my-0"></div>
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          logout();
+                        }}
+                        className="dropdown-item py-2 fw-semibold text-danger d-flex align-items-center gap-2"
+                      >
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                      </button>
+                    </div>
+                  </li>
+                </div>
+              )}
+            </ul>
+          </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }
 

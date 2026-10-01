@@ -1,149 +1,201 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Footer() {
   return (
-    <footer style={{backgroundColor: "#e1e5f2"}}>
-    <div className="container border-top mt-5">
-      <div className="row mt-5">
-        <div className="col text-center">
-          <img src="media/images/logo2.svg" style={{ width: "20%" }} /><h3 style={{ color: "#3A77CF" }}>
-           <b>TradeXpert</b>
-          </h3>
-          <p>© 2010 - 2026, TradeXpert Broking Ltd.All rights reserved.</p>
+    <footer className="site-footer pt-5 pb-4">
+      <div className="container mt-2">
+        <div className="row fade-up stagger-1">
+          {/* Brand Column */}
+          <div className="col-lg-3 col-md-6 mb-4">
+            <div className="d-flex align-items-center mb-3">
+              <img
+                src="/media/images/logo2.svg"
+                alt="TradeXpert Logo"
+                style={{ width: "38px" }}
+              />
+              <span className="footer-brand-title ms-2 fs-4">TradeXpert</span>
+            </div>
+            <p className="text-muted small">
+              © 2010 - 2026, TradeXpert Broking Ltd. All rights reserved.
+            </p>
+            <div className="d-flex gap-2 mt-3">
+              <a
+                href="#"
+                className="footer-social-link"
+                title="X / Twitter"
+              >
+                𝕏
+              </a>
+              <a
+                href="#"
+                className="footer-social-link"
+                title="Facebook"
+              >
+                f
+              </a>
+              <a
+                href="#"
+                className="footer-social-link"
+                title="LinkedIn"
+              >
+                in
+              </a>
+            </div>
+          </div>
+
+          {/* Company Links */}
+          <div className="col-lg-2 col-md-6 col-6 mb-4">
+            <h6 className="footer-heading">Company</h6>
+            <ul className="list-unstyled">
+              <li>
+                <Link to="/about" className="footer-link">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/product" className="footer-link">
+                  Products
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="footer-link">
+                  Pricing
+                </Link>
+              </li>
+              <li>
+                <a href="#calculators" className="footer-link">
+                  Calculators
+                </a>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  Careers
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Support Links */}
+          <div className="col-lg-2 col-md-6 col-6 mb-4">
+            <h6 className="footer-heading">Support</h6>
+            <ul className="list-unstyled">
+              <li>
+                <Link to="/support" className="footer-link">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/support" className="footer-link">
+                  Support Portal
+                </Link>
+              </li>
+              <li>
+                <a href="#faq" className="footer-link">
+                  FAQs
+                </a>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  File a Complaint
+                </a>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  Market Status
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Account Links */}
+          <div className="col-lg-2 col-md-6 col-6 mb-4">
+            <h6 className="footer-heading">Account</h6>
+            <ul className="list-unstyled">
+              <li>
+                <Link to="/signup" className="footer-link">
+                  Open Demat
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="footer-link">
+                  Sign In
+                </Link>
+              </li>
+              <li>
+                <Link to="/profile" className="footer-link">
+                  My Profile
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  Virtual Trading
+                </a>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  Referral Program
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Quick Links */}
+          <div className="col-lg-3 col-md-6 col-6 mb-4">
+            <h6 className="footer-heading">Trading Tools</h6>
+            <ul className="list-unstyled">
+              <li>
+                <a href="#calculators" className="footer-link">
+                  Brokerage Calculator
+                </a>
+              </li>
+              <li>
+                <a href="#calculators" className="footer-link">
+                  SIP Calculator
+                </a>
+              </li>
+              <li>
+                <Link to="/pricing" className="footer-link">
+                  Fee Schedule
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  Market Holidays
+                </a>
+              </li>
+              <li>
+                <a href="#" className="footer-link">
+                  API Documentation
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-        <div className="col">
-          <p><b>Company</b></p>
-          <a href="">About</a>
-          <br /><br/>
-          <a href="">Philosophy</a>
-          <br /><br/>
-          <a href="">Press & media</a>
-          <br /><br/>
-          <a href="">Careers</a>
-          <br /><br/>
-          <a href="">TradeXpert Cares (CSR)</a>
-          <br /><br/>
-          <a href="">TradeXpert.tech</a>
-          <br /><br/>
-          <a href="">Open source</a>
-        </div>
-        <div className="col">
-          <p><b>Support</b></p>
-          <a href="">Contact us</a>
-          <br /><br/>
-          <a href="">Support portal</a>
-          <br /><br/>
-          <a href="">How to file a complaint?</a>
-          <br /><br/>
-          <a href="">Status of your complaints</a>
-          <br /><br/>
-          <a href="">Bulletin</a>
-          <br /><br/>
-          <a href="">Circular</a>
-          <br /><br/>
-          <a href="">Z-Connect blog</a>
-          <br/><br/>
-          <a href="">Downloads</a>
-          <br/><br/>
-        </div>
-        <div className="col">
-          <p><b>Account</b></p>
-          <a href="">Open demat account</a>
-          <br /><br/>
-          <a href="">Minor demat account</a>
-          <br /><br/>
-          <a href="">NRI demat account</a>
-          <br /><br/>
-          <a href="">Commodity</a>
-          <br /><br/>
-          <a href="">Dematerialisation</a>
-          <br /><br/>
-          <a href="">Fund transfer</a>
-          <br /><br/>
-          <a href="">MTF</a>
-          <br/><br/>
-          <a href="">Referral program</a>
-          <br/><br/>
-        </div>
-        <div className="col">
-          <p><b>Quick Links</b></p>
-          <a href="">Upcoming IPOs</a>
-          <br /><br/>
-          <a href="">Brokerage charges</a>
-          <br /><br/>
-          <a href="">Market holidays</a>
-          <br /><br/>
-          <a href="">Economic calendar</a>
-          <br /><br/>
-          <a href="">Calculators</a>
-          <br /><br/>
-          <a href="">Markets</a>
-          <br /><br/>
-          <a href="">Sectors</a>
-          <br /><br/>
+
+        {/* Legal Disclaimer Section */}
+        <div className="footer-divider border-top my-4 pt-4 footer-legal-text fade-up stagger-2">
+          <p>
+            TradeXpert Broking Ltd.: Member of NSE, BSE, MCX & MSEI – SEBI
+            Registration no.: INZ000031633 CDSL/NSDL: Depository services
+            through TradeXpert Broking Ltd. – SEBI Registration no.:
+            IN-DP-431-2019 Registered Address: TradeXpert Broking Ltd., #153/154,
+            4th Cross, Dollars Colony, Opp. Clarence Public School, J.P Nagar 4th
+            Phase, Bengaluru - 560078, Karnataka, India.
+          </p>
+          <p>
+            Procedure to file a complaint on SEBI SCORES: Register on SCORES
+            portal. Mandatory details for filing complaints on SCORES: Name, PAN,
+            Address, Mobile Number, E-mail ID. Benefits: Effective
+            Communication, Speedy redressal of grievances.
+          </p>
+          <p>
+            Investments in securities market are subject to market risks; read
+            all the related documents carefully before investing. Brokerage will
+            not exceed the SEBI prescribed limit.
+          </p>
         </div>
       </div>
-      <div className="mt-5 text-small text-muted" style={{fontSize: "14px"}}>
-      <p>
-        TradeXpert Broking Ltd.: Member of NSE, BSE, MCX & MSEI – SEBI Registration
-        no.: INZ000031633 CDSL/NSDL: Depository services through TradeXpert Broking
-        Ltd. – SEBI Registration no.: IN-DP-431-2019 Registered Address: Zerodha
-        Broking Ltd., #153/154, 4th Cross, Dollars Colony, Opp. Clarence Public
-        School, J.P Nagar 4th Phase, Bengaluru - 560078, Karnataka, India. For
-        any complaints pertaining to securities broking please write to
-        complaints@TradeXpert.com, for DP related to dp@TradeXpert.com. Please ensure
-        you carefully read the Risk Disclosure Document as prescribed by SEBI |
-        ICF
-      </p>
-      <p>
-        Procedure to file a complaint on SEBI SCORES: Register on SCORES portal.
-        Mandatory details for filing complaints on SCORES: Name, PAN, Address,
-        Mobile Number, E-mail ID. Benefits: Effective Communication, Speedy
-        redressal of the grievances
-      </p>
-      <p>Smart Online Dispute Resolution | Grievances Redressal Mechanism</p>
-      <p>
-        Investments in securities market are subject to market risks; read all
-        the related documents carefully before investing.
-      </p>
-      <p>
-        Attention investors: 1) Stock brokers can accept securities as margins
-        from clients only by way of pledge in the depository system w.e.f
-        September 01, 2020. 2) Update your e-mail and phone number with your
-        stock broker / depository participant and receive OTP directly from
-        depository on your e-mail and/or mobile number to create pledge. 3)
-        Check your securities / MF / bonds in the consolidated account statement
-        issued by NSDL/CDSL every month.
-      </p>
-      <p>
-        India's largest broker based on networth as per NSE. NSE broker
-        factsheet
-      </p>
-      <p>
-        "Prevent unauthorised transactions in your account. Update your mobile
-        numbers/email IDs with your stock brokers. Receive information of your
-        transactions directly from Exchange on your mobile/email at the end of
-        the day. Issued in the interest of investors. KYC is one time exercise
-        while dealing in securities markets - once KYC is done through a SEBI
-        registered intermediary (broker, DP, Mutual Fund etc.), you need not
-        undergo the same process again when you approach another intermediary."
-        Dear Investor, if you are subscribing to an IPO, there is no need to
-        issue a cheque. Please write the Bank account number and sign the IPO
-        application form to authorize your bank to make payment in case of
-        allotment. In case of non allotment the funds will remain in your bank
-        account. As a business we don't give stock tips, and have not authorized
-        anyone to trade on behalf of others. If you find anyone claiming to be
-        part of Zerodha and offering such services, please create a ticket here.
-      </p>
-      <p>
-        *Customers availing insurance advisory services offered by Ditto
-        (Tacterial Consulting Private Limited | IRDAI Registered Corporate Agent
-        (Composite) License No CA0738) will not have access to the exchange
-        investor grievance redressal forum, SEBI SCORES/ODR, or arbitration
-        mechanism for such products.
-      </p>
-      </div>
-    </div>
     </footer>
   );
 }

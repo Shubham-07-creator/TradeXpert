@@ -694,6 +694,17 @@ a {
   margin: 4px 0 0 0;
 }
 
+@keyframes cardFloatIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .stats-card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -701,21 +712,47 @@ a {
   margin-bottom: 24px;
 }
 
+.stats-card-grid > *:nth-child(1) { animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both; }
+.stats-card-grid > *:nth-child(2) { animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both; }
+.stats-card-grid > *:nth-child(3) { animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.stats-card-grid > *:nth-child(4) { animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both; }
+
 .stat-card {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 22px 24px;
   box-shadow: var(--shadow-sm);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
+  animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  border-color: rgba(56, 126, 209, 0.4);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(56, 126, 209, 0.2);
+}
+
+[data-theme="dark"] .stat-card:hover {
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 147, 230, 0.3);
+}
+
+.stat-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 60%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.stat-card:hover::after {
+  opacity: 1;
 }
 
 .stat-card-label {
@@ -725,14 +762,25 @@ a {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
+  transition: color 0.2s ease;
+}
+
+.stat-card:hover .stat-card-label {
+  color: var(--color-primary);
 }
 
 .stat-card-value {
-  font-size: 1.8rem;
+  font-size: 1.85rem;
   font-weight: 800;
   color: var(--color-text-strong);
   letter-spacing: -0.5px;
   margin: 0;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: left;
+}
+
+.stat-card:hover .stat-card-value {
+  transform: scale(1.025);
 }
 
 .stat-card-sub {
@@ -755,6 +803,16 @@ a {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   margin-bottom: 24px;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.table-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.1), 0 0 0 1px var(--color-border-hover);
+  border-color: var(--color-border-hover);
 }
 
 .table-responsive {
@@ -789,8 +847,16 @@ a {
   transition: background-color 0.15s ease;
 }
 
+.order-table tbody tr {
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
 .order-table tbody tr:hover td {
   background-color: var(--color-bg-hover);
+}
+
+.order-table tbody tr:hover {
+  transform: scale(1.002);
 }
 
 .order-table tbody tr:last-child td {
@@ -807,6 +873,11 @@ a {
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.badge-buy:hover {
+  transform: scale(1.05);
 }
 
 .badge-sell {
@@ -818,6 +889,11 @@ a {
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.badge-sell:hover {
+  transform: scale(1.05);
 }
 
 .pnl-pill {
@@ -826,6 +902,11 @@ a {
   padding: 3px 8px;
   border-radius: 6px;
   display: inline-block;
+  transition: transform 0.15s ease;
+}
+
+.pnl-pill:hover {
+  transform: scale(1.04);
 }
 
 .pnl-pill.profit {
@@ -853,8 +934,22 @@ a {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: 20px;
+  padding: 22px 24px;
   box-shadow: var(--shadow-sm);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cardFloatIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chart-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(56, 126, 209, 0.35);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.12), 0 0 0 1px rgba(56, 126, 209, 0.18);
+}
+
+[data-theme="dark"] .chart-card:hover {
+  box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(79, 147, 230, 0.25);
 }
 
 .chart-card-header {

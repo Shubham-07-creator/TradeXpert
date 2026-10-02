@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import ReactDOM from "react-dom";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -415,7 +416,7 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
     },
   };
 
-  return (
+  const modalContent = (
     <div className="chart-modal-overlay" onClick={onClose}>
       <div
         className="chart-modal-card"
@@ -600,6 +601,8 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default StockChartModal;

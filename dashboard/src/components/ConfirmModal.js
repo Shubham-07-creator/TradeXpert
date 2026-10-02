@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import ReactDOM from "react-dom";
 import "./ConfirmModal.css";
 
 const ConfirmModal = ({
@@ -24,7 +25,7 @@ const ConfirmModal = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div className="confirm-modal-overlay" onClick={onCancel}>
       <div
         className="confirm-modal-card"
@@ -56,6 +57,8 @@ const ConfirmModal = ({
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default ConfirmModal;

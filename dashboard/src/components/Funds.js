@@ -183,12 +183,22 @@ const Funds = () => {
                     background: "var(--color-bg-card)",
                     border: "1px solid var(--color-border)",
                     color: "var(--color-primary)",
-                    padding: "6px 12px",
+                    padding: "6px 14px",
                     borderRadius: "var(--radius-sm)",
-                    fontSize: "0.8rem",
+                    fontSize: "0.82rem",
                     fontWeight: "700",
                     cursor: "pointer",
-                    transition: "all 0.2s ease",
+                    transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.borderColor = "var(--color-primary)";
+                    e.currentTarget.style.boxShadow = "var(--shadow-sm)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "none";
+                    e.currentTarget.style.borderColor = "var(--color-border)";
+                    e.currentTarget.style.boxShadow = "none";
                   }}
                   title={`Instantly add ₹${amt.toLocaleString("en-IN")}`}
                 >

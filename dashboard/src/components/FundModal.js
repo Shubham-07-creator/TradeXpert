@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactDOM from "react-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import {
@@ -85,7 +86,7 @@ const FundModal = ({ isOpen, onClose, initialMode = "DEPOSIT", walletBalance = 0
     }
   };
 
-  return (
+  const modalContent = (
     <div className="fund-modal-overlay" onClick={onClose}>
       <div
         className="fund-modal-card"
@@ -226,6 +227,8 @@ const FundModal = ({ isOpen, onClose, initialMode = "DEPOSIT", walletBalance = 0
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default FundModal;

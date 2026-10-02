@@ -214,26 +214,30 @@ a {
 }
 
 .indices-container {
-  flex-basis: 320px;
+  width: 320px;
+  min-width: 320px;
+  max-width: 320px;
   height: 100%;
-  padding: 0 16px;
+  padding: 0 10px;
   border-right: 1px solid var(--color-border);
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  gap: 12px;
+  justify-content: space-between;
   background: var(--color-bg-card);
+  box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .index-box {
   display: flex;
   align-items: baseline;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 5px;
+  padding: 2px 4px;
   border-radius: var(--radius-sm);
   background: transparent;
   transition: all 0.15s ease;
   cursor: default;
+  white-space: nowrap;
 }
 
 .index-box:hover {
@@ -243,34 +247,39 @@ a {
 .index-header {
   display: flex;
   align-items: baseline;
-  gap: 4px;
+  gap: 3px;
+  white-space: nowrap;
 }
 
 .index-name {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .index-data {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
+  white-space: nowrap;
 }
 
 .index-points {
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--color-text-strong);
+  white-space: nowrap;
 }
 
 .index-percent {
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 1px 5px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 1px 4px;
   border-radius: var(--radius-xs);
+  white-space: nowrap;
 }
 
 .index-percent.up {
@@ -515,7 +524,7 @@ a {
 
 .search {
   width: 100%;
-  padding: 8px 36px 8px 32px;
+  padding: 7px 56px 7px 32px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background-color: var(--color-bg-subtle);
@@ -534,10 +543,15 @@ a {
 
 .counts {
   position: absolute;
-  right: 24px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--color-text-faint);
+  right: 22px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg-card);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  pointer-events: none;
 }
 
 .watchlist-scrollable {

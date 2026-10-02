@@ -37,9 +37,9 @@ export function DoughnutChart({ data }) {
         labels: {
           color: isDark ? "#F8FAFC" : "#0F172A",
           font: { weight: "700", family: "Inter, sans-serif", size: 11 },
-          padding: 14,
+          padding: 8,
           usePointStyle: true,
-          boxWidth: 8,
+          boxWidth: 6,
         },
       },
       tooltip: {
@@ -62,7 +62,7 @@ export function DoughnutChart({ data }) {
   };
 
   return (
-    <div style={{ height: "240px", width: "100%", position: "relative" }}>
+    <div style={{ height: "215px", width: "100%", position: "relative" }}>
       <Doughnut data={data} options={options} />
     </div>
   );

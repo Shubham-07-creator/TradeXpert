@@ -14,7 +14,6 @@ import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 const WatchList = () => {
   const [search, setSearch] = useState("");
   const [liveStocks, setLiveStocks] = useState(getSnapshot());
-  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToLiveMarket(setLiveStocks);
@@ -63,10 +62,10 @@ const WatchList = () => {
     <aside className="watchlist-container">
       {/* Search Input Bar */}
       <div className="search-container">
-        <SearchIcon className="search-icon" style={{ fontSize: "1.05rem" }} />
+        <SearchIcon className="search-icon" style={{ fontSize: "1rem" }} />
         <input
           type="text"
-          placeholder="Search stocks (e.g. RELIANCE, TCS)"
+          placeholder="Search stocks..."
           className="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -76,7 +75,7 @@ const WatchList = () => {
             onClick={() => setSearch("")}
             style={{
               position: "absolute",
-              right: "24px",
+              right: "18px",
               background: "transparent",
               border: "none",
               color: "var(--color-text-faint)",
@@ -91,7 +90,7 @@ const WatchList = () => {
           </button>
         ) : (
           <span className="counts">
-            {filteredWatchlist.length} stocks
+            {filteredWatchlist.length}
           </span>
         )}
       </div>
@@ -103,43 +102,34 @@ const WatchList = () => {
         ))}
       </ul>
 
-      {/* Collapsible Market Distribution Footer */}
+      {/* Market Distribution Doughnut Chart - Always Visible */}
       <div
         style={{
           borderTop: "1px solid var(--color-border)",
           background: "var(--color-bg-card)",
+          padding: "10px 14px 14px",
+          flexShrink: 0,
         }}
       >
-        <button
-          type="button"
-          onClick={() => setShowChart(!showChart)}
+        <div
           style={{
-            width: "100%",
-            padding: "8px 16px",
-            background: "transparent",
-            border: "none",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            fontSize: "0.74rem",
+            fontSize: "0.72rem",
             fontWeight: "700",
             color: "var(--color-text-muted)",
             textTransform: "uppercase",
-            letterSpacing: "0.04em",
-            cursor: "pointer",
+            letterSpacing: "0.05em",
+            marginBottom: "6px",
           }}
         >
           <span>Market Weighting</span>
-          <span style={{ fontSize: "0.8rem", color: "var(--color-text-faint)" }}>
-            {showChart ? "✕ Close" : "📊 View"}
+          <span style={{ fontSize: "0.7rem", color: "var(--color-text-faint)" }}>
+            Top 7 Stocks
           </span>
-        </button>
-
-        {showChart && (
-          <div style={{ padding: "12px 16px 16px" }}>
-            <DoughnutChart data={chartData} />
-          </div>
-        )}
+        </div>
+        <DoughnutChart data={chartData} />
       </div>
     </aside>
   );

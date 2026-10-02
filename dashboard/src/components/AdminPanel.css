@@ -302,6 +302,19 @@
 }
 
 /* Trader Table Custom Cells */
+.admin-traders-table {
+  width: 100%;
+  table-layout: auto;
+}
+
+.admin-traders-table th {
+  white-space: nowrap;
+}
+
+.admin-traders-table td {
+  white-space: nowrap;
+}
+
 .admin-traders-table tr.row-suspended {
   opacity: 0.65;
 }
@@ -312,6 +325,18 @@
   gap: 10px;
 }
 
+.trader-info-block {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.trader-email-sub {
+  font-size: 0.72rem;
+  color: var(--color-text-faint);
+  line-height: 1.2;
+}
+
 .admin-avatar {
   background: var(--color-primary) !important;
   color: #ffffff !important;
@@ -320,7 +345,7 @@
 .trader-name-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .trader-name {
@@ -339,8 +364,8 @@
 }
 
 .trader-positions-pill {
-  font-size: 0.7rem;
-  color: var(--color-text-faint);
+  font-size: 0.68rem;
+  color: var(--color-text-muted);
   display: block;
 }
 
@@ -396,19 +421,22 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 5px;
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
 .action-btn-chip {
-  padding: 4px 9px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 600;
   border: 1px solid var(--color-border);
   background: var(--color-bg-card);
   color: var(--color-text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .action-btn-chip:hover {

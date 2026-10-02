@@ -435,19 +435,18 @@ const AdminPanel = () => {
                 <thead>
                   <tr>
                     <th>Trader</th>
-                    <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
                     <th>Available Cash</th>
                     <th>Invested Capital</th>
                     <th>Holdings Value</th>
-                    <th style={{ textAlign: "right" }}>Actions</th>
+                    <th style={{ textAlign: "right", paddingRight: "20px" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
                     <tr>
-                      <td colSpan="8" style={{ textAlign: "center", padding: "36px" }}>
+                      <td colSpan="7" style={{ textAlign: "center", padding: "36px" }}>
                         <div style={{ fontWeight: "600", color: "var(--color-text-strong)" }}>No matching traders found</div>
                         <div style={{ color: "var(--color-text-faint)", fontSize: "0.82rem", marginTop: "4px" }}>
                           Try adjusting search query or filters.
@@ -464,25 +463,24 @@ const AdminPanel = () => {
                                 className={`user-avatar-circle ${
                                   u.role === "admin" ? "admin-avatar" : ""
                                 }`}
-                                style={{ width: "30px", height: "30px", fontSize: "0.74rem" }}
+                                style={{ width: "30px", height: "30px", fontSize: "0.74rem", flexShrink: 0 }}
                               >
                                 {u.name ? u.name.substring(0, 2).toUpperCase() : "TR"}
                               </div>
-                              <div>
+                              <div className="trader-info-block">
                                 <div className="trader-name-row">
                                   <span className="trader-name">{u.name}</span>
                                   {u.role === "admin" && (
                                     <span className="admin-crown-badge">Admin</span>
                                   )}
                                 </div>
+                                <span className="trader-email-sub">{u.email}</span>
                                 <span className="trader-positions-pill">
                                   {u.holdingsCount} positions
                                 </span>
                               </div>
                             </div>
                           </td>
-
-                          <td style={{ color: "var(--color-text-muted)" }}>{u.email}</td>
 
                           <td>
                             <button

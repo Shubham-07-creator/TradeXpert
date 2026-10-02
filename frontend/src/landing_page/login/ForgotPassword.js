@@ -135,7 +135,7 @@ function ForgotPassword() {
             className="text-decoration-none fw-semibold small d-inline-flex align-items-center gap-1"
             style={{ color: "var(--primary)" }}
           >
-            <i className="fa-solid fa-arrow-left-long"></i> Back to Login
+            <i className="fa-solid fa-arrow-left-long"></i> Back to Sign In
           </Link>
         </div>
       </div>

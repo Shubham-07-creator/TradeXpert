@@ -153,7 +153,7 @@ function Navbar() {
                       }}
                       to="/login"
                     >
-                      Login
+                      Sign In
                     </Link>
                   </li>
                   <li className="nav-item">
@@ -261,7 +261,7 @@ function Navbar() {
                         }}
                         className="dropdown-item py-2 fw-semibold text-danger d-flex align-items-center gap-2"
                       >
-                        <i className="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                        <i className="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                       </button>
                     </div>
                   </li>

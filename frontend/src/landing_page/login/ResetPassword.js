@@ -192,13 +192,13 @@ function ResetPassword() {
             <i className="fa-solid fa-circle-check text-success fs-1 mb-3"></i>
             <h5 className="fw-bold mb-2">Password Updated!</h5>
             <p className="text-muted small mb-3">
-              Your password has been changed. Redirecting to login page...
+              Your password has been changed. Redirecting to sign in page...
             </p>
             <Link
               to="/login"
               className="btn btn-primary rounded-pill px-4 py-2 small"
             >
-              Go to Login Now
+              Go to Sign In Now
             </Link>
           </div>
         )}

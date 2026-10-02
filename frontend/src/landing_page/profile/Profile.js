@@ -43,9 +43,9 @@ function Profile() {
             <i className="fa-regular fa-user"></i>
           </div>
           <h2>Access Your Profile</h2>
-          <p>Please log in to your account to view and manage your profile details.</p>
+          <p>Please sign in to your account to view and manage your profile details.</p>
           <Link to="/login" className="btn-custom-primary" style={{ display: "inline-block", textDecoration: "none" }}>
-            Log In Now
+            Sign In Now
           </Link>
         </div>
       </div>

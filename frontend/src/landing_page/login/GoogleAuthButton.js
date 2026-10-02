@@ -89,7 +89,7 @@ function GoogleAuthButton({ isSignup = false }) {
       toast.dismiss("demo-auth");
       const { token, user } = res.data;
       login(token, user);
-      toast.success("Google login success! Welcome to TradeXpert 🚀");
+      toast.success("Google sign-in success! Welcome to TradeXpert 🚀");
 
       // Cross-origin exchange for Dashboard
       try {
@@ -107,7 +107,7 @@ function GoogleAuthButton({ isSignup = false }) {
     } catch (err) {
       toast.dismiss("demo-auth");
       console.error("Demo Google login failed:", err);
-      toast.error(err.response?.data?.message || "Demo login failed ❌");
+      toast.error(err.response?.data?.message || "Demo sign in failed ❌");
     } finally {
       setLoading(false);
     }
@@ -274,7 +274,7 @@ function GoogleAuthButton({ isSignup = false }) {
             color: "#387ED1",
             fontWeight: "600",
           }}
-          title="Instant 1-Click Google Login with ₹1,00,000 Wallet"
+          title="Instant 1-Click Google Sign In with ₹1,00,000 Wallet"
         >
           ⚡ 1-Click Google Test
         </button>
@@ -393,7 +393,7 @@ function GoogleAuthButton({ isSignup = false }) {
                     borderRadius: "20px",
                   }}
                 >
-                  <i className="fa-solid fa-bolt"></i> Login as Demo Google Trader
+                  <i className="fa-solid fa-bolt"></i> Sign In as Demo Google Trader
                 </button>
               </div>
 

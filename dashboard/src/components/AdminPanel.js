@@ -98,7 +98,7 @@ const AdminPanel = () => {
       isOpen: true,
       title: willBlock ? `Suspend ${user.name}?` : `Reactivate ${user.name}?`,
       message: willBlock
-        ? `Suspending will immediately revoke trading and login access for ${user.name} (${user.email}).`
+        ? `Suspending will immediately revoke trading and sign in access for ${user.name} (${user.email}).`
         : `This will restore full trading privileges for ${user.name}.`,
       confirmText: willBlock ? "Suspend Account" : "Reactivate Account",
       isDanger: willBlock,

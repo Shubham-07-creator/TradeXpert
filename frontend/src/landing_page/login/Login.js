@@ -55,7 +55,7 @@ function Login() {
         window.location.href = DASHBOARD;
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed ❌");
+      toast.error(err.response?.data?.message || "Sign in failed ❌");
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ function Login() {
           </p>
         </div>
 
-        {/* Google One-Click Login */}
+        {/* Google One-Click Sign In */}
         <div className="d-flex justify-content-center mb-2">
           <GoogleAuthButton isSignup={false} />
         </div>

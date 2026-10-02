@@ -191,7 +191,7 @@ const Menu = () => {
           className="btn-logout"
           title="Sign out of TradeXpert"
         >
-          Logout
+          Sign Out
         </button>
       </div>
 

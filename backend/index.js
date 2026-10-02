@@ -834,6 +834,9 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         target: target ? Number(target) : null,
       });
 
+      // Quant Simulation: Register user demand impact on stock
+      liveMarket.recordTradeDemand(name, "BUY", quantity);
+
       return res.json({ message: "Buy success ✅", wallet: user.wallet });
     }
 
@@ -923,6 +926,9 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         status: "EXECUTED",
         product,
       });
+
+      // Quant Simulation: Register user supply pressure on stock
+      liveMarket.recordTradeDemand(name, "SELL", quantity);
 
       return res.json({
         message: "Sell success ✅",

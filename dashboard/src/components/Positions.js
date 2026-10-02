@@ -14,13 +14,8 @@ const buildLiveMap = (snapshot) => {
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
-
   const [allPositions, setAllPositions] = useState([]);
-
-  // Live-updating price map — see utils/liveMarket.js. Positions whose
-  // name matches a watchlist stock get a moving LTP/P&L automatically.
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
-
   const [hover, setHover] = useState(null);
 
   useEffect(() => {
@@ -39,8 +34,7 @@ const Positions = () => {
       const res = await axios.get(`${API}/allPositions`, {
         headers: getAuthHeader(),
       });
-
-      setAllPositions(res.data);
+      setAllPositions(res.data || []);
     } catch (err) {
       console.log(err);
     }
@@ -59,102 +53,165 @@ const Positions = () => {
           price: sellPrice,
           mode: "SELL",
         },
-        { headers: getAuthHeader() },
+        { headers: getAuthHeader() }
       );
 
       const gain = res.data.realizedPnL || 0;
       const gainText =
         gain >= 0
-          ? `Sold ✅ — Profit ₹${gain.toFixed(2)}`
-          : `Sold ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
+          ? `Square off ${stock.name} ✅ — Profit ₹${gain.toFixed(2)}`
+          : `Square off ${stock.name} ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
 
       toast.success(gainText, {
         style: {
-          background: gain >= 0 ? "#1ea672" : "#e5484d",
+          background: gain >= 0 ? "#00D09C" : "#EF4444",
           color: "#fff",
+          fontWeight: "600",
         },
       });
 
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Sell failed ❌");
+      toast.error(err.response?.data?.message || "Square off failed ❌");
     }
   };
 
+  const totalPositionsPnL = allPositions.reduce((acc, stock) => {
+    const live = liveMap[stock.name];
+    const price = live ? live.price : stock.price;
+    return acc + (price - stock.avg) * stock.qty;
+  }, 0);
+  const isPositionsProfit = totalPositionsPnL >= 0;
+
   return (
-    <>
-      <h3 className="title">Positions ({allPositions.length})</h3>
-
-      <div className="order-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Instrument</th>
-              <th>Qty</th>
-              <th>Avg</th>
-              <th>LTP</th>
-              <th>P&L</th>
-              <th>Chg</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {allPositions.map((stock, i) => {
-              const live = liveMap[stock.name];
-              const price = live ? live.price : stock.price;
-
-              const pnl = (price - stock.avg) * stock.qty;
-
-              const cls = pnl >= 0 ? "profit" : "loss";
-
-              const chgLabel = live ? live.percent : stock.chg;
-
-              return (
-                <tr
-                  key={i}
-                  onMouseEnter={() => setHover(i)}
-                  onMouseLeave={() => setHover(null)}
-                >
-                  <td>{stock.product}</td>
-
-                  <td>
-                    {stock.name}
-
-                    {hover === i && (
-                      <button
-                        style={{
-                          marginLeft: "10px",
-                          background: "#ff4d4f",
-                          color: "#fff",
-                          border: "none",
-                          padding: "3px 8px",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleSell(stock)}
-                      >
-                        Sell
-                      </button>
-                    )}
-                  </td>
-
-                  <td>{stock.qty}</td>
-
-                  <td>{stock.avg.toFixed(2)}</td>
-
-                  <td>{price.toFixed(2)}</td>
-
-                  <td className={cls}>{pnl.toFixed(2)}</td>
-
-                  <td>{chgLabel}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+    <div className="fade-up">
+      {/* Page Header */}
+      <div className="section-header">
+        <div>
+          <h2 className="page-title">Open Positions ({allPositions.length})</h2>
+          <p className="page-subtitle">
+            Intraday and F&amp;O active trading positions.
+          </p>
+        </div>
+        {allPositions.length > 0 && (
+          <div>
+            <span
+              className={`pnl-pill ${isPositionsProfit ? "profit" : "loss"}`}
+              style={{ fontSize: "0.95rem", padding: "6px 14px" }}
+            >
+              Net P&amp;L: {isPositionsProfit ? "+" : ""}₹{totalPositionsPnL.toFixed(2)}
+            </span>
+          </div>
+        )}
       </div>
-    </>
+
+      {/* Positions Table */}
+      <div className="table-card">
+        {allPositions.length > 0 ? (
+          <div className="table-responsive">
+            <table className="order-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Instrument</th>
+                  <th>Qty</th>
+                  <th>Avg. Cost</th>
+                  <th>LTP (Live)</th>
+                  <th>P&amp;L</th>
+                  <th>Day Chg</th>
+                  <th style={{ textAlign: "right" }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allPositions.map((stock, i) => {
+                  const live = liveMap[stock.name];
+                  const price = live ? live.price : stock.price;
+                  const pnl = (price - stock.avg) * stock.qty;
+                  const isProfit = pnl >= 0;
+                  const chgLabel = live ? live.percent : stock.chg || "0.00%";
+                  const isDown = live ? live.isDown : false;
+
+                  return (
+                    <tr
+                      key={i}
+                      onMouseEnter={() => setHover(i)}
+                      onMouseLeave={() => setHover(null)}
+                    >
+                      <td>
+                        <span
+                          style={{
+                            background: "var(--color-bg-subtle)",
+                            color: "var(--color-primary)",
+                            padding: "3px 8px",
+                            borderRadius: "4px",
+                            fontSize: "0.75rem",
+                            fontWeight: "700",
+                          }}
+                        >
+                          {stock.product || "MIS"}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
+                          {stock.name}
+                        </span>
+                      </td>
+
+                      <td style={{ fontWeight: "600" }}>{stock.qty}</td>
+                      <td>₹{stock.avg.toFixed(2)}</td>
+                      <td style={{ fontWeight: "700" }}>₹{price.toFixed(2)}</td>
+
+                      <td>
+                        <span className={`pnl-pill ${isProfit ? "profit" : "loss"}`}>
+                          {isProfit ? "+" : ""}₹{pnl.toFixed(2)}
+                        </span>
+                      </td>
+
+                      <td>
+                        <span className={`index-percent ${isDown ? "down" : "up"}`}>
+                          {chgLabel}
+                        </span>
+                      </td>
+
+                      <td style={{ textAlign: "right" }}>
+                        <button
+                          style={{
+                            background: "var(--color-loss)",
+                            color: "#fff",
+                            border: "none",
+                            padding: "6px 14px",
+                            borderRadius: "var(--radius-sm)",
+                            fontWeight: "600",
+                            fontSize: "0.8rem",
+                            cursor: "pointer",
+                            transition: "all 0.2s ease",
+                            opacity: hover === i ? 1 : 0.85,
+                          }}
+                          onClick={() => handleSell(stock)}
+                          title={`Square off ${stock.name}`}
+                        >
+                          Exit
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-state-icon">📊</div>
+            <h4 className="empty-state-title">No Open Positions</h4>
+            <p className="empty-state-text">
+              You don't have any open intraday positions today. Any MIS or
+              short-term orders you place will appear here in real-time.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

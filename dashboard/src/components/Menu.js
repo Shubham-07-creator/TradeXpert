@@ -1,140 +1,174 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { isAdmin } from "../utils/auth";
+import { isAdmin, getCurrentUser } from "../utils/auth";
+import toast from "react-hot-toast";
 
 const Menu = () => {
   const location = useLocation();
+  const user = getCurrentUser();
 
   const FRONTEND =
     process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
 
-  const [selectedMenu, setSelectedMenu] = useState(0);
+  // Dark / Light Mode Sync
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("theme") || "light";
+  });
 
-  const handleMenuClick = (index) => {
-    setSelectedMenu(index);
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    toast.success(`Switched to ${nextTheme === "dark" ? "Dark" : "Light"} Mode`, {
+      icon: nextTheme === "dark" ? "🌙" : "☀️",
+      duration: 1800,
+    });
   };
 
   const handleLogout = () => {
-    // Clear auth data
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-
-    // Notify listeners
     window.dispatchEvent(new Event("userChanged"));
-
-    // Redirect to frontend
-    window.location.href = FRONTEND + "?logout=true";
+    toast.success("Logged out successfully");
+    setTimeout(() => {
+      window.location.href = FRONTEND + "?logout=true";
+    }, 600);
   };
 
-  const menuClass = "menu";
-  const activeMenuClass = "menu selected";
-
-  const isActive = (path, index) => {
-    if (location.pathname === path) {
-      return activeMenuClass;
-    }
-
-    return selectedMenu === index ? activeMenuClass : menuClass;
+  const getInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   return (
-    <div className="menu-container">
-      <img src="logo.png" alt="logo" style={{ width: "50px" }} />
+    <nav className="menu-container">
+      {/* Brand logo & name */}
+      <div className="menu-brand-group">
+        <Link to="/" className="d-flex align-items-center gap-2" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <img src="/logo2.svg" alt="TradeXpert" className="menu-logo" />
+          <span className="menu-brand-title">TradeXpert</span>
+        </Link>
+      </div>
 
+      {/* Navigation links */}
       <div className="menus">
         <ul>
-          {/* HOME */}
           <li>
-            <a
-              href={FRONTEND}
-              style={{
-                background: "linear-gradient(135deg,#387ed1,#2f6bc2)",
-                color: "#fff",
-                padding: "6px 16px",
-                borderRadius: "6px",
-                fontWeight: "500",
-                textDecoration: "none",
-                display: "inline-block",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-              }}
+            <Link
+              to="/"
+              className={`menu-link ${location.pathname === "/" ? "selected" : ""}`}
             >
-              Home
-            </a>
-          </li>
-
-          {/* DASHBOARD */}
-          <li>
-            <Link to="/" onClick={() => handleMenuClick(0)}>
-              <p className={isActive("/", 0)}>Dashboard</p>
+              Dashboard
             </Link>
           </li>
 
-          {/* ORDERS */}
           <li>
-            <Link to="/orders" onClick={() => handleMenuClick(1)}>
-              <p className={isActive("/orders", 1)}>Orders</p>
+            <Link
+              to="/orders"
+              className={`menu-link ${location.pathname === "/orders" ? "selected" : ""}`}
+            >
+              Orders
             </Link>
           </li>
 
-          {/* HOLDINGS */}
           <li>
-            <Link to="/holdings" onClick={() => handleMenuClick(2)}>
-              <p className={isActive("/holdings", 2)}>Holdings</p>
+            <Link
+              to="/holdings"
+              className={`menu-link ${location.pathname === "/holdings" ? "selected" : ""}`}
+            >
+              Holdings
             </Link>
           </li>
 
-          {/* POSITIONS */}
           <li>
-            <Link to="/positions" onClick={() => handleMenuClick(3)}>
-              <p className={isActive("/positions", 3)}>Positions</p>
+            <Link
+              to="/positions"
+              className={`menu-link ${location.pathname === "/positions" ? "selected" : ""}`}
+            >
+              Positions
             </Link>
           </li>
 
-          {/* FUNDS */}
           <li>
-            <Link to="/funds" onClick={() => handleMenuClick(4)}>
-              <p className={isActive("/funds", 4)}>Funds</p>
+            <Link
+              to="/funds"
+              className={`menu-link ${location.pathname === "/funds" ? "selected" : ""}`}
+            >
+              Funds
             </Link>
           </li>
 
-          {/* LEADERBOARD */}
           <li>
-            <Link to="/leaderboard" onClick={() => handleMenuClick(5)}>
-              <p className={isActive("/leaderboard", 5)}>Leaderboard</p>
+            <Link
+              to="/leaderboard"
+              className={`menu-link ${location.pathname === "/leaderboard" ? "selected" : ""}`}
+            >
+              Leaderboard
             </Link>
           </li>
 
-          {/* ADMIN */}
           {isAdmin() && (
             <li>
-              <Link to="/admin" onClick={() => handleMenuClick(6)}>
-                <p className={isActive("/admin", 6)}>Admin</p>
+              <Link
+                to="/admin"
+                className={`menu-link ${location.pathname === "/admin" ? "selected" : ""}`}
+              >
+                Admin
               </Link>
             </li>
           )}
-
-          {/* LOGOUT */}
-          <li>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: "#387ed1",
-                color: "#fff",
-                border: "none",
-                padding: "6px 14px",
-                borderRadius: "6px",
-                fontWeight: "500",
-                cursor: "pointer",
-              }}
-            >
-              Logout
-            </button>
-          </li>
         </ul>
-
-        <hr />
       </div>
-    </div>
+
+      {/* Action buttons: Theme Toggle, User Chip, Home, Logout */}
+      <div className="menu-actions">
+        {/* Theme Toggle */}
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="theme-toggle-btn"
+          title={`Switch to ${theme === "dark" ? "Light" : "Dark"} Mode`}
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+
+        {/* User Avatar Chip */}
+        <div className="user-badge" title={user?.email || "User Profile"}>
+          <div className="user-avatar-circle">
+            {getInitials(user?.name)}
+          </div>
+          <span className="user-badge-name">{user?.name || "Trader"}</span>
+        </div>
+
+        {/* Home Link back to Landing page */}
+        <a
+          href={FRONTEND}
+          className="btn-home"
+          title="Go to TradeXpert Landing Page"
+        >
+          🌐 Home
+        </a>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="btn-logout"
+          title="Sign out of TradeXpert"
+        >
+          Logout
+        </button>
+      </div>
+    </nav>
   );
 };
 

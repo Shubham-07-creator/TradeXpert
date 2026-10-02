@@ -1,26 +1,17 @@
 import React, { useState, useEffect, useContext } from "react";
-
-import axios from "axios";
 import GeneralContext from "./GeneralContext";
-
 import { Tooltip, Grow } from "@mui/material";
-
 import {
-  BarChartOutlined,
   KeyboardArrowDown,
   KeyboardArrowUp,
-  MoreHoriz,
+  Search as SearchIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
-
 import { DoughnutChart } from "./DoughnoutChart";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 
 const WatchList = () => {
   const [search, setSearch] = useState("");
-
-  // Live-updating snapshot of the "market" — see utils/liveMarket.js.
-  // Ticks every ~2.5s so prices/percent move on their own like a real
-  // exchange, without needing a real market-data API.
   const [liveStocks, setLiveStocks] = useState(getSnapshot());
 
   useEffect(() => {
@@ -28,67 +19,93 @@ const WatchList = () => {
     return unsubscribe;
   }, []);
 
-  // Search bar used to be decorative — typing in it did nothing.
-  // Now it actually filters the visible list.
   const filteredWatchlist = liveStocks.filter((stock) =>
-    stock.name.toLowerCase().includes(search.toLowerCase()),
+    stock.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const labels = liveStocks.map((stock) => stock.name);
+  // Modern Neo-Broker Chart Colors matching Option 1
+  const chartColors = [
+    "rgba(56, 126, 209, 0.8)",  // Royal Blue
+    "rgba(0, 208, 156, 0.8)",   // Mint Emerald
+    "rgba(79, 147, 230, 0.8)",  // Sky Blue
+    "rgba(37, 99, 235, 0.8)",   // Deep Blue
+    "rgba(16, 185, 129, 0.8)",  // Bright Emerald
+    "rgba(99, 102, 241, 0.8)",  // Indigo
+    "rgba(245, 158, 11, 0.8)",  // Amber
+  ];
 
-  const data = {
-    labels,
+  const chartBorderColors = [
+    "#387ED1",
+    "#00D09C",
+    "#4F93E6",
+    "#2563EB",
+    "#10B981",
+    "#6366F1",
+    "#F59E0B",
+  ];
+
+  const chartData = {
+    labels: liveStocks.slice(0, 7).map((stock) => stock.name),
     datasets: [
       {
-        label: "Price",
-        data: liveStocks.map((stock) => stock.price),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-          "rgba(255, 206, 86, 0.5)",
-          "rgba(75, 192, 192, 0.5)",
-          "rgba(153, 102, 255, 0.5)",
-          "rgba(255, 159, 64, 0.5)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
-        ],
-        borderWidth: 1,
+        label: "Price (₹)",
+        data: liveStocks.slice(0, 7).map((stock) => stock.price),
+        backgroundColor: chartColors,
+        borderColor: chartBorderColors,
+        borderWidth: 2,
       },
     ],
   };
 
   return (
-    <div className="watchlist-container">
+    <aside className="watchlist-container">
+      {/* Search Input Bar */}
       <div className="search-container">
+        <SearchIcon className="search-icon" style={{ fontSize: "1.1rem" }} />
         <input
           type="text"
-          name="search"
-          id="search"
-          placeholder="Search eg:infy, bse, nifty fut weekly, gold mcx"
+          placeholder="Search stocks (e.g. RELIANCE, INFY, TCS)"
           className="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-        <span className="counts">
-          {" "}
-          {filteredWatchlist.length} / {liveStocks.length}
-        </span>
+        {search ? (
+          <button
+            onClick={() => setSearch("")}
+            style={{
+              position: "absolute",
+              right: "26px",
+              background: "transparent",
+              border: "none",
+              color: "var(--color-text-faint)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              padding: 0,
+            }}
+            title="Clear search"
+          >
+            <CloseIcon style={{ fontSize: "1rem" }} />
+          </button>
+        ) : (
+          <span className="counts">
+            {filteredWatchlist.length}/{liveStocks.length}
+          </span>
+        )}
       </div>
 
-      <ul className="list">
-        {filteredWatchlist.map((stock, index) => {
-          return <WatchListItem stock={stock} key={index} />;
-        })}
+      {/* Stock Items List */}
+      <ul className="watchlist-scrollable">
+        {filteredWatchlist.map((stock, index) => (
+          <WatchListItem stock={stock} key={index} />
+        ))}
       </ul>
 
-      <DoughnutChart data={data} />
-    </div>
+      {/* Visual Market Weight Doughnut Chart */}
+      <div style={{ padding: "16px", borderTop: "1px solid var(--color-border)" }}>
+        <DoughnutChart data={chartData} />
+      </div>
+    </aside>
   );
 };
 
@@ -99,22 +116,27 @@ const WatchListItem = ({ stock }) => {
 
   return (
     <li
+      className="watchlist-item"
       onMouseEnter={() => setShowWatchlistActions(true)}
       onMouseLeave={() => setShowWatchlistActions(false)}
     >
-      <div className="item">
-        <p className={stock.isDown ? "down" : "up"}>{stock.name}</p>
-        <div className="itemInfo">
-          <span className={`percent ${stock.isDown ? "down" : "up"}`}>
-            {stock.percent}
-          </span>
+      <div className="stock-name-group">
+        <span className="stock-name">{stock.name}</span>
+        <span className="stock-sector">NSE • EQ</span>
+      </div>
+
+      <div className="stock-price-group">
+        <span className={`stock-percent ${stock.isDown ? "down" : "up"}`}>
           {stock.isDown ? (
-            <KeyboardArrowDown className="down" />
+            <KeyboardArrowDown style={{ fontSize: "0.9rem" }} />
           ) : (
-            <KeyboardArrowUp className="down" />
+            <KeyboardArrowUp style={{ fontSize: "0.9rem" }} />
           )}
-          <span className="price">{stock.price.toFixed(2)}</span>
-        </div>
+          {stock.percent}
+        </span>
+        <span className="stock-price">
+          ₹{Number(stock.price).toFixed(2)}
+        </span>
       </div>
 
       {showWatchlistActions && <WatchListActions uid={stock.name} />}
@@ -125,51 +147,29 @@ const WatchListItem = ({ stock }) => {
 const WatchListActions = ({ uid }) => {
   const generalContext = useContext(GeneralContext);
 
-  const handleBuyClick = () => {
+  const handleBuyClick = (e) => {
+    e.stopPropagation();
     generalContext.openBuyWindow(uid);
   };
 
-  const handleSellClick = () => {
+  const handleSellClick = (e) => {
+    e.stopPropagation();
     generalContext.openSellWindow(uid);
   };
 
   return (
-    <span className="actions">
-      <span>
-        <Tooltip
-          title="Buy (B)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="buy" onClick={handleBuyClick}>
-            Buy
-          </button>
-        </Tooltip>
+    <div className="watchlist-actions">
+      <Tooltip title="Buy Order (B)" placement="top" arrow TransitionComponent={Grow}>
+        <button className="btn-buy-quick" onClick={handleBuyClick}>
+          BUY
+        </button>
+      </Tooltip>
 
-        <Tooltip
-          title="Sell (S)"
-          placement="top"
-          arrow
-          TransitionComponent={Grow}
-        >
-          <button className="sell" onClick={handleSellClick}>
-            Sell
-          </button>
-        </Tooltip>
-
-        <Tooltip title="Analytics (A)" placement="top" arrow>
-          <button className="action">
-            <BarChartOutlined className="icon" />
-          </button>
-        </Tooltip>
-
-        <Tooltip title="More" placement="top" arrow>
-          <button className="action">
-            <MoreHoriz className="icon" />
-          </button>
-        </Tooltip>
-      </span>
-    </span>
+      <Tooltip title="Sell Order (S)" placement="top" arrow TransitionComponent={Grow}>
+        <button className="btn-sell-quick" onClick={handleSellClick}>
+          SELL
+        </button>
+      </Tooltip>
+    </div>
   );
 };

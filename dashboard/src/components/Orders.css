@@ -1,20 +1,47 @@
-.order-table {
-  width: 100%;
-  border-collapse: collapse;
+/* Orders Component Styles matching Option 1 Neo-Broker */
+
+.orders-wrapper {
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.order-table th {
-  background: #111;
-  color: #fff;
-  padding: 10px;
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
 }
 
-.order-table td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+.btn-page {
+  background: var(--color-bg-card);
+  color: var(--color-text-strong);
+  border: 1px solid var(--color-border);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
-.order-table tr:hover {
-  background: #f5f5f5;
-  transition: 0.2s;
+.btn-page:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.btn-page:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-indicator {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  padding: 8px 14px;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
 }

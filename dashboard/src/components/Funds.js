@@ -12,13 +12,8 @@ const buildLiveMap = (snapshot) => {
   return map;
 };
 
-// This page shows the whole money story in one place, in plain
-// language: how much free cash you have, how much is tied up in
-// stocks, what those stocks are worth right now, and how much
-// you've actually gained/lost — both on paper and for real.
 const Funds = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
-
   const [wallet, setWallet] = useState(0);
   const [realizedPnL, setRealizedPnL] = useState(0);
   const [holdings, setHoldings] = useState([]);
@@ -30,7 +25,7 @@ const Funds = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeToLiveMarket((snapshot) =>
-      setLiveMap(buildLiveMap(snapshot)),
+      setLiveMap(buildLiveMap(snapshot))
     );
     return unsubscribe;
   }, []);
@@ -44,14 +39,18 @@ const Funds = () => {
 
       setWallet(profileRes.data.wallet || 0);
       setRealizedPnL(profileRes.data.realizedPnL || 0);
-      setHoldings(holdingsRes.data);
+      setHoldings(holdingsRes.data || []);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const handleAddFunds = async () => {
-    const amount = Number(window.prompt("Amount to add (₹)"));
+  const handleAddFunds = async (presetAmount) => {
+    let amount = presetAmount;
+    if (!amount) {
+      const input = window.prompt("Enter virtual cash amount to add (₹):", "50000");
+      amount = Number(input);
+    }
 
     if (!amount || amount <= 0) return;
 
@@ -59,10 +58,12 @@ const Funds = () => {
       await axios.post(
         `${API}/wallet/add`,
         { amount },
-        { headers: getAuthHeader() },
+        { headers: getAuthHeader() }
       );
 
-      toast.success("Funds added ✅");
+      toast.success(`₹${amount.toLocaleString("en-IN")} credited to your virtual wallet! ✅`, {
+        style: { background: "#00D09C", color: "#fff", fontWeight: "600" },
+      });
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Add funds failed ❌");
@@ -70,7 +71,8 @@ const Funds = () => {
   };
 
   const handleWithdraw = async () => {
-    const amount = Number(window.prompt("Amount to withdraw (₹)"));
+    const input = window.prompt("Enter amount to withdraw (₹):", "10000");
+    const amount = Number(input);
 
     if (!amount || amount <= 0) return;
 
@@ -78,10 +80,10 @@ const Funds = () => {
       await axios.post(
         `${API}/wallet/withdraw`,
         { amount },
-        { headers: getAuthHeader() },
+        { headers: getAuthHeader() }
       );
 
-      toast.success("Withdrawal successful ✅");
+      toast.success(`₹${amount.toLocaleString("en-IN")} withdrawn successfully! ✅`);
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Withdraw failed ❌");
@@ -89,7 +91,6 @@ const Funds = () => {
   };
 
   const investment = holdings.reduce((sum, h) => sum + h.avg * h.qty, 0);
-
   const currentValue = holdings.reduce((sum, h) => {
     const live = liveMap[h.name];
     const price = live ? live.price : h.price;
@@ -98,85 +99,161 @@ const Funds = () => {
 
   const unrealizedPnL = currentValue - investment;
   const totalPortfolioValue = wallet + currentValue;
+  const isUnrealizedProfit = unrealizedPnL >= 0;
+  const isRealizedProfit = realizedPnL >= 0;
 
   return (
-    <>
-      <div className="funds">
-        <p>Add or withdraw your virtual trading balance</p>
-        <button className="btn btn-green" onClick={handleAddFunds}>
-          Add funds
-        </button>
-        <button className="btn btn-blue" onClick={handleWithdraw}>
-          Withdraw
-        </button>
-      </div>
-
-      {/* The one number that matters most, up top and big */}
-      <div className="section">
-        <span>
-          <p>Total Portfolio Value</p>
-        </span>
-        <h3 className="total-value">
-          ₹
-          {totalPortfolioValue.toLocaleString("en-IN", {
-            maximumFractionDigits: 2,
-          })}
-        </h3>
-        <p className="stat-note">
-          Your available cash + what your current holdings are worth right
-          now
-        </p>
-      </div>
-
-      <div className="funds-grid">
-        <div className="section stat-card">
-          <p className="stat-label">Available Cash</p>
-          <h3 className="stat-value">₹{wallet.toLocaleString("en-IN")}</h3>
-          <p className="stat-note">Free money you can use to buy stocks</p>
-        </div>
-
-        <div className="section stat-card">
-          <p className="stat-label">Invested Amount</p>
-          <h3 className="stat-value">₹{investment.toFixed(2)}</h3>
-          <p className="stat-note">
-            What you originally paid for the stocks you still hold
+    <div className="fade-up">
+      {/* Header */}
+      <div className="section-header">
+        <div>
+          <h2 className="page-title">Funds &amp; Capital</h2>
+          <p className="page-subtitle">
+            Manage your virtual trading balance and view account margins.
           </p>
         </div>
 
-        <div className="section stat-card">
-          <p className="stat-label">Current Holdings Value</p>
-          <h3 className="stat-value">₹{currentValue.toFixed(2)}</h3>
-          <p className="stat-note">What those same stocks are worth now</p>
-        </div>
-
-        <div className="section stat-card">
-          <p className="stat-label">Unrealized P&L</p>
-          <h3
-            className={`stat-value ${unrealizedPnL >= 0 ? "profit" : "loss"}`}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            onClick={() => handleAddFunds()}
+            style={{
+              background: "var(--gradient-profit)",
+              color: "#fff",
+              border: "none",
+              padding: "9px 18px",
+              borderRadius: "var(--radius-md)",
+              fontSize: "0.85rem",
+              fontWeight: "700",
+              cursor: "pointer",
+              boxShadow: "var(--shadow-glow-profit)",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+            }}
           >
-            {unrealizedPnL >= 0 ? "+" : "-"}₹
-            {Math.abs(unrealizedPnL).toFixed(2)}
-          </h3>
-          <p className="stat-note">
-            What you'd gain or lose if you sold everything right now — this
-            moves live with the market
-          </p>
-        </div>
-
-        <div className="section stat-card">
-          <p className="stat-label">Realized P&L (All-time)</p>
-          <h3
-            className={`stat-value ${realizedPnL >= 0 ? "profit" : "loss"}`}
+            + Add Funds
+          </button>
+          <button
+            onClick={handleWithdraw}
+            style={{
+              background: "var(--color-bg-card)",
+              color: "var(--color-text-strong)",
+              border: "1px solid var(--color-border)",
+              padding: "9px 18px",
+              borderRadius: "var(--radius-md)",
+              fontSize: "0.85rem",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
           >
-            {realizedPnL >= 0 ? "+" : "-"}₹{Math.abs(realizedPnL).toFixed(2)}
-          </h3>
-          <p className="stat-note">
-            Actual profit or loss you've locked in from stocks you've
-            already sold
-          </p>
+            Withdraw
+          </button>
         </div>
       </div>
-    </>
+
+      {/* Hero Wallet Card */}
+      <div
+        className="stat-card"
+        style={{
+          background: "linear-gradient(135deg, rgba(56, 126, 209, 0.08) 0%, rgba(0, 208, 156, 0.08) 100%)",
+          border: "1px solid var(--color-border)",
+          padding: "28px",
+          marginBottom: "24px",
+          borderRadius: "var(--radius-lg)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <span className="stat-card-label" style={{ color: "var(--color-primary)" }}>
+              Net Portfolio Worth
+            </span>
+            <h1
+              style={{
+                fontSize: "2.8rem",
+                fontWeight: "800",
+                color: "var(--color-text-strong)",
+                margin: "4px 0 8px 0",
+                letterSpacing: "-0.5px",
+              }}
+            >
+              ₹{totalPortfolioValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+            </h1>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
+              Available Cash + Current Market Value of Holdings
+            </p>
+          </div>
+
+          {/* Quick preset add buttons */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <span style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--color-text-faint)", textTransform: "uppercase" }}>
+              Quick Cash Deposit
+            </span>
+            <div style={{ display: "flex", gap: "8px" }}>
+              {[10000, 50000, 100000].map((amt) => (
+                <button
+                  key={amt}
+                  onClick={() => handleAddFunds(amt)}
+                  style={{
+                    background: "var(--color-bg-card)",
+                    border: "1px solid var(--color-border)",
+                    color: "var(--color-primary)",
+                    padding: "6px 12px",
+                    borderRadius: "var(--radius-sm)",
+                    fontSize: "0.8rem",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  +₹{(amt / 1000).toFixed(0)}k
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Financial Stat Cards Grid */}
+      <div className="stats-card-grid">
+        <div className="stat-card">
+          <div className="stat-card-label">Available Trading Cash</div>
+          <div className="stat-card-value" style={{ color: "var(--color-primary)" }}>
+            ₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+          </div>
+          <div className="stat-card-sub">Liquid capital ready for orders</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-label">Invested in Stocks</div>
+          <div className="stat-card-value">
+            ₹{investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+          </div>
+          <div className="stat-card-sub">Cost basis across all holdings</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-label">Unrealized Market P&amp;L</div>
+          <div
+            className="stat-card-value"
+            style={{ color: isUnrealizedProfit ? "var(--color-profit)" : "var(--color-loss)" }}
+          >
+            {isUnrealizedProfit ? "+" : ""}₹{unrealizedPnL.toFixed(2)}
+          </div>
+          <div className="stat-card-sub">Paper returns on active holdings</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-card-label">Realized Closed P&amp;L</div>
+          <div
+            className="stat-card-value"
+            style={{ color: isRealizedProfit ? "var(--color-profit)" : "var(--color-loss)" }}
+          >
+            {isRealizedProfit ? "+" : ""}₹{realizedPnL.toFixed(2)}
+          </div>
+          <div className="stat-card-sub">Locked profit from completed sales</div>
+        </div>
+      </div>
+    </div>
   );
 };
 

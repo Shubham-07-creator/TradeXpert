@@ -60,19 +60,19 @@ function ForgotPassword() {
           <form onSubmit={handleSubmit}>
             <div className="field mb-4">
               <label
-                className="fw-semibold text-muted mb-1"
-                style={{ fontSize: "14px" }}
+                className="fw-semibold small mb-1"
+                style={{ color: "var(--ink-secondary)" }}
               >
                 Registered Email Address
               </label>
-              <div className="input-group">
-                <span className="input-group-text border-end-0">
-                  <i className="fas fa-envelope text-muted"></i>
+              <div className="auth-input-group">
+                <span className="auth-input-icon">
+                  <i className="fas fa-envelope"></i>
                 </span>
                 <input
                   type="email"
                   placeholder="name@example.com"
-                  className="form-control border-start-0 ps-0 shadow-none"
+                  className="auth-input-field"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -84,19 +84,18 @@ function ForgotPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-100 py-2 fw-bold hover-scale"
-              style={{
-                background: "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
-                border: "none",
-                borderRadius: "8px",
-              }}
+              className="btn-auth-shimmer mt-2"
             >
               {loading ? (
                 <>
-                  <i className="fas fa-spinner fa-spin me-2"></i> Sending link...
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Sending reset link...</span>
                 </>
               ) : (
-                "Send Reset Link"
+                <>
+                  <span>Send Reset Link</span>
+                  <i className="fa-solid fa-arrow-right"></i>
+                </>
               )}
             </button>
           </form>

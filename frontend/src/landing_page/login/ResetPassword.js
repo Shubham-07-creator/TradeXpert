@@ -115,52 +115,53 @@ function ResetPassword() {
           <form onSubmit={handleSubmit}>
             <div className="field mb-3">
               <label
-                className="fw-semibold text-muted mb-1"
-                style={{ fontSize: "14px" }}
+                className="fw-semibold small mb-1"
+                style={{ color: "var(--ink-secondary)" }}
               >
                 New Password
               </label>
-              <div className="input-group">
-                <span className="input-group-text border-end-0">
-                  <i className="fas fa-lock text-muted"></i>
+              <div className="auth-input-group">
+                <span className="auth-input-icon">
+                  <i className="fas fa-lock"></i>
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="At least 6 characters"
-                  className="form-control border-start-0 border-end-0 px-0 shadow-none"
+                  className="auth-input-field"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   required
                 />
-                <span
-                  className="input-group-text border-start-0"
+                <button
+                  type="button"
+                  className="auth-eye-btn"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{ cursor: "pointer" }}
+                  title={showPassword ? "Hide password" : "Show password"}
                 >
                   <i
                     className={`fas ${
                       showPassword ? "fa-eye-slash" : "fa-eye"
-                    } text-muted`}
+                    }`}
                   ></i>
-                </span>
+                </button>
               </div>
             </div>
 
             <div className="field mb-4">
               <label
-                className="fw-semibold text-muted mb-1"
-                style={{ fontSize: "14px" }}
+                className="fw-semibold small mb-1"
+                style={{ color: "var(--ink-secondary)" }}
               >
                 Confirm New Password
               </label>
-              <div className="input-group">
-                <span className="input-group-text border-end-0">
-                  <i className="fas fa-shield text-muted"></i>
+              <div className="auth-input-group">
+                <span className="auth-input-icon">
+                  <i className="fas fa-shield"></i>
                 </span>
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Repeat new password"
-                  className="form-control border-start-0 px-0 shadow-none"
+                  className="auth-input-field"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -171,20 +172,18 @@ function ResetPassword() {
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-100 py-2 fw-bold hover-scale"
-              style={{
-                background: "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
-                border: "none",
-                borderRadius: "8px",
-              }}
+              className="btn-auth-shimmer mt-2"
             >
               {loading ? (
                 <>
-                  <i className="fas fa-spinner fa-spin me-2"></i> Updating
-                  password...
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Updating password...</span>
                 </>
               ) : (
-                "Update Password"
+                <>
+                  <span>Update Password</span>
+                  <i className="fa-solid fa-arrow-right"></i>
+                </>
               )}
             </button>
           </form>

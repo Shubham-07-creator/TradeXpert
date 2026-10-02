@@ -36,28 +36,32 @@ const TopBar = () => {
     <header className="topbar-container">
       <div className="indices-container">
         <div className="index-box" title="National Stock Exchange Nifty 50 Index">
-          <span className="index-name">NIFTY 50</span>
+          <div className="index-header">
+            <span className="index-name">NIFTY 50</span>
+            <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
+              {niftyPercent}
+            </span>
+          </div>
           <span className="index-points">
             {Number(niftyPrice).toLocaleString("en-IN", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
           </span>
-          <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
-            {niftyPercent}
-          </span>
         </div>
 
         <div className="index-box" title="Bombay Stock Exchange SENSEX Index">
-          <span className="index-name">SENSEX</span>
+          <div className="index-header">
+            <span className="index-name">SENSEX</span>
+            <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
+              {formattedSensexPercent}
+            </span>
+          </div>
           <span className="index-points">
             {Number(sensexPrice).toLocaleString("en-IN", {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}
-          </span>
-          <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
-            {formattedSensexPercent}
           </span>
         </div>
 

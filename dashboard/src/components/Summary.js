@@ -292,7 +292,12 @@ const Summary = () => {
           </div>
         ) : (
           <div className="empty-state" style={{ padding: "36px 20px" }}>
-            <div className="empty-state-icon">💼</div>
+            <div className="empty-state-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="20" height="14" x="2" y="7" rx="2" ry="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+            </div>
             <h4 className="empty-state-title">No Active Holdings</h4>
             <p className="empty-state-text">
               Select any stock from the watchlist on the left and click <b>BUY</b> to start investing.

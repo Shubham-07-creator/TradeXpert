@@ -134,6 +134,28 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
   const [hoveredCandle, setHoveredCandle] = useState(null);
   const canvasRef = useRef(null);
 
+  const [themeMode, setThemeMode] = useState(() => {
+    return (
+      (typeof document !== "undefined" &&
+        document.documentElement.getAttribute("data-theme")) ||
+      "light"
+    );
+  });
+
+  useEffect(() => {
+    const handleTheme = (e) => {
+      setThemeMode(
+        e.detail ||
+          document.documentElement.getAttribute("data-theme") ||
+          "light"
+      );
+    };
+    window.addEventListener("themeChanged", handleTheme);
+    return () => window.removeEventListener("themeChanged", handleTheme);
+  }, []);
+
+  const isDark = themeMode === "dark";
+
   // Subscribe to real-time price updates for this stock
   useEffect(() => {
     const unsubscribe = subscribeToLiveMarket(() => {
@@ -210,9 +232,9 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
 
     // Draw horizontal grid lines & price labels
     const gridSteps = 5;
-    ctx.strokeStyle = "rgba(148, 163, 184, 0.12)";
-    ctx.fillStyle = "rgba(148, 163, 184, 0.7)";
-    ctx.font = "11px Inter, system-ui, sans-serif";
+    ctx.strokeStyle = isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.09)";
+    ctx.fillStyle = isDark ? "#94A3B8" : "#1E293B";
+    ctx.font = "600 11px Inter, system-ui, sans-serif";
     ctx.lineWidth = 1;
 
     for (let i = 0; i <= gridSteps; i++) {
@@ -236,13 +258,15 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
     candles.forEach((c, idx) => {
       const x = padding.left + idx * spacing + spacing / 2;
       const isBull = c.close >= c.open;
-      const candleColor = isBull ? "#00D09C" : "#EF4444";
+      const candleColor = isBull
+        ? (isDark ? "#10B981" : "#059669")
+        : (isDark ? "#F87171" : "#DC2626");
 
       // 1. Draw Volume bar
       const vH = (c.volume / maxVol) * volHeight;
       ctx.fillStyle = isBull
-        ? "rgba(0, 208, 156, 0.2)"
-        : "rgba(239, 68, 68, 0.2)";
+        ? (isDark ? "rgba(16, 185, 129, 0.25)" : "rgba(5, 150, 105, 0.25)")
+        : (isDark ? "rgba(248, 113, 113, 0.25)" : "rgba(220, 38, 38, 0.25)");
       ctx.fillRect(
         x - candleWidth / 2,
         padding.top + chartH - vH,
@@ -269,11 +293,11 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
 
       // 4. X-Axis Time Labels (spaced out)
       if (idx % Math.ceil(candles.length / 6) === 0) {
-        ctx.fillStyle = "rgba(148, 163, 184, 0.8)";
+        ctx.fillStyle = isDark ? "#94A3B8" : "#1E293B";
         ctx.fillText(c.time, x - 14, height - 12);
       }
     });
-  }, [candles]);
+  }, [candles, isDark]);
 
   useEffect(() => {
     if (chartType === "candle") {
@@ -292,7 +316,9 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
         fill: true,
         label: `${stockName} Price (₹)`,
         data: candles.map((c) => c.close),
-        borderColor: isPositive ? "#00D09C" : "#EF4444",
+        borderColor: isPositive
+          ? (isDark ? "#10B981" : "#059669")
+          : (isDark ? "#F87171" : "#DC2626"),
         backgroundColor: (context) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
@@ -304,19 +330,21 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
             chartArea.bottom
           );
           if (isPositive) {
-            gradient.addColorStop(0, "rgba(0, 208, 156, 0.28)");
-            gradient.addColorStop(1, "rgba(0, 208, 156, 0.00)");
+            gradient.addColorStop(0, isDark ? "rgba(16, 185, 129, 0.28)" : "rgba(5, 150, 105, 0.22)");
+            gradient.addColorStop(1, "rgba(5, 150, 105, 0.00)");
           } else {
-            gradient.addColorStop(0, "rgba(239, 68, 68, 0.28)");
-            gradient.addColorStop(1, "rgba(239, 68, 68, 0.00)");
+            gradient.addColorStop(0, isDark ? "rgba(248, 113, 113, 0.28)" : "rgba(220, 38, 38, 0.22)");
+            gradient.addColorStop(1, "rgba(220, 38, 38, 0.00)");
           }
           return gradient;
         },
-        borderWidth: 2.2,
+        borderWidth: 2.4,
         tension: 0.35,
         pointRadius: 0,
         pointHoverRadius: 6,
-        pointHoverBackgroundColor: isPositive ? "#00D09C" : "#EF4444",
+        pointHoverBackgroundColor: isPositive
+          ? (isDark ? "#10B981" : "#059669")
+          : (isDark ? "#F87171" : "#DC2626"),
         pointHoverBorderColor: "#fff",
         pointHoverBorderWidth: 2,
       },
@@ -370,17 +398,17 @@ const StockChartModal = ({ stockName, onClose, onBuy, onSell }) => {
       x: {
         grid: { display: false },
         ticks: {
-          color: "rgba(148, 163, 184, 0.8)",
-          font: { size: 11, family: "Inter, sans-serif" },
+          color: isDark ? "#94A3B8" : "#1E293B",
+          font: { size: 11, family: "Inter, sans-serif", weight: "600" },
           maxTicksLimit: 7,
         },
       },
       y: {
         position: "right",
-        grid: { color: "rgba(148, 163, 184, 0.12)" },
+        grid: { color: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(15, 23, 42, 0.08)" },
         ticks: {
-          color: "rgba(148, 163, 184, 0.8)",
-          font: { size: 11, family: "Inter, sans-serif" },
+          color: isDark ? "#94A3B8" : "#1E293B",
+          font: { size: 11, family: "Inter, sans-serif", weight: "600" },
           callback: (value) => `₹${value.toFixed(1)}`,
         },
       },

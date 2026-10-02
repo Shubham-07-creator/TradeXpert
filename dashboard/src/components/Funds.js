@@ -93,9 +93,9 @@ const Funds = () => {
       {/* Header */}
       <div className="section-header">
         <div>
-          <h2 className="page-title">Funds &amp; Capital</h2>
+          <h2 className="page-title">फंड्स व बैलेंस • Funds &amp; Capital</h2>
           <p className="page-subtitle">
-            Manage your virtual trading balance and view account margins.
+            अपने ट्रेडिंग वॉलेट का बैलेंस देखें, पैसे जोड़ें या निकालें • Manage cash &amp; margins.
           </p>
         </div>
 
@@ -117,7 +117,7 @@ const Funds = () => {
               gap: "6px",
             }}
           >
-            + Add Funds
+            + Add Funds (पैसे जोड़ें)
           </button>
           <button
             onClick={openWithdrawModal}
@@ -132,7 +132,7 @@ const Funds = () => {
               cursor: "pointer",
             }}
           >
-            Withdraw
+            Withdraw (पैसे निकालें)
           </button>
         </div>
       </div>
@@ -203,41 +203,41 @@ const Funds = () => {
       {/* 4 Financial Stat Cards Grid */}
       <div className="stats-card-grid">
         <div className="stat-card">
-          <div className="stat-card-label">Available Trading Cash</div>
+          <div className="stat-card-label">उपलब्ध ट्रेडिंग कैश • Available Cash</div>
           <div className="stat-card-value" style={{ color: "var(--color-primary)" }}>
             ₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
           </div>
-          <div className="stat-card-sub">Liquid capital ready for orders</div>
+          <div className="stat-card-sub">नये शेयर खरीदने या निकासी के लिए फ्री कैश</div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-card-label">Invested in Stocks</div>
+          <div className="stat-card-label">शेयरों में लगी लागत • Invested in Stocks</div>
           <div className="stat-card-value">
             ₹{investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
           </div>
-          <div className="stat-card-sub">Cost basis across all holdings</div>
+          <div className="stat-card-sub">शेयर खरीदने में खर्च किए गए कुल पैसे</div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-card-label">Unrealized Market P&amp;L</div>
+          <div className="stat-card-label">शेयरों में चल रहा फायदा/घाटा • Unrealized P&amp;L</div>
           <div
             className="stat-card-value"
             style={{ color: isUnrealizedProfit ? "var(--color-profit)" : "var(--color-loss)" }}
           >
             {isUnrealizedProfit ? "+" : ""}₹{unrealizedPnL.toFixed(2)}
           </div>
-          <div className="stat-card-sub">Paper returns on active holdings</div>
+          <div className="stat-card-sub">{isUnrealizedProfit ? "🟢 वर्तमान में मुनाफा चल रहा है" : "🔴 वर्तमान में घाटा चल रहा है"}</div>
         </div>
 
         <div className="stat-card">
-          <div className="stat-card-label">Realized Closed P&amp;L</div>
+          <div className="stat-card-label">बुक किया गया पक्का मुनाफा • Realized P&amp;L</div>
           <div
             className="stat-card-value"
             style={{ color: isRealizedProfit ? "var(--color-profit)" : "var(--color-loss)" }}
           >
             {isRealizedProfit ? "+" : ""}₹{realizedPnL.toFixed(2)}
           </div>
-          <div className="stat-card-sub">Locked profit from completed sales</div>
+          <div className="stat-card-sub">शेयर बेचकर बुक किया गया लाइफटाइम रिटर्न</div>
         </div>
       </div>
 

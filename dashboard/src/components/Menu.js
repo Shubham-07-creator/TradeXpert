@@ -20,6 +20,7 @@ const Menu = () => {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
+    window.dispatchEvent(new CustomEvent("themeChanged", { detail: theme }));
   }, [theme]);
 
   const toggleTheme = () => {

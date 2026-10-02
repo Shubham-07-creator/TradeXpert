@@ -12,16 +12,18 @@ const buildLiveMap = (snapshot) => {
   return map;
 };
 
+// Vibrant, solid neo-broker sector colors (high contrast in both Light & Dark modes)
 const SECTOR_COLORS = [
-  "rgba(255, 99, 132, 0.6)",
-  "rgba(54, 162, 235, 0.6)",
-  "rgba(255, 206, 86, 0.6)",
-  "rgba(75, 192, 192, 0.6)",
-  "rgba(153, 102, 255, 0.6)",
-  "rgba(255, 159, 64, 0.6)",
-  "rgba(103, 201, 136, 0.6)",
-  "rgba(223, 73, 73, 0.6)",
-  "rgba(180, 180, 180, 0.6)",
+  "#387ED1", // Blue (Banking/Financials)
+  "#10B981", // Emerald (Consumer/FMCG)
+  "#8B5CF6", // Purple (Technology)
+  "#F59E0B", // Amber (Energy/Oil)
+  "#EC4899", // Pink (Auto)
+  "#06B6D4", // Cyan (Healthcare/Pharma)
+  "#F97316", // Orange (Metals & Mining)
+  "#6366F1", // Indigo (Infrastructure)
+  "#14B8A6", // Teal (Telecom)
+  "#84CC16", // Lime (Other)
 ];
 
 const SectorAllocation = () => {
@@ -36,7 +38,7 @@ const SectorAllocation = () => {
 
   useEffect(() => {
     const unsubscribe = subscribeToLiveMarket((snapshot) =>
-      setLiveMap(buildLiveMap(snapshot)),
+      setLiveMap(buildLiveMap(snapshot))
     );
     return unsubscribe;
   }, []);
@@ -46,7 +48,7 @@ const SectorAllocation = () => {
       const res = await axios.get(`${API}/allHoldings`, {
         headers: getAuthHeader(),
       });
-      setHoldings(res.data);
+      setHoldings(res.data || []);
     } catch (err) {
       console.log(err);
     }
@@ -55,7 +57,7 @@ const SectorAllocation = () => {
   const sectorTotals = {};
   holdings.forEach((h) => {
     const live = liveMap[h.name];
-    const sector = live?.sector || "Other";
+    const sector = live?.sector || "Diversified";
     const price = live ? live.price : h.price;
     sectorTotals[sector] = (sectorTotals[sector] || 0) + price * h.qty;
   });
@@ -65,9 +67,13 @@ const SectorAllocation = () => {
 
   if (labels.length === 0) {
     return (
-      <div className="section">
-        <p style={{ padding: "10px 0", color: "#888" }}>
-          Buy some stocks to see your sector-wise diversification here.
+      <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>
+        <div style={{ fontSize: "2rem", marginBottom: "8px" }}>🥧</div>
+        <p style={{ margin: 0, fontWeight: "700", fontSize: "0.92rem", color: "var(--color-text-strong)" }}>
+          विभिन्न सेक्टर्स में विविधीकरण (Diversification)
+        </p>
+        <p style={{ margin: "4px 0 0 0", fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
+          जब आप अलग-अलग कंपनियों के शेयर खरीदेंगे, तो आपका सेक्टर ब्रेकडाउन यहाँ दिखेगा।
         </p>
       </div>
     );
@@ -77,18 +83,17 @@ const SectorAllocation = () => {
     labels,
     datasets: [
       {
-        label: "Sector allocation (₹)",
+        label: "Sector allocation",
         data: values,
-        backgroundColor: SECTOR_COLORS,
+        backgroundColor: SECTOR_COLORS.slice(0, labels.length),
+        borderWidth: 2,
+        borderColor: "var(--color-bg-card)",
       },
     ],
   };
 
   return (
-    <div className="section">
-      <p style={{ marginBottom: "10px" }}>
-        Sector-wise Portfolio Diversification
-      </p>
+    <div>
       <DoughnutChart data={data} />
     </div>
   );

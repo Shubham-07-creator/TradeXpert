@@ -17,8 +17,10 @@
   /* Surfaces & Backgrounds */
   --color-bg-page: #F8FAFD;
   --color-bg-card: #FFFFFF;
+  --color-bg-surface: #FFFFFF;
   --color-bg-subtle: #F1F5F9;
   --color-bg-hover: #F8FAFC;
+  --color-bg-base: #F8FAFC;
 
   /* Typography */
   --color-text-strong: #0F172A;
@@ -63,8 +65,10 @@
   /* Surfaces & Backgrounds */
   --color-bg-page: #0B1120;
   --color-bg-card: #151F32;
+  --color-bg-surface: #151F32;
   --color-bg-subtle: #0E1726;
   --color-bg-hover: #1E2B45;
+  --color-bg-base: #0B1120;
 
   /* Typography */
   --color-text-strong: #F8FAFC;

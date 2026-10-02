@@ -1,0 +1,294 @@
+/* Modern Neo-Broker Fund Modal (Deposit & Withdraw) */
+
+.fund-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: modalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fund-modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.fund-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fund-modal-header.deposit {
+  background: linear-gradient(135deg, rgba(0, 208, 156, 0.1) 0%, rgba(56, 126, 209, 0.05) 100%);
+  border-left: 4px solid var(--color-profit);
+}
+
+.fund-modal-header.withdraw {
+  background: linear-gradient(135deg, rgba(56, 126, 209, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-left: 4px solid var(--color-primary);
+}
+
+.fund-modal-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--color-text-strong);
+  margin: 0;
+}
+
+.fund-modal-sub {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  margin: 2px 0 0 0;
+}
+
+.fund-modal-body {
+  padding: 22px 24px;
+}
+
+/* Mode Switcher Tabs */
+.fund-mode-tabs {
+  display: flex;
+  background: var(--color-bg-subtle);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  margin-bottom: 20px;
+  gap: 4px;
+}
+
+.fund-mode-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.fund-mode-btn.active.deposit {
+  background: var(--color-bg-card);
+  color: var(--color-profit);
+  box-shadow: var(--shadow-sm);
+}
+
+.fund-mode-btn.active.withdraw {
+  background: var(--color-bg-card);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Balance Info Strip */
+.fund-balance-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  margin-bottom: 18px;
+  font-size: 0.82rem;
+}
+
+.fund-balance-label {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.fund-balance-val {
+  color: var(--color-text-strong);
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+/* Amount Input Box */
+.fund-amount-wrapper {
+  margin-bottom: 16px;
+}
+
+.fund-amount-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.fund-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.fund-currency-symbol {
+  position: absolute;
+  left: 14px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-muted);
+}
+
+.fund-amount-input {
+  width: 100%;
+  padding: 12px 14px 12px 34px;
+  font-size: 1.35rem;
+  font-weight: 800;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-strong);
+  outline: none;
+  transition: all 0.2s ease;
+  font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
+}
+
+.fund-amount-input:focus {
+  border-color: var(--color-primary);
+  background: var(--color-bg-card);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Preset Amount Chips */
+.fund-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.fund-preset-btn {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 7px 4px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.fund-preset-btn:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.fund-preset-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
+/* Payment Simulation Channel */
+.fund-channel-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--color-bg-subtle);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  margin-bottom: 22px;
+}
+
+.fund-channel-badge span {
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+/* Modal Actions */
+.fund-modal-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-fund-submit {
+  flex: 2;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-fund-submit.deposit {
+  background: var(--color-profit);
+  box-shadow: 0 4px 14px rgba(0, 208, 156, 0.35);
+}
+
+.btn-fund-submit.deposit:hover:not(:disabled) {
+  background: #05b487;
+  transform: translateY(-1px);
+}
+
+.btn-fund-submit.withdraw {
+  background: var(--color-primary);
+  box-shadow: 0 4px 14px rgba(56, 126, 209, 0.35);
+}
+
+.btn-fund-submit.withdraw:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.btn-fund-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-fund-close {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-fund-close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-strong);
+}

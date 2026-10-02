@@ -8,6 +8,7 @@ import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 import GeneralContext from "./GeneralContext";
 import { socket } from "../utils/socket";
 import { sound } from "../utils/sound";
+import ConfirmModal from "./ConfirmModal";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -26,6 +27,7 @@ const Holdings = () => {
   const [slInput, setSlInput] = useState("");
   const [targetInput, setTargetInput] = useState("");
   const [savingGtt, setSavingGtt] = useState(false);
+  const [confirmSellStock, setConfirmSellStock] = useState(null);
 
   const generalContext = useContext(GeneralContext);
 
@@ -386,7 +388,7 @@ const Holdings = () => {
                               transition: "all 0.2s ease",
                               opacity: hover === i ? 1 : 0.85,
                             }}
-                            onClick={() => handleSell(stock)}
+                            onClick={() => setConfirmSellStock(stock)}
                             title={`Sell all ${stock.qty} shares of ${stock.name}`}
                           >
                             Sell
@@ -522,6 +524,23 @@ const Holdings = () => {
           </div>
         </div>
       )}
+
+      {/* Modern Confirmation Modal for Selling Delivery Holdings */}
+      <ConfirmModal
+        isOpen={!!confirmSellStock}
+        title={`Sell ${confirmSellStock?.name}?`}
+        message={`Are you sure you want to sell all ${confirmSellStock?.qty} shares of ${confirmSellStock?.name} at current LTP of ₹${(liveMap[confirmSellStock?.name]?.price || confirmSellStock?.price || 0).toFixed(2)}?`}
+        icon="📉"
+        confirmText="Confirm Sell"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={() => {
+          const s = confirmSellStock;
+          setConfirmSellStock(null);
+          handleSell(s);
+        }}
+        onCancel={() => setConfirmSellStock(null)}
+      />
     </div>
   );
 };

@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getAuthHeader } from "../utils/auth";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import { sound } from "../utils/sound";
+import FundModal from "./FundModal";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -19,18 +21,11 @@ const Funds = () => {
   const [holdings, setHoldings] = useState([]);
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // Modern Modal State
+  const [fundModalOpen, setFundModalOpen] = useState(false);
+  const [fundModalMode, setFundModalMode] = useState("DEPOSIT");
 
-  useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) =>
-      setLiveMap(buildLiveMap(snapshot))
-    );
-    return unsubscribe;
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [profileRes, holdingsRes] = await Promise.all([
         axios.get(`${API}/profile`, { headers: getAuthHeader() }),
@@ -43,50 +38,41 @@ const Funds = () => {
     } catch (err) {
       console.log(err);
     }
+  }, [API]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) =>
+      setLiveMap(buildLiveMap(snapshot))
+    );
+    return unsubscribe;
+  }, []);
+
+  const openDepositModal = () => {
+    setFundModalMode("DEPOSIT");
+    setFundModalOpen(true);
   };
 
-  const handleAddFunds = async (presetAmount) => {
-    let amount = presetAmount;
-    if (!amount) {
-      const input = window.prompt("Enter virtual cash amount to add (₹):", "50000");
-      amount = Number(input);
-    }
+  const openWithdrawModal = () => {
+    setFundModalMode("WITHDRAW");
+    setFundModalOpen(true);
+  };
 
-    if (!amount || amount <= 0) return;
-
+  const handleQuickAdd = async (amount) => {
     try {
       await axios.post(
         `${API}/wallet/add`,
         { amount },
         { headers: getAuthHeader() }
       );
-
-      toast.success(`₹${amount.toLocaleString("en-IN")} credited to your virtual wallet! ✅`, {
-        style: { background: "#00D09C", color: "#fff", fontWeight: "600" },
-      });
+      sound.playTradeChime();
+      toast.success(`+₹${amount.toLocaleString("en-IN")} added to your virtual wallet! 💳`);
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Add funds failed ❌");
-    }
-  };
-
-  const handleWithdraw = async () => {
-    const input = window.prompt("Enter amount to withdraw (₹):", "10000");
-    const amount = Number(input);
-
-    if (!amount || amount <= 0) return;
-
-    try {
-      await axios.post(
-        `${API}/wallet/withdraw`,
-        { amount },
-        { headers: getAuthHeader() }
-      );
-
-      toast.success(`₹${amount.toLocaleString("en-IN")} withdrawn successfully! ✅`);
-      fetchData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Withdraw failed ❌");
+      toast.error(err.response?.data?.message || "Failed to add funds ❌");
     }
   };
 
@@ -115,7 +101,7 @@ const Funds = () => {
 
         <div style={{ display: "flex", gap: "10px" }}>
           <button
-            onClick={() => handleAddFunds()}
+            onClick={openDepositModal}
             style={{
               background: "var(--gradient-profit)",
               color: "#fff",
@@ -134,7 +120,7 @@ const Funds = () => {
             + Add Funds
           </button>
           <button
-            onClick={handleWithdraw}
+            onClick={openWithdrawModal}
             style={{
               background: "var(--color-bg-card)",
               color: "var(--color-text-strong)",
@@ -192,7 +178,7 @@ const Funds = () => {
               {[10000, 50000, 100000].map((amt) => (
                 <button
                   key={amt}
-                  onClick={() => handleAddFunds(amt)}
+                  onClick={() => handleQuickAdd(amt)}
                   style={{
                     background: "var(--color-bg-card)",
                     border: "1px solid var(--color-border)",
@@ -204,6 +190,7 @@ const Funds = () => {
                     cursor: "pointer",
                     transition: "all 0.2s ease",
                   }}
+                  title={`Instantly add ₹${amt.toLocaleString("en-IN")}`}
                 >
                   +₹{(amt / 1000).toFixed(0)}k
                 </button>
@@ -253,6 +240,15 @@ const Funds = () => {
           <div className="stat-card-sub">Locked profit from completed sales</div>
         </div>
       </div>
+
+      {/* Modern Add / Withdraw Modal */}
+      <FundModal
+        isOpen={fundModalOpen}
+        initialMode={fundModalMode}
+        walletBalance={wallet}
+        onClose={() => setFundModalOpen(false)}
+        onSuccess={fetchData}
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { ShowChart } from "@mui/icons-material";
 import { getAuthHeader } from "../utils/auth";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 import GeneralContext from "./GeneralContext";
+import ConfirmModal from "./ConfirmModal";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -19,6 +20,7 @@ const Positions = () => {
   const [allPositions, setAllPositions] = useState([]);
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
   const [hover, setHover] = useState(null);
+  const [confirmExitPos, setConfirmExitPos] = useState(null);
   const generalContext = useContext(GeneralContext);
 
   useEffect(() => {
@@ -216,7 +218,7 @@ const Positions = () => {
                               transition: "all 0.2s ease",
                               opacity: hover === i ? 1 : 0.85,
                             }}
-                            onClick={() => handleSell(stock)}
+                            onClick={() => setConfirmExitPos(stock)}
                             title={`Square off ${stock.name}`}
                           >
                             Exit
@@ -240,6 +242,23 @@ const Positions = () => {
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal for Squaring Off Positions */}
+      <ConfirmModal
+        isOpen={!!confirmExitPos}
+        title={`Square off ${confirmExitPos?.name}?`}
+        message={`Are you sure you want to exit your ${confirmExitPos?.product || "MIS"} position of ${confirmExitPos?.qty} shares of ${confirmExitPos?.name} at current LTP of ₹${(liveMap[confirmExitPos?.name]?.price || confirmExitPos?.price || 0).toFixed(2)}?`}
+        icon="⚡"
+        confirmText="Square Off"
+        cancelText="Cancel"
+        isDanger={true}
+        onConfirm={() => {
+          const p = confirmExitPos;
+          setConfirmExitPos(null);
+          handleSell(p);
+        }}
+        onCancel={() => setConfirmExitPos(null)}
+      />
     </div>
   );
 };

@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { isAdmin, getCurrentUser } from "../utils/auth";
 import toast from "react-hot-toast";
+import ConfirmModal from "./ConfirmModal";
 
 const Menu = () => {
   const location = useLocation();
   const user = getCurrentUser();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const FRONTEND =
     process.env.REACT_APP_FRONTEND_URL || "http://localhost:3000";
@@ -23,17 +25,19 @@ const Menu = () => {
   const toggleTheme = () => {
     const nextTheme = theme === "dark" ? "light" : "dark";
     setTheme(nextTheme);
-    toast.success(`Switched to ${nextTheme === "dark" ? "Dark" : "Light"} Mode`, {
+    toast(`Switched to ${nextTheme === "dark" ? "Dark" : "Light"} Mode`, {
       icon: nextTheme === "dark" ? "🌙" : "☀️",
-      duration: 1800,
+      duration: 1500,
+      id: "theme-toggle",
     });
   };
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     window.dispatchEvent(new Event("userChanged"));
-    toast.success("Logged out successfully");
+    toast.success("Signed out successfully. See you again! 👋", { duration: 1500 });
     setTimeout(() => {
       window.location.href = FRONTEND + "?logout=true";
     }, 600);
@@ -161,13 +165,26 @@ const Menu = () => {
 
         {/* Logout */}
         <button
-          onClick={handleLogout}
+          onClick={() => setShowLogoutModal(true)}
           className="btn-logout"
           title="Sign out of TradeXpert"
         >
           Logout
         </button>
       </div>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        title="Sign Out of TradeXpert?"
+        message="Are you sure you want to end your active trading session? Any open limit orders will remain safely in the market."
+        icon="🚪"
+        confirmText="Yes, Sign Out"
+        cancelText="Keep Trading"
+        isDanger={true}
+        onConfirm={confirmLogout}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </nav>
   );
 };

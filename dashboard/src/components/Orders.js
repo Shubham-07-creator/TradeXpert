@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import "./Orders.css";
 import { getAuthHeader } from "../utils/auth";
 import { socket } from "../utils/socket";
+import ConfirmModal from "./ConfirmModal";
 
 const Orders = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -12,6 +13,7 @@ const Orders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("ALL"); // "ALL" | "OPEN" | "EXECUTED"
   const [cancellingId, setCancellingId] = useState(null);
+  const [orderToCancel, setOrderToCancel] = useState(null);
 
   const fetchOrders = useCallback(
     async (p) => {
@@ -285,7 +287,7 @@ const Orders = () => {
                           <button
                             className="btn-cancel-order"
                             disabled={cancellingId === o._id}
-                            onClick={() => handleCancelOrder(o._id)}
+                            onClick={() => setOrderToCancel(o)}
                             title="Cancel this open limit order and refund wallet"
                           >
                             {cancellingId === o._id ? "Cancelling..." : "Cancel"}
@@ -343,6 +345,23 @@ const Orders = () => {
           </button>
         </div>
       )}
+
+      {/* Confirmation Modal for Cancelling Limit Order */}
+      <ConfirmModal
+        isOpen={!!orderToCancel}
+        title="Cancel Limit Order?"
+        message={`Are you sure you want to cancel your open ${orderToCancel?.mode} order for ${orderToCancel?.qty} shares of ${orderToCancel?.name}? The margin of ₹${(Number(orderToCancel?.qty) * Number(orderToCancel?.limitPrice || orderToCancel?.price || 0)).toFixed(2)} will be refunded to your wallet immediately.`}
+        icon="❌"
+        confirmText="Yes, Cancel Order"
+        cancelText="Keep Order Open"
+        isDanger={true}
+        onConfirm={() => {
+          const id = orderToCancel._id;
+          setOrderToCancel(null);
+          handleCancelOrder(id);
+        }}
+        onCancel={() => setOrderToCancel(null)}
+      />
     </div>
   );
 };

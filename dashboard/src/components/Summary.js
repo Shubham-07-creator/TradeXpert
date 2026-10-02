@@ -116,7 +116,7 @@ const Summary = () => {
             Welcome back, {user?.name || "Trader"} 👋
           </h2>
           <p className="summary-user-subtitle">
-            आपका लाइव वित्तीय डैशबोर्ड • All your investments, cash &amp; returns at a glance.
+            Live Portfolio Overview • All your investments, cash &amp; returns at a glance.
           </p>
         </div>
 
@@ -126,10 +126,10 @@ const Summary = () => {
             type="button"
             className="btn-summary-guide"
             onClick={() => setShowGuide(!showGuide)}
-            title="डैशबोर्ड को आसानी से समझें"
+            title="Understand your dashboard numbers"
           >
             <HelpOutline style={{ fontSize: "1rem" }} />
-            {showGuide ? "गाइड बंद करें" : "💡 डैशबोर्ड कैसे समझें?"}
+            {showGuide ? "Close Guide" : "💡 How to Read Dashboard"}
           </button>
 
           {/* Add Funds Button */}
@@ -139,7 +139,7 @@ const Summary = () => {
             onClick={() => setFundModalOpen(true)}
           >
             <Payments style={{ fontSize: "1.05rem" }} />
-            + Add Funds (पैसे जोड़ें)
+            + Add Funds
           </button>
         </div>
       </div>
@@ -150,7 +150,7 @@ const Summary = () => {
           <div className="summary-guide-header">
             <h4 className="summary-guide-title">
               <CheckCircleOutline style={{ color: "var(--color-primary)" }} />
-              TradeXpert Quick Guide — आपके खाते के 3 मुख्य सवाल:
+              TradeXpert Quick Guide — Understanding Your Portfolio:
             </h4>
             <button
               onClick={() => setShowGuide(false)}
@@ -168,32 +168,31 @@ const Summary = () => {
           <div className="summary-guide-grid">
             <div className="summary-guide-item">
               <div className="summary-guide-item-title">
-                💰 1. कितना पैसा है मेरे पास?
+                💰 1. Where is my money?
               </div>
               <p className="summary-guide-item-desc">
-                <b>कुल संपत्ति (Net Worth)</b> = आपके वॉलेट का कैश + खरीदे हुए शेयरों की आज की कीमत।<br />
-                <b>उपलब्ध कैश (Available Cash)</b> = वह पैसा जिससे आप तुरंत नए शेयर खरीद सकते हैं या निकाल सकते हैं।
+                <b>Total Net Worth</b>: Your total account value (Free Cash in Wallet + Current Market Value of owned stocks).<br />
+                <b>Available Cash</b>: Free balance ready to buy new stocks or withdraw anytime.
               </p>
             </div>
 
             <div className="summary-guide-item">
               <div className="summary-guide-item-title">
-                📈 2. कितना फायदा या नुकसान हुआ?
+                📈 2. What is my Profit &amp; Loss?
               </div>
               <p className="summary-guide-item-desc">
-                <b>चल रहा फायदा/घाटा (Unrealized P&amp;L)</b>: आपके खरीदे हुए शेयरों पर अभी चल रहा लाभ/हानि।<br />
-                <b>🟢 हरा रंग</b> = आपको फायदा (Profit) हुआ है।<br />
-                <b>🔴 लाल रंग</b> = आपको घाटा (Loss) हुआ है।
+                <b>Unrealized P&amp;L</b>: Live return on stocks you currently hold (Green = Profit, Red = Loss).<br />
+                <b>Realized P&amp;L</b>: Locked profit or loss from completed sales.
               </p>
             </div>
 
             <div className="summary-guide-item">
               <div className="summary-guide-item-title">
-                📦 3. अभी कितने शेयर खरीदे हुए हैं?
+                📦 3. What stocks and orders do I own?
               </div>
               <p className="summary-guide-item-desc">
-                <b>Active Holdings</b> = वे कंपनियाँ जिनके शेयर आपके पास मौजूद हैं।<br />
-                <b>Pending Orders</b> = वे लिमिट ऑर्डर जो आपके तय भाव पर आने का इंतज़ार कर रहे हैं।
+                <b>Active Holdings</b>: Companies whose shares you currently hold in delivery.<br />
+                <b>Pending Orders</b>: Limit orders waiting for market price to reach your set target.
               </p>
             </div>
           </div>
@@ -206,14 +205,14 @@ const Summary = () => {
           <div className="summary-hero-title-group">
             <span className="summary-hero-tag">
               <AccountBalanceWallet style={{ fontSize: "0.95rem" }} />
-              कुल कुल संपत्ति • Total Net Worth
+              Total Net Worth
             </span>
             <div className="summary-hero-value">
               ₹{totalPortfolio.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </div>
             <p className="summary-hero-subtext">
-              वॉलेट कैश (₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}) +
-              शेयरों की वर्तमान वैल्यू (₹{currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })})
+              Wallet Cash (₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}) +
+              Current Stock Value (₹{currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })})
             </p>
           </div>
 
@@ -243,8 +242,8 @@ const Summary = () => {
               }}
             >
               {isProfit
-                ? "🟢 कुल मिलाकर आपका पोर्टफोलियो मुनाफे में है!"
-                : "🔴 आपके शेयर खरीद मूल्य से कम पर ट्रेड कर रहे हैं।"}
+                ? "🟢 Your overall portfolio is currently profitable"
+                : "🔴 Portfolio currently trading below purchase cost"}
             </div>
           </div>
         </div>
@@ -252,9 +251,9 @@ const Summary = () => {
         {/* Asset Allocation Bar (Cash vs Stocks) */}
         <div className="summary-asset-bar-section">
           <div className="summary-asset-bar-labels">
-            <span>पैसा कहाँ लगा है? (Asset Breakdown)</span>
+            <span>Asset Allocation Breakdown</span>
             <span>
-              कैश: {cashRatio}% • शेयर: {stocksRatio}%
+              Cash: {cashRatio}% • Stocks: {stocksRatio}%
             </span>
           </div>
 
@@ -262,12 +261,12 @@ const Summary = () => {
             <div
               className="summary-asset-segment-cash"
               style={{ width: `${cashRatio}%` }}
-              title={`फ्री कैश: ₹${wallet.toLocaleString("en-IN")} (${cashRatio}%)`}
+              title={`Liquid Cash: ₹${wallet.toLocaleString("en-IN")} (${cashRatio}%)`}
             />
             <div
               className="summary-asset-segment-stocks"
               style={{ width: `${stocksRatio}%` }}
-              title={`शेयरों में निवेश: ₹${currentValue.toLocaleString("en-IN")} (${stocksRatio}%)`}
+              title={`Equity Holdings: ₹${currentValue.toLocaleString("en-IN")} (${stocksRatio}%)`}
             />
           </div>
 
@@ -278,7 +277,7 @@ const Summary = () => {
                 style={{ background: "#387ED1" }}
               />
               <span>
-                <b>उपलब्ध कैश (Liquid Cash):</b> ₹
+                <b>Available Cash (Liquid Margin):</b> ₹
                 {wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })} ({cashRatio}%)
               </span>
             </div>
@@ -288,7 +287,7 @@ const Summary = () => {
                 style={{ background: "#10B981" }}
               />
               <span>
-                <b>शेयरों में निवेश (Equity Value):</b> ₹
+                <b>Stock Holdings (Market Value):</b> ₹
                 {currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })} ({stocksRatio}%)
               </span>
             </div>
@@ -296,40 +295,40 @@ const Summary = () => {
         </div>
       </div>
 
-      {/* 4. The 3 User Clarity Cards (Direct Answers to User's Questions) */}
+      {/* 4. The 3 Clarity Question Cards */}
       <div className="summary-clarity-grid">
-        {/* Question 1: कितना पैसा है? */}
+        {/* Question 1: How much money do I have? */}
         <div className="summary-clarity-card">
           <div className="summary-clarity-card-header">
             <h3 className="summary-clarity-question">
-              💰 1. कितना पैसा है मेरे पास?
+              💰 1. Available Capital
             </h3>
-            <span className="summary-clarity-badge">कैपिटल स्थिति</span>
+            <span className="summary-clarity-badge">Cash &amp; Margin</span>
           </div>
 
           <div className="summary-clarity-main-stat" style={{ color: "var(--color-primary)" }}>
             ₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
           </div>
           <p className="summary-clarity-explanation">
-            यह आपका <b>फ्री ट्रेडिंग बैलेंस</b> है। इससे आप तुरंत नए शेयर खरीद सकते हैं या अपने बैंक में निकाल सकते हैं।
+            This is your <b>liquid trading balance</b> ready to buy new shares or withdraw to your bank account anytime.
           </p>
 
           <div className="summary-clarity-breakdown">
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">वॉलेट में फ्री कैश:</span>
+              <span className="summary-breakdown-label">Free Cash in Wallet:</span>
               <span className="summary-breakdown-value">
                 ₹{wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">शेयरों की आज की कीमत:</span>
+              <span className="summary-breakdown-label">Current Value in Stocks:</span>
               <span className="summary-breakdown-value">
                 ₹{currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
               </span>
             </div>
             <div className="summary-breakdown-row" style={{ borderTop: "1px dashed var(--color-border)", paddingTop: "6px", marginTop: "2px" }}>
               <span className="summary-breakdown-label" style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
-                कुल खाता संपत्ति:
+                Total Account Worth:
               </span>
               <span className="summary-breakdown-value" style={{ fontWeight: "800", color: "var(--color-primary)" }}>
                 ₹{totalPortfolio.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
@@ -338,11 +337,11 @@ const Summary = () => {
           </div>
         </div>
 
-        {/* Question 2: कितना फायदा या नुकसान हुआ? */}
+        {/* Question 2: How much profit / loss did I make? */}
         <div className="summary-clarity-card">
           <div className="summary-clarity-card-header">
             <h3 className="summary-clarity-question">
-              📈 2. कितना फायदा / नुकसान हुआ?
+              📈 2. Returns &amp; Performance
             </h3>
             <span
               className="summary-clarity-badge"
@@ -351,7 +350,7 @@ const Summary = () => {
                 borderColor: isProfit ? "var(--color-profit)" : "var(--color-loss)",
               }}
             >
-              {isProfit ? "🟢 PROFIT" : "🔴 LOSS"}
+              {isProfit ? "PROFIT" : "LOSS"}
             </span>
           </div>
 
@@ -365,13 +364,13 @@ const Summary = () => {
           </div>
           <p className="summary-clarity-explanation">
             {isProfit
-              ? `आपने शेयर ₹${investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })} में खरीदे थे, जिनकी आज वैल्यू बढ़कर ₹${currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })} हो गई है।`
-              : `शेयरों की खरीद लागत ₹${investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })} थी, जो अभी ₹${currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })} पर चल रही है।`}
+              ? `You invested ₹${investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}, and your shares are currently valued at ₹${currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}.`
+              : `You invested ₹${investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}, currently trading at ₹${currentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}.`}
           </p>
 
           <div className="summary-clarity-breakdown">
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">चल रहा मुनाफा/घाटा (Unrealized):</span>
+              <span className="summary-breakdown-label">Unrealized Holdings P&amp;L:</span>
               <span
                 className="summary-breakdown-value"
                 style={{ color: isProfit ? "var(--color-profit)" : "var(--color-loss)" }}
@@ -380,7 +379,7 @@ const Summary = () => {
               </span>
             </div>
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">बेचकर बुक किया गया लाभ (Realized):</span>
+              <span className="summary-breakdown-label">Realized Closed Trades P&amp;L:</span>
               <span
                 className="summary-breakdown-value"
                 style={{ color: realizedPnL >= 0 ? "var(--color-profit)" : "var(--color-loss)" }}
@@ -390,7 +389,7 @@ const Summary = () => {
             </div>
             <div className="summary-breakdown-row" style={{ borderTop: "1px dashed var(--color-border)", paddingTop: "6px", marginTop: "2px" }}>
               <span className="summary-breakdown-label" style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
-                नेट लाइफटाइम रिटर्न:
+                Net Lifetime Return:
               </span>
               <span
                 className="summary-breakdown-value"
@@ -405,62 +404,62 @@ const Summary = () => {
           </div>
         </div>
 
-        {/* Question 3: अभी कितने ऑर्डर / शेयर खरीदे हुए हैं? */}
+        {/* Question 3: How many orders and stocks bought? */}
         <div className="summary-clarity-card">
           <div className="summary-clarity-card-header">
             <h3 className="summary-clarity-question">
-              📦 3. अभी कितने शेयर खरीदे हैं?
+              📦 3. Active Holdings &amp; Orders
             </h3>
             <span className="summary-clarity-badge">
-              {holdings.length} कंपनियाँ
+              {holdings.length} Companies
             </span>
           </div>
 
           <div className="summary-clarity-main-stat">
-            {totalSharesCount} <span style={{ fontSize: "1.1rem", fontWeight: "600", color: "var(--color-text-muted)" }}>शेयर्स</span>
+            {totalSharesCount} <span style={{ fontSize: "1.1rem", fontWeight: "600", color: "var(--color-text-muted)" }}>Shares</span>
           </div>
           <p className="summary-clarity-explanation">
-            आपके पोर्टफोलियो में कुल <b>{holdings.length} विभिन्न कंपनियों</b> के <b>{totalSharesCount} शेयर्स</b> खरीदे हुए रखे हैं।
+            You currently hold <b>{totalSharesCount} shares</b> across <b>{holdings.length} delivery companies</b> in your portfolio.
           </p>
 
           <div className="summary-clarity-breakdown">
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">डिलीवरी होल्डिंग्स (कंपनियाँ):</span>
-              <span className="summary-breakdown-value">{holdings.length} स्टॉक्स</span>
+              <span className="summary-breakdown-label">Active Delivery Stocks:</span>
+              <span className="summary-breakdown-value">{holdings.length} Stocks</span>
             </div>
             <div className="summary-breakdown-row">
-              <span className="summary-breakdown-label">पेंडिंग लिमिट ऑर्डर्स (Pending):</span>
+              <span className="summary-breakdown-label">Pending Limit Orders:</span>
               <span className="summary-breakdown-value" style={{ color: openOrders.length > 0 ? "var(--color-primary)" : "var(--color-text-muted)" }}>
-                {openOrders.length} ऑर्डर्स
+                {openOrders.length} Orders
               </span>
             </div>
             <div className="summary-breakdown-row" style={{ borderTop: "1px dashed var(--color-border)", paddingTop: "6px", marginTop: "2px" }}>
               <span className="summary-breakdown-label" style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
-                सफल निष्पादित ऑर्डर्स (Executed):
+                Executed Trades:
               </span>
               <span className="summary-breakdown-value" style={{ fontWeight: "800", color: "var(--color-profit)" }}>
-                {executedOrders.length} ट्रेड्स
+                {executedOrders.length} Trades
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 5. Direct Active Holdings Table (खरीदे हुए शेयर - सीधे यहीं देखें) */}
+      {/* 5. Direct Active Holdings Table on Summary */}
       <div className="summary-holdings-card">
         <div className="summary-holdings-header">
           <div>
             <h3 className="summary-holdings-title">
               <Inventory2 style={{ color: "var(--color-primary)", fontSize: "1.3rem" }} />
-              आपके खरीदे हुए शेयर (Your Active Holdings)
+              Your Active Holdings
             </h3>
             <p className="summary-holdings-subtitle">
-              यहाँ आपके सभी खरीदे हुए शेयर्स, खरीद भाव, लाइव कीमत और मुनाफा/घाटा लाइव दिखता है।
+              Live tracking of all delivery stocks, purchase prices, LTP and real-time returns.
             </p>
           </div>
 
           <Link to="/holdings" className="summary-view-all-link">
-            पूरी होल्डिंग्स लिस्ट देखें (View All)
+            View All Holdings
             <ArrowForward style={{ fontSize: "1rem" }} />
           </Link>
         </div>
@@ -470,13 +469,13 @@ const Summary = () => {
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>कंपनी (Stock)</th>
-                  <th>मात्रा (Qty)</th>
-                  <th>खरीद भाव (Avg Price)</th>
-                  <th>लाइव भाव (Live LTP)</th>
-                  <th>आज कुल कीमत (Current Value)</th>
-                  <th>कुल मुनाफा / घाटा (P&amp;L)</th>
-                  <th style={{ textAlign: "right" }}>चार्ट देखें</th>
+                  <th>Instrument</th>
+                  <th>Quantity</th>
+                  <th>Avg Price</th>
+                  <th>LTP (Live)</th>
+                  <th>Current Value</th>
+                  <th>Unrealized P&amp;L</th>
+                  <th style={{ textAlign: "right" }}>Chart</th>
                 </tr>
               </thead>
               <tbody>
@@ -508,7 +507,7 @@ const Summary = () => {
                           </div>
                         </div>
                       </td>
-                      <td style={{ fontWeight: "700" }}>{stock.qty} शेयर</td>
+                      <td style={{ fontWeight: "700" }}>{stock.qty} Qty</td>
                       <td>₹{Number(stock.avg).toFixed(2)}</td>
                       <td style={{ fontWeight: "700", color: "var(--color-primary)" }}>
                         ₹{Number(livePrice).toFixed(2)}
@@ -561,17 +560,17 @@ const Summary = () => {
           <div className="summary-empty-holdings">
             <div style={{ fontSize: "2.4rem", marginBottom: "8px" }}>💼</div>
             <h4 style={{ margin: "0 0 6px 0", color: "var(--color-text-strong)", fontWeight: "800" }}>
-              आपने अभी तक कोई शेयर नहीं खरीदा है (No Holdings)
+              No Holdings in Portfolio Yet
             </h4>
             <p style={{ margin: "0 0 16px 0", color: "var(--color-text-muted)", fontSize: "0.85rem", maxWidth: "450px", marginLeft: "auto", marginRight: "auto" }}>
-              ट्रेडिंग शुरू करने के लिए बाईं ओर वॉचलिस्ट में से किसी भी कंपनी (जैसे Reliance, TCS, HDFC) पर क्लिक करें और <b>BUY</b> बटन दबाएं!
+              To start investing, select any stock from the watchlist on the left (e.g., Reliance, TCS, HDFC) and click <b>BUY</b>!
             </p>
             <button
               type="button"
               className="btn-summary-addfunds"
               onClick={() => setFundModalOpen(true)}
             >
-              + वॉलेट में पैसे जोड़ें (Add Virtual Cash)
+              + Deposit Virtual Cash
             </button>
           </div>
         )}
@@ -583,10 +582,10 @@ const Summary = () => {
           <div className="chart-card-header">
             <div>
               <h4 className="chart-card-title">
-                📈 पोर्टफोलियो परफॉर्मेंस बनाम NIFTY 50
+                📈 Portfolio Performance vs NIFTY 50
               </h4>
               <p style={{ margin: "2px 0 0 0", fontSize: "0.78rem", color: "var(--color-text-muted)" }}>
-                आपका पोर्टफोलियो निफ्टी 50 इंडेक्स की तुलना में कैसा प्रदर्शन कर रहा है।
+                Compare your portfolio growth in real-time against benchmark index.
               </p>
             </div>
           </div>
@@ -597,10 +596,10 @@ const Summary = () => {
           <div className="chart-card-header">
             <div>
               <h4 className="chart-card-title">
-                🥧 सेक्टर विविधीकरण (Sector Allocation)
+                🥧 Sector Diversification
               </h4>
               <p style={{ margin: "2px 0 0 0", fontSize: "0.78rem", color: "var(--color-text-muted)" }}>
-                आपके पैसे अलग-अलग इंडस्ट्रीज (Banking, IT, Auto, etc.) में कैसे बंटे हुए हैं।
+                Asset allocation across Banking, Technology, Auto, Energy and more.
               </p>
             </div>
           </div>

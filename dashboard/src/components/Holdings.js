@@ -184,9 +184,9 @@ const Holdings = () => {
       {/* Page Header */}
       <div className="section-header">
         <div>
-          <h2 className="page-title">खरीदे हुए शेयर्स • Portfolio Holdings ({allHoldings.length})</h2>
+          <h2 className="page-title">Portfolio Holdings ({allHoldings.length})</h2>
           <p className="page-subtitle">
-            लंबे समय के लिए खरीदे गए डिलीवरी शेयर्स • Long-term delivery positions with live GTT Stop-Loss &amp; Target triggers.
+            Long-term delivery positions with live GTT Stop-Loss &amp; Target triggers.
           </p>
         </div>
       </div>
@@ -195,21 +195,21 @@ const Holdings = () => {
       {allHoldings.length > 0 && (
         <div className="stats-card-grid" style={{ marginBottom: "20px" }}>
           <div className="stat-card" style={{ padding: "16px 20px" }}>
-            <div className="stat-card-label">कुल लागत • Total Invested</div>
+            <div className="stat-card-label">Total Invested</div>
             <div className="stat-card-value" style={{ fontSize: "1.5rem" }}>
               ₹{totalInvestment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </div>
-            <div className="stat-card-sub">शेयर खरीदने में लगे कुल पैसे</div>
+            <div className="stat-card-sub">Total cost basis of all holdings</div>
           </div>
           <div className="stat-card" style={{ padding: "16px 20px" }}>
-            <div className="stat-card-label">आज की कीमत • Current Value</div>
+            <div className="stat-card-label">Current Value</div>
             <div className="stat-card-value" style={{ fontSize: "1.5rem" }}>
               ₹{totalCurrentValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </div>
-            <div className="stat-card-sub">आज सभी शेयर बेचने पर मिलने वाली राशि</div>
+            <div className="stat-card-sub">Live liquidation value at current LTP</div>
           </div>
           <div className="stat-card" style={{ padding: "16px 20px" }}>
-            <div className="stat-card-label">कुल मुनाफा / घाटा • Overall P&amp;L</div>
+            <div className="stat-card-label">Overall Return</div>
             <div
               className="stat-card-value"
               style={{
@@ -219,7 +219,7 @@ const Holdings = () => {
             >
               {isTotalProfit ? "+" : ""}₹{totalPnL.toFixed(2)} ({isTotalProfit ? "+" : ""}{totalPnLPercent}%)
             </div>
-            <div className="stat-card-sub">{isTotalProfit ? "🟢 आप मुनाफे में हैं" : "🔴 आप नुकसान में हैं"}</div>
+            <div className="stat-card-sub">{isTotalProfit ? "🟢 Portfolio in profit" : "🔴 Portfolio in loss"}</div>
           </div>
         </div>
       )}
@@ -231,15 +231,15 @@ const Holdings = () => {
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>कंपनी (Instrument)</th>
-                  <th>मात्रा (Qty)</th>
-                  <th>खरीद भाव (Avg Cost)</th>
-                  <th>लाइव भाव (Live LTP)</th>
-                  <th>आज कुल कीमत (Cur. Value)</th>
-                  <th>मुनाफा / घाटा (P&amp;L)</th>
-                  <th>नेट बदलाव (Net Chg)</th>
-                  <th>सुरक्षा नियम (GTT SL / Tgt)</th>
-                  <th style={{ textAlign: "right" }}>एक्शन (Actions)</th>
+                  <th>Instrument</th>
+                  <th>Qty</th>
+                  <th>Avg. Cost</th>
+                  <th>LTP (Live)</th>
+                  <th>Cur. Value</th>
+                  <th>Unrealized P&amp;L</th>
+                  <th>Net Chg</th>
+                  <th>GTT (SL / Target)</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>

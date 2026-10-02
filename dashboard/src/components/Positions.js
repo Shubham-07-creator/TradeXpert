@@ -93,9 +93,9 @@ const Positions = () => {
       {/* Page Header */}
       <div className="section-header">
         <div>
-          <h2 className="page-title">इंट्राडे पोसिशन्स • Open Positions ({allPositions.length})</h2>
+          <h2 className="page-title">Open Positions ({allPositions.length})</h2>
           <p className="page-subtitle">
-            आज के दिन के लाइव सौदे (Intraday Trades) • बाजार बंद होने से पहले स्क्वायर-ऑफ होते हैं।
+            Active intraday positions • Automatically squared off before market close.
           </p>
         </div>
         {allPositions.length > 0 && (
@@ -104,7 +104,7 @@ const Positions = () => {
               className={`pnl-pill ${isPositionsProfit ? "profit" : "loss"}`}
               style={{ fontSize: "0.95rem", padding: "6px 14px" }}
             >
-              नेट फायदा/घाटा: {isPositionsProfit ? "+" : ""}₹{totalPositionsPnL.toFixed(2)}
+              Net P&amp;L: {isPositionsProfit ? "+" : ""}₹{totalPositionsPnL.toFixed(2)}
             </span>
           </div>
         )}
@@ -117,14 +117,14 @@ const Positions = () => {
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>प्रोडक्ट (Product)</th>
-                  <th>कंपनी (Instrument)</th>
-                  <th>मात्रा (Qty)</th>
-                  <th>खरीद भाव (Avg Cost)</th>
-                  <th>लाइव भाव (Live LTP)</th>
-                  <th>मुनाफा / घाटा (P&amp;L)</th>
-                  <th>आज का बदलाव (Day Chg)</th>
-                  <th style={{ textAlign: "right" }}>एक्शन (Action)</th>
+                  <th>Product</th>
+                  <th>Instrument</th>
+                  <th>Qty</th>
+                  <th>Avg. Cost</th>
+                  <th>LTP (Live)</th>
+                  <th>P&amp;L</th>
+                  <th>Day Chg</th>
+                  <th style={{ textAlign: "right" }}>Action</th>
                 </tr>
               </thead>
               <tbody>

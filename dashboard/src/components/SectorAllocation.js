@@ -70,10 +70,10 @@ const SectorAllocation = () => {
       <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>
         <div style={{ fontSize: "2rem", marginBottom: "8px" }}>🥧</div>
         <p style={{ margin: 0, fontWeight: "700", fontSize: "0.92rem", color: "var(--color-text-strong)" }}>
-          विभिन्न सेक्टर्स में विविधीकरण (Diversification)
+          Sector Diversification
         </p>
         <p style={{ margin: "4px 0 0 0", fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
-          जब आप अलग-अलग कंपनियों के शेयर खरीदेंगे, तो आपका सेक्टर ब्रेकडाउन यहाँ दिखेगा।
+          Buy shares across different companies to see your industry breakdown here.
         </p>
       </div>
     );

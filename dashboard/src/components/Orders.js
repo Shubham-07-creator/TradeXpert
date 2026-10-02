@@ -113,9 +113,9 @@ const Orders = () => {
       {/* Header */}
       <div className="section-header">
         <div>
-          <h2 className="page-title">ऑर्डर बुक • Order History ({orders.length})</h2>
+          <h2 className="page-title">Order Book ({orders.length})</h2>
           <p className="page-subtitle">
-            आपके द्वारा लगाए गए सभी खरीद-बिक्री के ऑर्डर्स का लाइव हिसाब-किताब • Live transaction record.
+            Complete transaction record of Market orders, Limit orders &amp; GTT triggers.
           </p>
         </div>
       </div>
@@ -126,19 +126,19 @@ const Orders = () => {
           className={`order-filter-btn ${filter === "ALL" ? "active" : ""}`}
           onClick={() => setFilter("ALL")}
         >
-          सभी ऑर्डर्स • All ({orders.length})
+          All Orders ({orders.length})
         </button>
         <button
           className={`order-filter-btn ${filter === "OPEN" ? "active" : ""}`}
           onClick={() => setFilter("OPEN")}
         >
-          ⏳ पेंडिंग • Open ({openCount})
+          Open / Pending ({openCount})
         </button>
         <button
           className={`order-filter-btn ${filter === "EXECUTED" ? "active" : ""}`}
           onClick={() => setFilter("EXECUTED")}
         >
-          ✅ सफल • Executed ({executedCount})
+          Executed ({executedCount})
         </button>
       </div>
 
@@ -149,16 +149,16 @@ const Orders = () => {
             <table className="order-table">
               <thead>
                 <tr>
-                  <th>प्रकार (Mode)</th>
-                  <th>कंपनी (Instrument)</th>
-                  <th>ऑर्डर टाइप (Type)</th>
-                  <th>मात्रा (Qty)</th>
-                  <th>ऑर्डर भाव (Price)</th>
-                  <th>कुल मूल्य (Order Value)</th>
-                  <th>सुरक्षा नियम (GTT)</th>
-                  <th>तारीख व समय (Date)</th>
-                  <th>स्थिति (Status)</th>
-                  <th style={{ textAlign: "right" }}>एक्शन (Action)</th>
+                  <th>Mode</th>
+                  <th>Instrument</th>
+                  <th>Type</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Order Value</th>
+                  <th>GTT Triggers</th>
+                  <th>Date &amp; Time</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: "right" }}>Action</th>
                 </tr>
               </thead>
               <tbody>

@@ -9,6 +9,7 @@ const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
@@ -64,6 +65,14 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:3001",
 ].filter(Boolean);
+
+// OWASP Recommended Security Headers
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+  }),
+);
 
 app.use(
   cors({
@@ -577,8 +586,8 @@ app.post("/wallet/add", authMiddleware, async (req, res) => {
   try {
     const amount = Number(req.body.amount);
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: "Enter a valid amount ❌" });
+    if (!amount || !Number.isFinite(amount) || amount <= 0 || amount > 10000000) {
+      return res.status(400).json({ message: "Enter a valid amount (Max ₹1,00,00,000 per transaction) ❌" });
     }
 
     const user = await UserModel.findByIdAndUpdate(
@@ -598,8 +607,8 @@ app.post("/wallet/withdraw", authMiddleware, async (req, res) => {
     const amount = Number(req.body.amount);
     const user = await UserModel.findById(req.userId);
 
-    if (!amount || amount <= 0) {
-      return res.status(400).json({ message: "Enter a valid amount ❌" });
+    if (!amount || !Number.isFinite(amount) || amount <= 0 || amount > 10000000) {
+      return res.status(400).json({ message: "Enter a valid amount (Max ₹1,00,00,000 per transaction) ❌" });
     }
 
     if (amount > user.wallet) {
@@ -672,8 +681,31 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
     const quantity = Number(qty);
     const orderPrice = Number(price);
 
-    if (!name || !quantity || quantity <= 0 || !orderPrice || orderPrice <= 0) {
-      return res.status(400).json({ message: "Invalid order details ❌" });
+    if (
+      !name ||
+      typeof name !== "string" ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > 1000000 ||
+      !Number.isFinite(orderPrice) ||
+      orderPrice <= 0
+    ) {
+      return res.status(400).json({
+        message: "Invalid order details: quantity must be a positive whole number (Max 10,00,000 shares) ❌",
+      });
+    }
+
+    if (stopLoss !== undefined && stopLoss !== null && stopLoss !== "") {
+      const sl = Number(stopLoss);
+      if (!Number.isFinite(sl) || sl <= 0) {
+        return res.status(400).json({ message: "Invalid stop-loss value ❌" });
+      }
+    }
+    if (target !== undefined && target !== null && target !== "") {
+      const tgt = Number(target);
+      if (!Number.isFinite(tgt) || tgt <= 0) {
+        return res.status(400).json({ message: "Invalid target value ❌" });
+      }
     }
 
     const user = await UserModel.findById(req.userId);
@@ -683,7 +715,7 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
     // ==================== LIMIT ORDER (PENDING) ====================
     if (orderType === "LIMIT") {
       const targetLimitPrice = Number(limitPrice) || orderPrice;
-      if (targetLimitPrice <= 0) {
+      if (!Number.isFinite(targetLimitPrice) || targetLimitPrice <= 0) {
         return res.status(400).json({ message: "Invalid limit price ❌" });
       }
 

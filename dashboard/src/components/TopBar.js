@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Menu from "./Menu";
-import { getNifty, subscribeToNifty } from "../utils/liveMarket";
+import { getNifty, subscribeToNifty, subscribeToMarketHalt } from "../utils/liveMarket";
 
 const TopBar = () => {
   const [nifty, setNifty] = useState(() => getNifty());
+  const [isHalted, setIsHalted] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToNifty((updatedNifty) => {
@@ -11,7 +12,14 @@ const TopBar = () => {
         setNifty(updatedNifty);
       }
     });
-    return unsub;
+    const unsubHalt = subscribeToMarketHalt((halted) => {
+      setIsHalted(Boolean(halted));
+    });
+
+    return () => {
+      unsub();
+      unsubHalt();
+    };
   }, []);
 
   const niftyPrice = nifty.price || 24850.2;
@@ -60,6 +68,29 @@ const TopBar = () => {
             </span>
           </div>
         </div>
+
+        {isHalted && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "rgba(239, 68, 68, 0.12)",
+              border: "1px solid rgba(239, 68, 68, 0.35)",
+              color: "var(--color-loss)",
+              padding: "4px 12px",
+              borderRadius: "var(--radius-pill)",
+              fontSize: "0.75rem",
+              fontWeight: "700",
+              letterSpacing: "0.04em",
+              animation: "pulseCritical 2s infinite",
+            }}
+            title="Trading has been halted by Admin Circuit Breaker"
+          >
+            <span style={{ fontSize: "0.85rem" }}>🛑</span>
+            <span>CIRCUIT BREAKER: HALTED</span>
+          </div>
+        )}
       </div>
 
       <Menu />

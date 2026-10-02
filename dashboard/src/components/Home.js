@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import Dashboard from "./Dashboard";
 import TopBar from "./TopBar";
+import AnnouncementBanner from "./AnnouncementBanner";
 import { isLoggedIn, bootstrapAuthFromUrl, FRONTEND } from "../utils/auth";
 
 const Home = () => {
@@ -30,6 +31,7 @@ const Home = () => {
   return (
     <>
       <TopBar />
+      <AnnouncementBanner />
       <Dashboard />
     </>
   );

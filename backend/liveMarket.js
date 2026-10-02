@@ -22,7 +22,14 @@ watchlistSeed.forEach((stock) => {
 let niftyBase = 24850.2;
 let niftyPrice = niftyBase;
 
+let isHalted = false;
+
 const tick = () => {
+  if (isHalted) {
+    const niftyTotalChange = ((niftyPrice - niftyBase) / niftyBase) * 100;
+    return getSnapshot(niftyTotalChange);
+  }
+
   Object.values(state).forEach((stock) => {
     // random wiggle of roughly ±0.6% per tick
     const changePercent = (Math.random() - 0.5) * 1.2;
@@ -49,6 +56,7 @@ const tick = () => {
 function getSnapshot(niftyTotalChange = 0) {
   return {
     stocks: Object.values(state),
+    isHalted,
     nifty: {
       price: Number(niftyPrice.toFixed(2)),
       changePercent: Number(niftyTotalChange.toFixed(2)),
@@ -61,4 +69,57 @@ function getSnapshot(niftyTotalChange = 0) {
 
 const getLivePrice = (name) => state[name]?.price;
 
-module.exports = { tick, getSnapshot, getLivePrice };
+const isMarketHalted = () => isHalted;
+
+const setMarketHalt = (haltStatus) => {
+  if (typeof haltStatus === "boolean") {
+    isHalted = haltStatus;
+  } else {
+    isHalted = !isHalted;
+  }
+  return isHalted;
+};
+
+const triggerShock = (direction, percent = 2.5) => {
+  const pct = Math.abs(Number(percent) || 2.5);
+  const factor = direction === "BEAR" ? 1 - pct / 100 : 1 + pct / 100;
+
+  Object.values(state).forEach((stock) => {
+    const newPrice = Math.max(stock.price * factor, 0.05);
+    const totalChangePercent =
+      ((newPrice - stock.basePrice) / stock.basePrice) * 100;
+
+    stock.price = Number(newPrice.toFixed(2));
+    stock.isDown = totalChangePercent < 0;
+    stock.percent = `${
+      totalChangePercent >= 0 ? "+" : ""
+    }${totalChangePercent.toFixed(2)}%`;
+  });
+
+  niftyPrice = Math.max(niftyPrice * factor, 1);
+  const niftyTotalChange = ((niftyPrice - niftyBase) / niftyBase) * 100;
+
+  return getSnapshot(niftyTotalChange);
+};
+
+const resetMarketPrices = () => {
+  watchlistSeed.forEach((stock) => {
+    if (state[stock.name]) {
+      state[stock.name].price = stock.price;
+      state[stock.name].percent = "+0.00%";
+      state[stock.name].isDown = false;
+    }
+  });
+  niftyPrice = niftyBase;
+  return getSnapshot(0);
+};
+
+module.exports = {
+  tick,
+  getSnapshot,
+  getLivePrice,
+  isMarketHalted,
+  setMarketHalt,
+  triggerShock,
+  resetMarketPrices,
+};

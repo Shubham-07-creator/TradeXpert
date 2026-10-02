@@ -1,0 +1,334 @@
+.admin-wallet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999999;
+  padding: 16px;
+  animation: adminModalFadeIn 0.2s ease-out;
+}
+
+@keyframes adminModalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.admin-wallet-card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  animation: adminModalSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes adminModalSlideUp {
+  from {
+    transform: translateY(20px) scale(0.97);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.admin-wallet-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.admin-wallet-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text-strong);
+  margin: 0 0 4px 0;
+}
+
+.admin-wallet-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.highlight-trader {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.admin-modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.admin-modal-close:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-text-strong);
+}
+
+/* Balance Projection Card */
+.balance-projection-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 18px;
+  margin-bottom: 20px;
+}
+
+.balance-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.balance-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.balance-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.balance-val.current {
+  color: var(--color-text-strong);
+}
+
+.balance-val.projected.up {
+  color: var(--color-profit);
+}
+
+.balance-val.projected.down {
+  color: var(--color-loss);
+}
+
+.balance-arrow {
+  font-size: 1.2rem;
+  color: var(--color-text-faint);
+}
+
+/* Type Toggle Buttons */
+.type-toggle-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.type-btn {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-btn:hover {
+  border-color: var(--color-border-hover);
+  background: var(--color-bg-subtle);
+}
+
+.type-btn.active-credit {
+  background: var(--color-profit-soft);
+  border-color: var(--color-profit);
+  color: var(--color-profit);
+}
+
+.type-btn.active-debit {
+  background: var(--color-loss-soft);
+  border-color: var(--color-loss);
+  color: var(--color-loss);
+}
+
+/* Form inputs */
+.admin-form-group {
+  margin-bottom: 14px;
+}
+
+.admin-form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.admin-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-currency-prefix {
+  position: absolute;
+  left: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-faint);
+}
+
+.admin-amount-input {
+  width: 100%;
+  padding: 12px 14px 12px 32px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-strong);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.admin-amount-input:focus {
+  border-color: var(--color-primary);
+}
+
+.admin-text-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-strong);
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.admin-text-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* Preset Chips */
+.preset-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preset-chip-btn {
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-chip-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.admin-form-error {
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--color-loss-soft);
+  color: var(--color-loss);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+/* Modal Actions */
+.admin-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.btn-admin-submit {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  color: #ffffff;
+  font-size: 0.92rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-submit.credit {
+  background: var(--gradient-profit);
+  box-shadow: var(--shadow-glow-profit);
+}
+
+.btn-admin-submit.credit:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-admin-submit.debit {
+  background: var(--color-loss);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+.btn-admin-submit.debit:hover:not(:disabled) {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.btn-admin-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-admin-cancel {
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-card);
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-admin-cancel:hover:not(:disabled) {
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-hover);
+  color: var(--color-text-strong);
+}

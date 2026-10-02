@@ -1,9 +1,15 @@
 const { UserModel } = require("../model/UserModel");
 
 // Role-based admin check — any user with role "admin" gets through.
-// Much safer than hardcoding an email; roles are assigned in the DB.
 const adminMiddleware = async (req, res, next) => {
   try {
+    if (req.userRole) {
+      if (req.userRole !== "admin") {
+        return res.status(403).json({ message: "Admin access only ❌" });
+      }
+      return next();
+    }
+
     const user = await UserModel.findById(req.userId);
 
     if (!user || user.role !== "admin") {

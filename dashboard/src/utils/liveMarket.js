@@ -11,6 +11,7 @@ import { socket } from "./socket";
 
 let stocksState = {};
 let niftyState = { price: 0, percent: "+0.00%", changePercent: 0 };
+let marketHaltedState = false;
 
 // Seed with the static list so the UI has something to render before
 // the first "market:update" event arrives from the server.
@@ -25,17 +26,33 @@ baseWatchlist.forEach((stock) => {
 });
 
 const listeners = new Set();
+const haltListeners = new Set();
 
 socket.on("market:update", (snapshot) => {
   const map = {};
-  snapshot.stocks.forEach((s) => {
-    map[s.name] = s;
-  });
-  stocksState = map;
-  niftyState = snapshot.nifty;
+  if (snapshot.stocks) {
+    snapshot.stocks.forEach((s) => {
+      map[s.name] = s;
+    });
+    stocksState = map;
+  }
+  if (snapshot.nifty) {
+    niftyState = snapshot.nifty;
+  }
+  if (typeof snapshot.isHalted === "boolean") {
+    marketHaltedState = snapshot.isHalted;
+    haltListeners.forEach((cb) => cb(marketHaltedState));
+  }
 
   const out = getSnapshot();
   listeners.forEach((cb) => cb(out));
+});
+
+socket.on("market:circuit-breaker", (data) => {
+  if (data && typeof data.isHalted === "boolean") {
+    marketHaltedState = data.isHalted;
+    haltListeners.forEach((cb) => cb(marketHaltedState));
+  }
 });
 
 export const getSnapshot = () => Object.values(stocksState);
@@ -43,6 +60,8 @@ export const getSnapshot = () => Object.values(stocksState);
 export const getNifty = () => niftyState;
 
 export const getLivePrice = (name) => stocksState[name]?.price;
+
+export const isMarketHalted = () => marketHaltedState;
 
 export const subscribeToLiveMarket = (callback) => {
   listeners.add(callback);
@@ -53,4 +72,10 @@ export const subscribeToNifty = (callback) => {
   const wrapped = () => callback(getNifty());
   listeners.add(wrapped);
   return () => listeners.delete(wrapped);
+};
+
+export const subscribeToMarketHalt = (callback) => {
+  haltListeners.add(callback);
+  callback(marketHaltedState);
+  return () => haltListeners.delete(callback);
 };

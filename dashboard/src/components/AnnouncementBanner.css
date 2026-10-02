@@ -1,0 +1,113 @@
+.system-broadcast-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 24px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--color-border);
+  animation: slideDownBanner 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  position: relative;
+  z-index: 99;
+}
+
+@keyframes slideDownBanner {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.broadcast-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.broadcast-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.broadcast-tag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.broadcast-message {
+  color: var(--color-text-strong);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.broadcast-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--color-text-muted);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.broadcast-close-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--color-text-strong);
+}
+
+/* Severity styles */
+.broadcast-info {
+  background: rgba(56, 126, 209, 0.08);
+  border-bottom-color: rgba(56, 126, 209, 0.25);
+}
+.broadcast-info .broadcast-tag {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.broadcast-warning {
+  background: rgba(245, 158, 11, 0.1);
+  border-bottom-color: rgba(245, 158, 11, 0.3);
+}
+.broadcast-warning .broadcast-tag {
+  background: #f59e0b;
+  color: #ffffff;
+}
+
+.broadcast-critical {
+  background: rgba(239, 68, 68, 0.12);
+  border-bottom-color: rgba(239, 68, 68, 0.35);
+}
+.broadcast-critical .broadcast-tag {
+  background: var(--color-loss);
+  color: #ffffff;
+  animation: pulseCritical 1.8s infinite;
+}
+
+@keyframes pulseCritical {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}

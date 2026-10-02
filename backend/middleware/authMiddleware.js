@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const { UserModel } = require("../model/UserModel");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -7,10 +8,9 @@ if (!JWT_SECRET) {
   process.exit(1);
 }
 
-// Verifies the JWT sent in the Authorization header and attaches
-// the logged-in user's id to req.userId so routes can scope data
-// per-user instead of returning everyone's data.
-const authMiddleware = (req, res, next) => {
+// Verifies the JWT sent in the Authorization header, verifies user is not blocked,
+// and attaches req.userId & req.userRole so routes can scope data safely.
+const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -26,6 +26,20 @@ const authMiddleware = (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
 
     req.userId = decoded.id;
+
+    // Check if user is blocked by administrator
+    const user = await UserModel.findById(decoded.id).select("isBlocked role");
+    if (!user) {
+      return res.status(401).json({ message: "User account not found ❌" });
+    }
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "Your account has been suspended by an administrator. 🚫",
+        isBlocked: true,
+      });
+    }
+
+    req.userRole = user.role;
     next();
   } catch (err) {
     return res.status(401).json({ message: "Unauthorized ❌" });

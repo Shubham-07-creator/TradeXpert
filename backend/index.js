@@ -165,6 +165,12 @@ app.post("/login", authLimiter, async (req, res) => {
       });
     }
 
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "Your account has been suspended by an administrator. Please contact support. 🚫",
+      });
+    }
+
     const token = jwt.sign(
       {
         id: user._id,
@@ -259,6 +265,11 @@ app.post("/auth/google", authLimiter, async (req, res) => {
         modified = true;
       }
       if (modified) await user.save();
+      if (user.isBlocked) {
+        return res.status(403).json({
+          message: "Your account has been suspended by an administrator. Please contact support. 🚫",
+        });
+      }
     } else {
       // New user: auto-signup with Google
       user = await UserModel.create({
@@ -988,12 +999,42 @@ app.get("/leaderboard", authMiddleware, async (req, res) => {
 });
 
 // ==========================================
-// ADMIN (protected — only the admin email can access)
+// SERVER + SOCKET.IO (real-time market broadcast)
 // ==========================================
 
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+let activeAnnouncement = null;
+
+io.on("connection", (socket) => {
+  // send the current snapshot immediately so a new tab isn't blank
+  // until the next tick
+  socket.emit("market:update", liveMarket.getSnapshot());
+  if (activeAnnouncement) {
+    socket.emit("system:announcement", activeAnnouncement);
+  }
+});
+
+// Public / client endpoint to fetch active announcement
+app.get("/system/announcement", (req, res) => {
+  res.json({ announcement: activeAnnouncement });
+});
+
+// ==========================================
+// ADMIN COMMAND CENTER (Protected by authMiddleware & adminMiddleware)
+// ==========================================
+
+// 1. Get detailed user list with portfolio metrics & status
 app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const users = await UserModel.find().select("-password");
+    const users = await UserModel.find().select("-password").sort({ createdAt: -1 });
     const holdings = await HoldingsModel.find();
 
     const data = users.map((u) => {
@@ -1015,53 +1056,254 @@ app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
         id: u._id,
         name: u.name,
         email: u.email,
+        role: u.role || "user",
+        isBlocked: Boolean(u.isBlocked),
         wallet: u.wallet,
+        realizedPnL: u.realizedPnL || 0,
         investment: Number(investment.toFixed(2)),
         holdingsValue: Number(holdingsValue.toFixed(2)),
         holdingsCount: userHoldings.length,
+        createdAt: u.createdAt || null,
       };
     });
 
     res.json(data);
   } catch (err) {
-    res.status(500).json({ message: "Failed to load admin data ❌" });
+    res.status(500).json({ message: "Failed to load admin user data ❌" });
   }
 });
 
+// 2. Platform statistics & system state
 app.get("/admin/stats", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const totalUsers = await UserModel.countDocuments();
     const totalOrders = await OrdersModel.countDocuments();
+    const totalAdmins = await UserModel.countDocuments({ role: "admin" });
     const users = await UserModel.find().select("wallet");
-    const totalWallet = users.reduce((sum, u) => sum + u.wallet, 0);
+    const totalWallet = users.reduce((sum, u) => sum + (u.wallet || 0), 0);
+
+    const holdings = await HoldingsModel.find();
+    const totalHoldingsValue = holdings.reduce((sum, h) => {
+      const live = liveMarket.getLivePrice(h.name);
+      return sum + (live || h.price) * h.qty;
+    }, 0);
 
     res.json({
       totalUsers,
       totalOrders,
+      totalAdmins,
       totalWallet: Number(totalWallet.toFixed(2)),
+      totalHoldingsValue: Number(totalHoldingsValue.toFixed(2)),
+      isMarketHalted: liveMarket.isMarketHalted(),
+      activeAnnouncement,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to load stats ❌" });
   }
 });
 
-// ==========================================
-// SERVER + SOCKET.IO (real-time market broadcast)
-// ==========================================
+// 3. Adjust User Virtual Wallet (Credit / Debit)
+app.post("/admin/users/:id/wallet", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amount, type, reason } = req.body;
+    const numAmount = Number(amount);
 
-const server = http.createServer(app);
+    if (!numAmount || numAmount <= 0) {
+      return res.status(400).json({ message: "Please enter a valid positive amount ❌" });
+    }
 
-const io = new Server(server, {
-  cors: {
-    origin: allowedOrigins,
-    credentials: true,
-  },
+    const user = await UserModel.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+    if (type === "DEBIT") {
+      if (user.wallet < numAmount) {
+        return res.status(400).json({
+          message: `Cannot debit ₹${numAmount.toLocaleString("en-IN")}. Current balance is ₹${user.wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })} ❌`,
+        });
+      }
+      user.wallet = Number((user.wallet - numAmount).toFixed(2));
+    } else {
+      user.wallet = Number((user.wallet + numAmount).toFixed(2));
+    }
+
+    await user.save();
+
+    res.json({
+      message: `Successfully ${type === "CREDIT" ? "credited" : "debited"} ₹${numAmount.toLocaleString("en-IN")} to ${user.name}'s wallet! 💰`,
+      wallet: user.wallet,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to adjust user wallet ❌" });
+  }
 });
 
-io.on("connection", (socket) => {
-  // send the current snapshot immediately so a new tab isn't blank
-  // until the next tick
-  socket.emit("market:update", liveMarket.getSnapshot());
+// 4. Freeze / Unfreeze user account (Account suspension)
+app.put("/admin/users/:id/status", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isBlocked } = req.body;
+
+    if (String(req.userId) === String(id)) {
+      return res.status(400).json({ message: "You cannot suspend your own admin account! ❌" });
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+    user.isBlocked = Boolean(isBlocked);
+    await user.save();
+
+    res.json({
+      message: user.isBlocked ? `Account for ${user.name} suspended! 🚫` : `Account for ${user.name} reactivated! ✅`,
+      isBlocked: user.isBlocked,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update account status ❌" });
+  }
+});
+
+// 5. Promote / Demote user role
+app.put("/admin/users/:id/role", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    if (!["user", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role specified ❌" });
+    }
+
+    if (String(req.userId) === String(id)) {
+      return res.status(400).json({ message: "You cannot change your own admin role! ❌" });
+    }
+
+    const user = await UserModel.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+    user.role = role;
+    await user.save();
+
+    res.json({
+      message: `User ${user.name} role changed to ${role.toUpperCase()}! 👑`,
+      role: user.role,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update user role ❌" });
+  }
+});
+
+// 6. Reset user portfolio (wipe positions, cancel open orders, reset wallet to ₹1,00,000)
+app.post("/admin/users/:id/reset-portfolio", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await UserModel.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found ❌" });
+
+    await HoldingsModel.deleteMany({ user: id });
+    await OrdersModel.deleteMany({ user: id, status: "OPEN" });
+
+    user.wallet = 100000;
+    user.realizedPnL = 0;
+    await user.save();
+
+    res.json({
+      message: `Portfolio and open orders for ${user.name} have been reset to default ₹1,00,000! 🔄`,
+      wallet: user.wallet,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to reset portfolio ❌" });
+  }
+});
+
+// 7. Live Market Circuit Breaker (Halt / Resume market ticking)
+app.post("/admin/market/circuit-breaker", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { halted } = req.body;
+    const newHaltStatus = liveMarket.setMarketHalt(Boolean(halted));
+    const snapshot = liveMarket.getSnapshot();
+
+    io.emit("market:update", snapshot);
+    io.emit("market:circuit-breaker", { isHalted: newHaltStatus });
+
+    res.json({
+      message: newHaltStatus
+        ? "🛑 Market Circuit Breaker Activated (Live prices halted)"
+        : "🟢 Market Circuit Breaker Lifted (Live prices running)",
+      isHalted: newHaltStatus,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to toggle circuit breaker ❌" });
+  }
+});
+
+// 8. Inject Market Volatility Shock (Bull surge, Bear crash, or Base reset)
+app.post("/admin/market/shock", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { direction, percent } = req.body;
+    let snapshot;
+    let desc = "";
+
+    if (direction === "RESET") {
+      snapshot = liveMarket.resetMarketPrices();
+      desc = "Market prices normalized back to seed base values 🔄";
+    } else if (direction === "BULL") {
+      const pct = Math.abs(Number(percent) || 2.5);
+      snapshot = liveMarket.triggerShock("BULL", pct);
+      desc = `Bullish surge (+${pct}%) injected across all market tickers! 🚀`;
+    } else if (direction === "BEAR") {
+      const pct = Math.abs(Number(percent) || 2.5);
+      snapshot = liveMarket.triggerShock("BEAR", pct);
+      desc = `Flash market crash (-${pct}%) simulated across all tickers! 📉`;
+    } else {
+      return res.status(400).json({ message: "Invalid shock direction ❌" });
+    }
+
+    io.emit("market:update", snapshot);
+    await checkLimitOrdersAndGTT(io);
+
+    res.json({ message: desc, snapshot });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to inject market shock ❌" });
+  }
+});
+
+// 9. Send Global System Broadcast Banner (Real-time to all connected users)
+app.post("/admin/broadcast", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const { message, level } = req.body;
+
+    if (!message || !message.trim()) {
+      activeAnnouncement = null;
+      io.emit("system:announcement", null);
+      return res.json({ message: "Broadcast cleared! 🗑️", activeAnnouncement: null });
+    }
+
+    activeAnnouncement = {
+      id: Date.now(),
+      message: message.trim(),
+      level: level || "warning",
+      timestamp: new Date().toISOString(),
+    };
+
+    io.emit("system:announcement", activeAnnouncement);
+    res.json({
+      message: "Announcement broadcasted live to all active traders! 📢",
+      activeAnnouncement,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to broadcast announcement ❌" });
+  }
+});
+
+// 10. Clear Global Broadcast Banner
+app.delete("/admin/broadcast", authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    activeAnnouncement = null;
+    io.emit("system:announcement", null);
+    res.json({ message: "Broadcast banner cleared! 🗑️" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to clear broadcast ❌" });
+  }
 });
 
 // Limit Order & GTT (Stop-Loss / Target) Execution Engine

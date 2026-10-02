@@ -578,6 +578,33 @@ a {
   background-color: var(--color-bg-subtle);
 }
 
+/* Bloomberg / Wall Street Terminal Live Tick Flashes */
+@keyframes flashGreenTick {
+  0% {
+    background-color: rgba(16, 185, 129, 0.25);
+  }
+  100% {
+    background-color: var(--color-bg-card);
+  }
+}
+
+@keyframes flashRedTick {
+  0% {
+    background-color: rgba(239, 68, 68, 0.25);
+  }
+  100% {
+    background-color: var(--color-bg-card);
+  }
+}
+
+.watchlist-item.flash-green {
+  animation: flashGreenTick 0.6s ease-out;
+}
+
+.watchlist-item.flash-red {
+  animation: flashRedTick 0.6s ease-out;
+}
+
 .stock-name-group {
   display: flex;
   flex-direction: column;

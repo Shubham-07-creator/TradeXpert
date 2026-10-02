@@ -12,7 +12,7 @@ import { getAuthHeader } from "../utils/auth";
 import { sound } from "../utils/sound";
 import "./FundModal.css";
 
-const DEPOSIT_PRESETS = [10000, 25000, 50000, 100000, 500000];
+const DEPOSIT_PRESETS = [5000, 10000, 25000, 50000, 100000];
 const WITHDRAW_PRESETS = [5000, 10000, 25000, 50000];
 
 const FundModal = ({ isOpen, onClose, initialMode = "DEPOSIT", walletBalance = 0, onSuccess }) => {

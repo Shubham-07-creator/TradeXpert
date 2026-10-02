@@ -6,6 +6,7 @@ import { getAuthHeader } from "../utils/auth";
 import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
 import GeneralContext from "./GeneralContext";
 import ConfirmModal from "./ConfirmModal";
+import { sound } from "../utils/sound";
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
@@ -52,6 +53,8 @@ const Positions = () => {
         },
         { headers: getAuthHeader() }
       );
+
+      sound.playTradeChime();
 
       const gain = res.data.realizedPnL || 0;
       const gainText =

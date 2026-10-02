@@ -176,8 +176,8 @@ const Funds = () => {
             <span style={{ fontSize: "0.72rem", fontWeight: "700", color: "var(--color-text-faint)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               Quick Cash Deposit
             </span>
-            <div style={{ display: "flex", gap: "6px" }}>
-              {[10000, 50000, 100000].map((amt) => (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {[5000, 10000, 25000, 50000].map((amt) => (
                 <button
                   key={amt}
                   onClick={() => handleQuickAdd(amt)}
@@ -186,7 +186,7 @@ const Funds = () => {
                     border: "1px solid var(--color-border)",
                     color: "var(--color-primary)",
                     padding: "6px 12px",
-                    borderRadius: "var(--radius-sm)",
+                    borderRadius: "var(--radius-pill)",
                     fontSize: "0.78rem",
                     fontWeight: "600",
                     cursor: "pointer",
@@ -194,7 +194,7 @@ const Funds = () => {
                   }}
                   title={`Instantly add ₹${amt.toLocaleString("en-IN")}`}
                 >
-                  +₹{(amt / 1000).toFixed(0)}k
+                  +₹{amt.toLocaleString("en-IN")}
                 </button>
               ))}
             </div>

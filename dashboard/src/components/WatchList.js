@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import GeneralContext from "./GeneralContext";
 import { Tooltip, Grow } from "@mui/material";
 import {
@@ -172,11 +172,29 @@ export default WatchList;
 
 const WatchListItem = React.memo(({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
+  const [flashClass, setFlashClass] = useState("");
+  const prevPriceRef = useRef(stock.price);
   const generalContext = useContext(GeneralContext);
+
+  useEffect(() => {
+    if (prevPriceRef.current !== undefined && prevPriceRef.current !== stock.price) {
+      if (stock.price > prevPriceRef.current) {
+        setFlashClass("flash-green");
+      } else if (stock.price < prevPriceRef.current) {
+        setFlashClass("flash-red");
+      }
+      prevPriceRef.current = stock.price;
+
+      const timer = setTimeout(() => {
+        setFlashClass("");
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [stock.price]);
 
   return (
     <li
-      className="watchlist-item"
+      className={`watchlist-item ${flashClass}`}
       onMouseEnter={() => setShowWatchlistActions(true)}
       onMouseLeave={() => setShowWatchlistActions(false)}
       onClick={() => generalContext.openChartModal(stock.name)}

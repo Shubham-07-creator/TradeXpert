@@ -12,9 +12,23 @@ const TopBar = () => {
   const [sensex, setSensex] = useState(() => getSensex());
 
   useEffect(() => {
+    const initialNifty = getNifty();
+    if (initialNifty && initialNifty.price) {
+      const isDown = initialNifty.isDown || (initialNifty.changePercent && initialNifty.changePercent < 0);
+      const formattedPrice = Number(initialNifty.price).toLocaleString("en-IN", {
+        maximumFractionDigits: 0,
+      });
+      document.title = `(${isDown ? "▼" : "▲"} ${formattedPrice}) TradeXpert Terminal`;
+    }
+
     const unsubNifty = subscribeToNifty((updatedNifty) => {
       if (updatedNifty && updatedNifty.price) {
         setNifty(updatedNifty);
+        const isDown = updatedNifty.isDown || (updatedNifty.changePercent && updatedNifty.changePercent < 0);
+        const formattedPrice = Number(updatedNifty.price).toLocaleString("en-IN", {
+          maximumFractionDigits: 0,
+        });
+        document.title = `(${isDown ? "▼" : "▲"} ${formattedPrice}) TradeXpert Terminal`;
       }
     });
     const unsubSensex = subscribeToSensex((updatedSensex) => {

@@ -8,6 +8,8 @@ const HoldingsSchema = new Schema({
     price: Number,
     net: String,
     day: String,
+    stopLoss: { type: Number, default: null },
+    target: { type: Number, default: null },
 });
 
 module.exports = { HoldingsSchema };

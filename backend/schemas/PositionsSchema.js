@@ -10,6 +10,8 @@ const PositionsSchema = new Schema({
   net: String,
   day: String,
   isLoss: Boolean,
+  stopLoss: { type: Number, default: null },
+  target: { type: Number, default: null },
 });
 
 module.exports = { PositionsSchema };

@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import BuyActionWindow from "./BuyActionWindow";
+import StockChartModal from "./StockChartModal";
 
 const GeneralContext = React.createContext();
 
 export const GeneralContextProvider = (props) => {
   const [type, setType] = useState(null);
   const [uid, setUid] = useState("");
+  const [chartStock, setChartStock] = useState(null);
 
   const openBuyWindow = (id) => {
     setUid(id);
@@ -22,12 +24,34 @@ export const GeneralContextProvider = (props) => {
     setUid("");
   };
 
+  const openChartModal = (stockName) => {
+    setChartStock(stockName);
+  };
+
+  const closeChartModal = () => {
+    setChartStock(null);
+  };
+
   return (
     <GeneralContext.Provider
-      value={{ openBuyWindow, openSellWindow, closeWindow }}
+      value={{
+        openBuyWindow,
+        openSellWindow,
+        closeWindow,
+        openChartModal,
+        closeChartModal,
+      }}
     >
       {props.children}
       {type && <BuyActionWindow uid={uid} type={type} />}
+      {chartStock && (
+        <StockChartModal
+          stockName={chartStock}
+          onClose={closeChartModal}
+          onBuy={(stock) => openBuyWindow(stock)}
+          onSell={(stock) => openSellWindow(stock)}
+        />
+      )}
     </GeneralContext.Provider>
   );
 };

@@ -631,7 +631,17 @@ app.get("/orders", authMiddleware, async (req, res) => {
 
 app.post("/newOrder", authMiddleware, async (req, res) => {
   try {
-    const { name, qty, price, mode } = req.body;
+    const {
+      name,
+      qty,
+      price,
+      mode,
+      orderType = "MARKET",
+      limitPrice,
+      product = "CNC",
+      stopLoss,
+      target,
+    } = req.body;
 
     const quantity = Number(qty);
     const orderPrice = Number(price);
@@ -641,11 +651,76 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
     }
 
     const user = await UserModel.findById(req.userId);
-
     let holdings = await HoldingsModel.find({ user: req.userId, name });
     let positions = await PositionsModel.find({ user: req.userId, name });
 
-    // ==================== BUY ====================
+    // ==================== LIMIT ORDER (PENDING) ====================
+    if (orderType === "LIMIT") {
+      const targetLimitPrice = Number(limitPrice) || orderPrice;
+      if (targetLimitPrice <= 0) {
+        return res.status(400).json({ message: "Invalid limit price ❌" });
+      }
+
+      if (mode === "BUY") {
+        const cost = quantity * targetLimitPrice;
+        if (cost > user.wallet) {
+          return res.status(400).json({ message: "Insufficient funds for limit order ❌" });
+        }
+
+        // Lock margin in wallet
+        user.wallet -= cost;
+        await user.save();
+
+        const openOrder = await OrdersModel.create({
+          user: req.userId,
+          name,
+          qty: quantity,
+          price: targetLimitPrice,
+          limitPrice: targetLimitPrice,
+          mode: "BUY",
+          orderType: "LIMIT",
+          status: "OPEN",
+          product,
+          stopLoss: stopLoss ? Number(stopLoss) : null,
+          target: target ? Number(target) : null,
+        });
+
+        return res.json({
+          message: `Limit BUY order placed for ${name} at ₹${targetLimitPrice.toFixed(2)} (OPEN) 🎯`,
+          wallet: user.wallet,
+          order: openOrder,
+        });
+      }
+
+      if (mode === "SELL") {
+        if (!holdings.length) {
+          return res.status(400).json({ message: "Stock not bought yet ❌" });
+        }
+        let totalQty = holdings.reduce((sum, h) => sum + h.qty, 0);
+        if (quantity > totalQty) {
+          return res.status(400).json({ message: "Not enough quantity to sell ❌" });
+        }
+
+        const openOrder = await OrdersModel.create({
+          user: req.userId,
+          name,
+          qty: quantity,
+          price: targetLimitPrice,
+          limitPrice: targetLimitPrice,
+          mode: "SELL",
+          orderType: "LIMIT",
+          status: "OPEN",
+          product,
+        });
+
+        return res.json({
+          message: `Limit SELL order placed for ${name} at ₹${targetLimitPrice.toFixed(2)} (OPEN) 🎯`,
+          order: openOrder,
+        });
+      }
+    }
+
+    // ==================== MARKET BUY ====================
     if (mode === "BUY") {
       const cost = quantity * orderPrice;
 
@@ -655,8 +730,6 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         });
       }
 
-      // If this stock is already held, merge into it with a new average
-      // price instead of creating a duplicate row every time.
       let holding = holdings[0];
 
       if (holding) {
@@ -667,6 +740,12 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         holding.qty = totalQty;
         holding.avg = newAvg;
         holding.price = orderPrice;
+        if (stopLoss !== undefined && stopLoss !== null && stopLoss !== "") {
+          holding.stopLoss = Number(stopLoss);
+        }
+        if (target !== undefined && target !== null && target !== "") {
+          holding.target = Number(target);
+        }
         await holding.save();
       } else {
         await HoldingsModel.create({
@@ -677,6 +756,8 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
           price: orderPrice,
           net: "+0.00%",
           day: "+0.00%",
+          stopLoss: stopLoss ? Number(stopLoss) : null,
+          target: target ? Number(target) : null,
         });
       }
 
@@ -690,16 +771,24 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         position.qty = totalQty;
         position.avg = newAvg;
         position.price = orderPrice;
+        if (stopLoss !== undefined && stopLoss !== null && stopLoss !== "") {
+          position.stopLoss = Number(stopLoss);
+        }
+        if (target !== undefined && target !== null && target !== "") {
+          position.target = Number(target);
+        }
         await position.save();
       } else {
         await PositionsModel.create({
           user: req.userId,
-          product: "CNC",
+          product: product || "CNC",
           name,
           qty: quantity,
           avg: orderPrice,
           price: orderPrice,
           chg: "+0.00%",
+          stopLoss: stopLoss ? Number(stopLoss) : null,
+          target: target ? Number(target) : null,
         });
       }
 
@@ -712,12 +801,17 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         qty: quantity,
         price: orderPrice,
         mode,
+        orderType: "MARKET",
+        status: "EXECUTED",
+        product,
+        stopLoss: stopLoss ? Number(stopLoss) : null,
+        target: target ? Number(target) : null,
       });
 
       return res.json({ message: "Buy success ✅", wallet: user.wallet });
     }
 
-    // ==================== SELL ====================
+    // ==================== MARKET SELL ====================
     if (mode === "SELL") {
       if (!holdings.length) {
         return res.status(400).json({
@@ -740,11 +834,7 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         if (remaining <= 0) break;
 
         const qtyFromThis = Math.min(h.qty, remaining);
-
-        // The actual gain/loss locked in: what you sold this chunk for
-        // vs. what you originally paid for it (its average buy price).
         realizedPnLThisSell += (orderPrice - h.avg) * qtyFromThis;
-
         remaining -= qtyFromThis;
 
         if (h.qty <= qtyFromThis) {
@@ -753,7 +843,6 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
           });
         } else {
           h.qty -= qtyFromThis;
-
           await h.save();
         }
       }
@@ -771,9 +860,7 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
           });
         } else {
           p.qty -= remainingPos;
-
           remainingPos = 0;
-
           await p.save();
         }
       }
@@ -789,6 +876,9 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         qty: quantity,
         price: orderPrice,
         mode,
+        orderType: "MARKET",
+        status: "EXECUTED",
+        product,
       });
 
       return res.json({
@@ -802,6 +892,64 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server error ❌" });
+  }
+});
+
+// Cancel OPEN limit order
+app.put("/orders/cancel/:id", authMiddleware, async (req, res) => {
+  try {
+    const order = await OrdersModel.findOne({ _id: req.params.id, user: req.userId });
+    if (!order) {
+      return res.status(404).json({ message: "Order not found ❌" });
+    }
+    if (order.status !== "OPEN") {
+      return res.status(400).json({ message: "Only OPEN orders can be cancelled ❌" });
+    }
+
+    const user = await UserModel.findById(req.userId);
+    if (order.mode === "BUY") {
+      const refund = order.qty * (order.limitPrice || order.price);
+      user.wallet += refund;
+      await user.save();
+    }
+
+    order.status = "CANCELLED";
+    await order.save();
+
+    return res.json({
+      message: "Limit order cancelled successfully ✅",
+      order,
+      wallet: user.wallet,
+    });
+  } catch (err) {
+    console.error("Cancel order error:", err);
+    res.status(500).json({ message: "Failed to cancel order ❌" });
+  }
+});
+
+// Update GTT (Stop-Loss and Target) for a specific holding
+app.put("/holdings/gtt/:id", authMiddleware, async (req, res) => {
+  try {
+    const { stopLoss, target } = req.body;
+    const holding = await HoldingsModel.findOne({ _id: req.params.id, user: req.userId });
+    if (!holding) {
+      return res.status(404).json({ message: "Holding not found ❌" });
+    }
+
+    holding.stopLoss =
+      stopLoss !== undefined && stopLoss !== null && stopLoss !== ""
+        ? Number(stopLoss)
+        : null;
+    holding.target =
+      target !== undefined && target !== null && target !== ""
+        ? Number(target)
+        : null;
+
+    await holding.save();
+    return res.json({ message: "GTT Stop-Loss & Target updated ✅", holding });
+  } catch (err) {
+    console.error("Update GTT error:", err);
+    res.status(500).json({ message: "Failed to update GTT ❌" });
   }
 });
 
@@ -916,12 +1064,227 @@ io.on("connection", (socket) => {
   socket.emit("market:update", liveMarket.getSnapshot());
 });
 
+// Limit Order & GTT (Stop-Loss / Target) Execution Engine
+async function checkLimitOrdersAndGTT(ioInstance) {
+  try {
+    // 1. Process Open Limit Orders
+    const openOrders = await OrdersModel.find({ status: "OPEN" });
+    for (const order of openOrders) {
+      const livePrice = liveMarket.getLivePrice(order.name);
+      if (!livePrice) continue;
+
+      const limitThreshold = order.limitPrice || order.price;
+
+      // BUY LIMIT: triggers when price dips to or below limit
+      if (order.mode === "BUY" && livePrice <= limitThreshold) {
+        const user = await UserModel.findById(order.user);
+        if (!user) continue;
+
+        // If executed cheaper than limit, refund difference
+        if (livePrice < limitThreshold) {
+          const diff = (limitThreshold - livePrice) * order.qty;
+          user.wallet += diff;
+          await user.save();
+        }
+
+        if (order.product === "MIS") {
+          let position = await PositionsModel.findOne({
+            user: order.user,
+            name: order.name,
+          });
+          if (position) {
+            const totalQty = position.qty + order.qty;
+            position.avg =
+              (position.qty * position.avg + order.qty * livePrice) / totalQty;
+            position.qty = totalQty;
+            position.price = livePrice;
+            if (order.stopLoss) position.stopLoss = order.stopLoss;
+            if (order.target) position.target = order.target;
+            await position.save();
+          } else {
+            await PositionsModel.create({
+              user: order.user,
+              product: "MIS",
+              name: order.name,
+              qty: order.qty,
+              avg: livePrice,
+              price: livePrice,
+              chg: "+0.00%",
+              stopLoss: order.stopLoss || null,
+              target: order.target || null,
+            });
+          }
+        } else {
+          let holding = await HoldingsModel.findOne({
+            user: order.user,
+            name: order.name,
+          });
+          if (holding) {
+            const totalQty = holding.qty + order.qty;
+            holding.avg =
+              (holding.qty * holding.avg + order.qty * livePrice) / totalQty;
+            holding.qty = totalQty;
+            holding.price = livePrice;
+            if (order.stopLoss) holding.stopLoss = order.stopLoss;
+            if (order.target) holding.target = order.target;
+            await holding.save();
+          } else {
+            await HoldingsModel.create({
+              user: order.user,
+              name: order.name,
+              qty: order.qty,
+              avg: livePrice,
+              price: livePrice,
+              net: "+0.00%",
+              day: "+0.00%",
+              stopLoss: order.stopLoss || null,
+              target: order.target || null,
+            });
+          }
+        }
+
+        order.status = "EXECUTED";
+        order.price = livePrice;
+        await order.save();
+
+        ioInstance.emit("order:executed", {
+          orderId: order._id,
+          name: order.name,
+          mode: "BUY",
+          price: livePrice,
+          qty: order.qty,
+          user: order.user,
+          orderType: "LIMIT",
+        });
+      }
+
+      // SELL LIMIT: triggers when price rises to or above limit
+      else if (order.mode === "SELL" && livePrice >= limitThreshold) {
+        const user = await UserModel.findById(order.user);
+        if (!user) continue;
+
+        let holdings = await HoldingsModel.find({
+          user: order.user,
+          name: order.name,
+        });
+        let totalQty = holdings.reduce((sum, h) => sum + h.qty, 0);
+
+        if (order.qty > totalQty) {
+          order.status = "CANCELLED";
+          await order.save();
+          continue;
+        }
+
+        let remaining = order.qty;
+        let realizedPnL = 0;
+
+        for (let h of holdings) {
+          if (remaining <= 0) break;
+          const qtyFromThis = Math.min(h.qty, remaining);
+          realizedPnL += (livePrice - h.avg) * qtyFromThis;
+          remaining -= qtyFromThis;
+
+          if (h.qty <= qtyFromThis) {
+            await HoldingsModel.deleteOne({ _id: h._id });
+          } else {
+            h.qty -= qtyFromThis;
+            await h.save();
+          }
+        }
+
+        await PositionsModel.deleteMany({
+          user: order.user,
+          name: order.name,
+          qty: { $lte: order.qty },
+        });
+
+        const proceeds = order.qty * livePrice;
+        user.wallet += proceeds;
+        user.realizedPnL += realizedPnL;
+        await user.save();
+
+        order.status = "EXECUTED";
+        order.price = livePrice;
+        await order.save();
+
+        ioInstance.emit("order:executed", {
+          orderId: order._id,
+          name: order.name,
+          mode: "SELL",
+          price: livePrice,
+          qty: order.qty,
+          user: order.user,
+          orderType: "LIMIT",
+          realizedPnL,
+        });
+      }
+    }
+
+    // 2. Process GTT (Stop-Loss & Target) Triggers on Holdings
+    const gttHoldings = await HoldingsModel.find({
+      $or: [{ stopLoss: { $ne: null } }, { target: { $ne: null } }],
+    });
+
+    for (const holding of gttHoldings) {
+      const livePrice = liveMarket.getLivePrice(holding.name);
+      if (!livePrice) continue;
+
+      let triggeredType = null;
+      if (holding.stopLoss && livePrice <= holding.stopLoss) {
+        triggeredType = "SL_TRIGGER";
+      } else if (holding.target && livePrice >= holding.target) {
+        triggeredType = "TARGET_TRIGGER";
+      }
+
+      if (triggeredType) {
+        const user = await UserModel.findById(holding.user);
+        if (!user) continue;
+
+        const realizedPnL = (livePrice - holding.avg) * holding.qty;
+        const proceeds = holding.qty * livePrice;
+
+        user.wallet += proceeds;
+        user.realizedPnL += realizedPnL;
+        await user.save();
+
+        await OrdersModel.create({
+          user: holding.user,
+          name: holding.name,
+          qty: holding.qty,
+          price: livePrice,
+          mode: "SELL",
+          orderType: triggeredType,
+          status: "EXECUTED",
+          product: "CNC",
+        });
+
+        await HoldingsModel.deleteOne({ _id: holding._id });
+        await PositionsModel.deleteMany({
+          user: holding.user,
+          name: holding.name,
+        });
+
+        ioInstance.emit("gtt:triggered", {
+          user: holding.user,
+          name: holding.name,
+          type: triggeredType === "SL_TRIGGER" ? "STOP_LOSS" : "TARGET",
+          price: livePrice,
+          qty: holding.qty,
+          realizedPnL,
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Error in checkLimitOrdersAndGTT:", err.message);
+  }
+}
+
 // Single shared ticker — updates prices and pushes them to every
-// connected dashboard every 2.5s. This replaces per-browser random
-// simulation with one server-side source of truth all clients share.
-setInterval(() => {
+// connected dashboard every 2.5s. Also processes limit orders and GTT triggers.
+setInterval(async () => {
   const snapshot = liveMarket.tick();
   io.emit("market:update", snapshot);
+  await checkLimitOrdersAndGTT(io);
 }, 2500);
 
 server.listen(PORT, () => {

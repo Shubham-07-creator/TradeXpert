@@ -8,16 +8,18 @@
   height: 100vh;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   animation: fadeIn 0.2s ease-out;
+  padding: 16px;
 }
 
 .buy-modal-card {
-  width: 90%;
-  max-width: 440px;
+  width: 100%;
+  max-width: 480px;
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -45,7 +47,7 @@
 }
 
 .buy-stock-title {
-  font-size: 1.15rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--color-text-strong);
   margin: 0;
@@ -61,40 +63,51 @@
   padding: 22px;
 }
 
+/* Dual Segmented Toggles: Product (CNC/MIS) & Order Type (Market/Limit) */
+.order-controls-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
 .order-type-tabs {
   display: flex;
   background: var(--color-bg-subtle);
-  padding: 4px;
+  padding: 3px;
   border-radius: var(--radius-md);
-  margin-bottom: 20px;
-  gap: 4px;
+  border: 1px solid var(--color-border);
+  gap: 3px;
 }
 
 .order-tab-btn {
   flex: 1;
-  padding: 7px;
+  padding: 6px 10px;
   border: none;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .order-tab-btn.active {
   background: var(--color-bg-card);
   color: var(--color-primary);
   box-shadow: var(--shadow-sm);
-  font-weight: 700;
 }
 
 .input-field-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .input-box-wrapper {
@@ -104,25 +117,37 @@
 }
 
 .input-label {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   text-transform: uppercase;
   color: var(--color-text-muted);
   letter-spacing: 0.5px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.input-label-badge {
+  font-size: 0.68rem;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
 }
 
 .trade-input {
   width: 100%;
-  padding: 10px 14px;
+  padding: 9px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-bg-subtle);
   color: var(--color-text-strong);
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   outline: none;
   transition: all 0.2s ease;
   font-variant-numeric: tabular-nums;
+  box-sizing: border-box;
 }
 
 .trade-input:focus {
@@ -131,15 +156,125 @@
   box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
+.trade-input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Quick price adjustment buttons */
+.price-quick-tags {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.quick-tag-btn {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-tag-btn:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Stop-Loss & Target (GTT) Section */
+.gtt-section-box {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+}
+
+.gtt-header-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gtt-header-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-strong);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gtt-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+}
+
+.gtt-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.gtt-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: var(--color-border);
+  transition: 0.25s;
+  border-radius: 20px;
+}
+
+.gtt-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.25s;
+  border-radius: 50%;
+}
+
+input:checked + .gtt-slider {
+  background-color: var(--color-primary);
+}
+
+input:checked + .gtt-slider:before {
+  transform: translateX(16px);
+}
+
+.gtt-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--color-border);
+  animation: fadeIn 0.2s ease;
+}
+
+/* Live Margin Calculation */
 .margin-info-box {
   background: var(--color-bg-subtle);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 12px 16px;
+  padding: 11px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
 }
 
 .margin-label {
@@ -149,7 +284,7 @@
 }
 
 .margin-amount {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--color-text-strong);
 }
@@ -161,49 +296,61 @@
 }
 
 .btn-execute {
-  flex: 1;
+  flex: 2;
   padding: 12px;
-  border: none;
   border-radius: var(--radius-md);
-  color: #fff;
+  border: none;
   font-size: 0.95rem;
   font-weight: 700;
+  color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-execute.buy {
-  background: var(--gradient-primary);
+  background: var(--color-primary);
+  box-shadow: 0 4px 14px rgba(56, 126, 209, 0.35);
 }
 
-.btn-execute.buy:hover {
+.btn-execute.buy:hover:not(:disabled) {
+  background: #2563eb;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-glow-primary);
 }
 
 .btn-execute.sell {
   background: var(--color-loss);
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
 }
 
-.btn-execute.sell:hover {
-  opacity: 0.9;
+.btn-execute.sell:hover:not(:disabled) {
+  background: #dc2626;
   transform: translateY(-1px);
 }
 
+.btn-execute:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .btn-cancel {
-  padding: 12px 20px;
-  border: 1px solid var(--color-border);
-  background: var(--color-bg-subtle);
-  color: var(--color-text-muted);
+  flex: 1;
+  padding: 12px;
   border-radius: var(--radius-md);
-  font-size: 0.9rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-cancel:hover {
-  background: var(--color-border);
+  background: var(--color-bg-subtle);
   color: var(--color-text-strong);
 }

@@ -6,6 +6,7 @@ import {
   KeyboardArrowUp,
   Search as SearchIcon,
   Close as CloseIcon,
+  ShowChart,
 } from "@mui/icons-material";
 import { DoughnutChart } from "./DoughnoutChart";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
@@ -113,12 +114,16 @@ export default WatchList;
 
 const WatchListItem = ({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
+  const generalContext = useContext(GeneralContext);
 
   return (
     <li
       className="watchlist-item"
       onMouseEnter={() => setShowWatchlistActions(true)}
       onMouseLeave={() => setShowWatchlistActions(false)}
+      onClick={() => generalContext.openChartModal(stock.name)}
+      style={{ cursor: "pointer" }}
+      title={`Click to view ${stock.name} interactive chart`}
     >
       <div className="stock-name-group">
         <span className="stock-name">{stock.name}</span>
@@ -157,8 +162,35 @@ const WatchListActions = ({ uid }) => {
     generalContext.openSellWindow(uid);
   };
 
+  const handleChartClick = (e) => {
+    e.stopPropagation();
+    generalContext.openChartModal(uid);
+  };
+
   return (
     <div className="watchlist-actions">
+      <Tooltip title="View Interactive Chart" placement="top" arrow TransitionComponent={Grow}>
+        <button
+          className="btn-chart-quick"
+          onClick={handleChartClick}
+          style={{
+            background: "var(--color-bg-base)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-sm)",
+            padding: "4px 6px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "var(--color-primary)",
+            transition: "all 0.15s ease",
+          }}
+          title="Interactive Chart"
+        >
+          <ShowChart style={{ fontSize: "1.05rem" }} />
+        </button>
+      </Tooltip>
+
       <Tooltip title="Buy Order (B)" placement="top" arrow TransitionComponent={Grow}>
         <button className="btn-buy-quick" onClick={handleBuyClick}>
           BUY

@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { ShowChart } from "@mui/icons-material";
 import { getAuthHeader } from "../utils/auth";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import GeneralContext from "./GeneralContext";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -17,6 +19,7 @@ const Positions = () => {
   const [allPositions, setAllPositions] = useState([]);
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
   const [hover, setHover] = useState(null);
+  const generalContext = useContext(GeneralContext);
 
   useEffect(() => {
     fetchData();
@@ -153,9 +156,15 @@ const Positions = () => {
                       </td>
 
                       <td>
-                        <span style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
-                          {stock.name}
-                        </span>
+                        <div
+                          style={{ cursor: "pointer" }}
+                          onClick={() => generalContext.openChartModal(stock.name)}
+                          title={`Click to view ${stock.name} interactive chart`}
+                        >
+                          <span style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
+                            {stock.name}
+                          </span>
+                        </div>
                       </td>
 
                       <td style={{ fontWeight: "600" }}>{stock.qty}</td>
@@ -175,24 +184,44 @@ const Positions = () => {
                       </td>
 
                       <td style={{ textAlign: "right" }}>
-                        <button
-                          style={{
-                            background: "var(--color-loss)",
-                            color: "#fff",
-                            border: "none",
-                            padding: "6px 14px",
-                            borderRadius: "var(--radius-sm)",
-                            fontWeight: "600",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                            transition: "all 0.2s ease",
-                            opacity: hover === i ? 1 : 0.85,
-                          }}
-                          onClick={() => handleSell(stock)}
-                          title={`Square off ${stock.name}`}
-                        >
-                          Exit
-                        </button>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                          <button
+                            type="button"
+                            onClick={() => generalContext.openChartModal(stock.name)}
+                            style={{
+                              background: "var(--color-bg-base)",
+                              border: "1px solid var(--color-border)",
+                              color: "var(--color-primary)",
+                              padding: "5px 8px",
+                              borderRadius: "var(--radius-sm)",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                            title="Interactive Chart"
+                          >
+                            <ShowChart style={{ fontSize: "1rem" }} />
+                          </button>
+
+                          <button
+                            style={{
+                              background: "var(--color-loss)",
+                              color: "#fff",
+                              border: "none",
+                              padding: "6px 14px",
+                              borderRadius: "var(--radius-sm)",
+                              fontWeight: "600",
+                              fontSize: "0.8rem",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                              opacity: hover === i ? 1 : 0.85,
+                            }}
+                            onClick={() => handleSell(stock)}
+                            title={`Square off ${stock.name}`}
+                          >
+                            Exit
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

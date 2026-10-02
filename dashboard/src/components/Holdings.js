@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { ShowChart, ShieldOutlined } from "@mui/icons-material";
 import { VerticalGraph } from "./VerticalGraph";
 import { getAuthHeader } from "../utils/auth";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import GeneralContext from "./GeneralContext";
+import { socket } from "../utils/socket";
+import { sound } from "../utils/sound";
 
 const buildLiveMap = (snapshot) => {
   const map = {};
@@ -18,19 +22,14 @@ const Holdings = () => {
   const [allHoldings, setAllHoldings] = useState([]);
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
   const [hover, setHover] = useState(null);
+  const [gttModalHolding, setGttModalHolding] = useState(null);
+  const [slInput, setSlInput] = useState("");
+  const [targetInput, setTargetInput] = useState("");
+  const [savingGtt, setSavingGtt] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const generalContext = useContext(GeneralContext);
 
-  useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) => {
-      setLiveMap(buildLiveMap(snapshot));
-    });
-    return unsubscribe;
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/allHoldings`, {
         headers: getAuthHeader(),
@@ -39,7 +38,40 @@ const Holdings = () => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [API]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) => {
+      setLiveMap(buildLiveMap(snapshot));
+    });
+    return unsubscribe;
+  }, []);
+
+  // Listen for GTT trigger events from server
+  useEffect(() => {
+    const handleGtt = (data) => {
+      sound.playAlertChime();
+      fetchData();
+      const isSL = data.type === "STOP_LOSS";
+      toast(
+        `${isSL ? "🛑 Stop-Loss Triggered" : "🎉 Target Achieved"}: Auto-sold ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
+        {
+          style: {
+            background: isSL ? "#EF4444" : "#00D09C",
+            color: "#fff",
+            fontWeight: "600",
+          },
+        }
+      );
+    };
+
+    socket.on("gtt:triggered", handleGtt);
+    return () => socket.off("gtt:triggered", handleGtt);
+  }, [fetchData]);
 
   const handleSell = async (stock) => {
     const live = liveMap[stock.name];
@@ -53,9 +85,12 @@ const Holdings = () => {
           qty: stock.qty,
           price: sellPrice,
           mode: "SELL",
+          product: "CNC",
         },
         { headers: getAuthHeader() }
       );
+
+      sound.playTradeChime();
 
       const gain = res.data.realizedPnL || 0;
       const gainText =
@@ -74,6 +109,59 @@ const Holdings = () => {
       fetchData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Sell failed ❌");
+    }
+  };
+
+  const openGttModal = (holding) => {
+    setGttModalHolding(holding);
+    const live = liveMap[holding.name];
+    const currentPrice = live ? live.price : holding.price;
+    setSlInput(holding.stopLoss ? String(holding.stopLoss) : (currentPrice * 0.98).toFixed(2));
+    setTargetInput(holding.target ? String(holding.target) : (currentPrice * 1.05).toFixed(2));
+  };
+
+  const handleSaveGTT = async () => {
+    if (!gttModalHolding) return;
+
+    try {
+      setSavingGtt(true);
+      await axios.put(
+        `${API}/holdings/gtt/${gttModalHolding._id}`,
+        {
+          stopLoss: slInput ? Number(slInput) : null,
+          target: targetInput ? Number(targetInput) : null,
+        },
+        { headers: getAuthHeader() }
+      );
+
+      toast.success(`GTT rules updated for ${gttModalHolding.name} 🛡️`);
+      setGttModalHolding(null);
+      fetchData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to update GTT ❌");
+    } finally {
+      setSavingGtt(false);
+    }
+  };
+
+  const handleClearGTT = async () => {
+    if (!gttModalHolding) return;
+
+    try {
+      setSavingGtt(true);
+      await axios.put(
+        `${API}/holdings/gtt/${gttModalHolding._id}`,
+        { stopLoss: null, target: null },
+        { headers: getAuthHeader() }
+      );
+
+      toast.success(`GTT rules cleared for ${gttModalHolding.name}`);
+      setGttModalHolding(null);
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to clear GTT");
+    } finally {
+      setSavingGtt(false);
     }
   };
 
@@ -96,7 +184,7 @@ const Holdings = () => {
         <div>
           <h2 className="page-title">Portfolio Holdings ({allHoldings.length})</h2>
           <p className="page-subtitle">
-            Long-term delivery positions held in your virtual account.
+            Long-term delivery positions with live GTT Stop-Loss &amp; Target triggers.
           </p>
         </div>
       </div>
@@ -145,8 +233,8 @@ const Holdings = () => {
                   <th>Cur. Value</th>
                   <th>Unrealized P&L</th>
                   <th>Net Chg</th>
-                  <th>Day Chg</th>
-                  <th style={{ textAlign: "right" }}>Action</th>
+                  <th>GTT (SL / Target)</th>
+                  <th style={{ textAlign: "right" }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -157,17 +245,19 @@ const Holdings = () => {
                   const pnl = value - stock.avg * stock.qty;
                   const isProfit = pnl >= 0;
                   const netPercent = ((price - stock.avg) / stock.avg) * 100;
-                  const dayLabel = live ? live.percent : stock.day || "0.00%";
-                  const isDayDown = live ? live.isDown : false;
 
                   return (
                     <tr
-                      key={i}
+                      key={stock._id || i}
                       onMouseEnter={() => setHover(i)}
                       onMouseLeave={() => setHover(null)}
                     >
                       <td>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
+                        <div
+                          style={{ display: "flex", flexDirection: "column", cursor: "pointer" }}
+                          onClick={() => generalContext.openChartModal(stock.name)}
+                          title={`Click to view ${stock.name} interactive chart`}
+                        >
                           <span style={{ fontWeight: "700", color: "var(--color-text-strong)" }}>
                             {stock.name}
                           </span>
@@ -194,33 +284,114 @@ const Holdings = () => {
                         {netPercent >= 0 ? "+" : ""}{netPercent.toFixed(2)}%
                       </td>
 
+                      {/* GTT Status & Configuration */}
                       <td>
-                        <span
-                          className={`index-percent ${isDayDown ? "down" : "up"}`}
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => openGttModal(stock)}
+                          title="Click to set or modify Stop-Loss & Target"
                         >
-                          {dayLabel}
-                        </span>
+                          {stock.stopLoss || stock.target ? (
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                              {stock.stopLoss && (
+                                <span
+                                  style={{
+                                    fontSize: "0.72rem",
+                                    fontWeight: "700",
+                                    color: "var(--color-loss)",
+                                    background: "var(--color-loss-soft)",
+                                    padding: "2px 6px",
+                                    borderRadius: "var(--radius-pill)",
+                                  }}
+                                >
+                                  SL: ₹{Number(stock.stopLoss).toFixed(2)}
+                                </span>
+                              )}
+                              {stock.target && (
+                                <span
+                                  style={{
+                                    fontSize: "0.72rem",
+                                    fontWeight: "700",
+                                    color: "var(--color-profit)",
+                                    background: "var(--color-profit-soft)",
+                                    padding: "2px 6px",
+                                    borderRadius: "var(--radius-pill)",
+                                  }}
+                                >
+                                  Tgt: ₹{Number(stock.target).toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              style={{
+                                background: "var(--color-bg-subtle)",
+                                border: "1px dashed var(--color-border)",
+                                color: "var(--color-text-muted)",
+                                padding: "4px 8px",
+                                borderRadius: "var(--radius-sm)",
+                                fontSize: "0.74rem",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                            >
+                              <ShieldOutlined style={{ fontSize: "0.85rem" }} />
+                              + GTT
+                            </button>
+                          )}
+                        </div>
                       </td>
 
                       <td style={{ textAlign: "right" }}>
-                        <button
-                          style={{
-                            background: "var(--color-loss)",
-                            color: "#fff",
-                            border: "none",
-                            padding: "6px 14px",
-                            borderRadius: "var(--radius-sm)",
-                            fontWeight: "600",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                            transition: "all 0.2s ease",
-                            opacity: hover === i ? 1 : 0.85,
-                          }}
-                          onClick={() => handleSell(stock)}
-                          title={`Sell all ${stock.qty} shares of ${stock.name}`}
-                        >
-                          Sell
-                        </button>
+                        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                          {/* Chart Button */}
+                          <button
+                            type="button"
+                            onClick={() => generalContext.openChartModal(stock.name)}
+                            style={{
+                              background: "var(--color-bg-base)",
+                              border: "1px solid var(--color-border)",
+                              color: "var(--color-primary)",
+                              padding: "5px 8px",
+                              borderRadius: "var(--radius-sm)",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                            title="Interactive Chart"
+                          >
+                            <ShowChart style={{ fontSize: "1rem" }} />
+                          </button>
+
+                          {/* Quick Sell Button */}
+                          <button
+                            style={{
+                              background: "var(--color-loss)",
+                              color: "#fff",
+                              border: "none",
+                              padding: "6px 14px",
+                              borderRadius: "var(--radius-sm)",
+                              fontWeight: "600",
+                              fontSize: "0.8rem",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                              opacity: hover === i ? 1 : 0.85,
+                            }}
+                            onClick={() => handleSell(stock)}
+                            title={`Sell all ${stock.qty} shares of ${stock.name}`}
+                          >
+                            Sell
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -263,6 +434,92 @@ const Holdings = () => {
               ],
             }}
           />
+        </div>
+      )}
+
+      {/* GTT Edit Modal */}
+      {gttModalHolding && (
+        <div
+          className="buy-modal-overlay"
+          onClick={() => setGttModalHolding(null)}
+        >
+          <div
+            className="buy-modal-card"
+            style={{ maxWidth: "420px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="buy-modal-header buy">
+              <div>
+                <h3 className="buy-stock-title">
+                  Set GTT: {gttModalHolding.name}
+                </h3>
+                <p className="buy-stock-sub">
+                  Auto-exit position on Stop-Loss breach or Target reach
+                </p>
+              </div>
+            </div>
+
+            <div className="buy-modal-body">
+              <div style={{ marginBottom: "16px" }}>
+                <label className="input-label" style={{ color: "var(--color-loss)", marginBottom: "6px" }}>
+                  Stop-Loss Price (₹)
+                </label>
+                <input
+                  type="number"
+                  step="0.05"
+                  className="trade-input"
+                  value={slInput}
+                  onChange={(e) => setSlInput(e.target.value)}
+                  placeholder="e.g. 1450"
+                />
+              </div>
+
+              <div style={{ marginBottom: "20px" }}>
+                <label className="input-label" style={{ color: "var(--color-profit)", marginBottom: "6px" }}>
+                  Target Price (₹)
+                </label>
+                <input
+                  type="number"
+                  step="0.05"
+                  className="trade-input"
+                  value={targetInput}
+                  onChange={(e) => setTargetInput(e.target.value)}
+                  placeholder="e.g. 1650"
+                />
+              </div>
+
+              <div className="buy-modal-actions">
+                <button
+                  type="button"
+                  disabled={savingGtt}
+                  className="btn-execute buy"
+                  onClick={handleSaveGTT}
+                >
+                  {savingGtt ? "Saving..." : "Save GTT Rules"}
+                </button>
+
+                {(gttModalHolding.stopLoss || gttModalHolding.target) && (
+                  <button
+                    type="button"
+                    disabled={savingGtt}
+                    className="btn-cancel"
+                    style={{ color: "var(--color-loss)", borderColor: "var(--color-loss)" }}
+                    onClick={handleClearGTT}
+                  >
+                    Clear
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className="btn-cancel"
+                  onClick={() => setGttModalHolding(null)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

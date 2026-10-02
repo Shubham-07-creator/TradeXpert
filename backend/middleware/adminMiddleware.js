@@ -10,7 +10,7 @@ const adminMiddleware = async (req, res, next) => {
       return next();
     }
 
-    const user = await UserModel.findById(req.userId);
+    const user = await UserModel.findById(req.userId).select("role");
 
     if (!user || user.role !== "admin") {
       return res.status(403).json({ message: "Admin access only ❌" });

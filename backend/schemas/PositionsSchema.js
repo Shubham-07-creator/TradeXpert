@@ -14,4 +14,7 @@ const PositionsSchema = new Schema({
   target: { type: Number, default: null },
 });
 
+PositionsSchema.index({ user: 1 });
+PositionsSchema.index({ user: 1, name: 1 });
+
 module.exports = { PositionsSchema };

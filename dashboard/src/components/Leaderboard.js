@@ -2,6 +2,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
 
+const RANK_COLORS = [
+  { bg: "rgba(234, 179, 8, 0.12)", text: "#CA8A04", border: "rgba(234, 179, 8, 0.3)" }, // Gold
+  { bg: "rgba(148, 163, 184, 0.12)", text: "#64748B", border: "rgba(148, 163, 184, 0.3)" }, // Silver
+  { bg: "rgba(217, 119, 6, 0.12)", text: "#B45309", border: "rgba(217, 119, 6, 0.3)" }, // Bronze
+];
+
 const Leaderboard = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
   const [board, setBoard] = useState([]);
@@ -26,11 +32,6 @@ const Leaderboard = () => {
 
   const getRankBadge = (rank) => {
     const isTop3 = rank < 3;
-    const colors = [
-      { bg: "rgba(234, 179, 8, 0.12)", text: "#CA8A04", border: "rgba(234, 179, 8, 0.3)" }, // Gold
-      { bg: "rgba(148, 163, 184, 0.12)", text: "#64748B", border: "rgba(148, 163, 184, 0.3)" }, // Silver
-      { bg: "rgba(217, 119, 6, 0.12)", text: "#B45309", border: "rgba(217, 119, 6, 0.3)" }, // Bronze
-    ];
 
     if (isTop3) {
       return (
@@ -44,9 +45,9 @@ const Leaderboard = () => {
             borderRadius: "6px",
             fontSize: "0.78rem",
             fontWeight: "800",
-            backgroundColor: colors[rank].bg,
-            color: colors[rank].text,
-            border: `1px solid ${colors[rank].border}`,
+            backgroundColor: RANK_COLORS[rank].bg,
+            color: RANK_COLORS[rank].text,
+            border: `1px solid ${RANK_COLORS[rank].border}`,
           }}
         >
           {String(rank + 1).padStart(2, "0")}

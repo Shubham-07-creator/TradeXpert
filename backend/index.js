@@ -20,6 +20,20 @@ const liveMarket = require("./liveMarket");
 const { OAuth2Client } = require("google-auth-library");
 const nodemailer = require("nodemailer");
 
+let mailTransporter = null;
+const getMailTransporter = () => {
+  if (!mailTransporter && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    mailTransporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
+  return mailTransporter;
+};
+
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
   "499910353398-01upu2f47rj9d7sq5paeftngc0gjdat1.apps.googleusercontent.com";
@@ -355,16 +369,9 @@ app.post("/forgot-password", authLimiter, async (req, res) => {
 
     // Send email via nodemailer if SMTP credentials exist
     let emailSent = false;
-    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+    const transporter = getMailTransporter();
+    if (transporter) {
       try {
-        const transporter = nodemailer.createTransport({
-          service: process.env.EMAIL_SERVICE || "gmail",
-          auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS,
-          },
-        });
-
         await transporter.sendMail({
           from: `"TradeXpert Security" <${process.env.EMAIL_USER}>`,
           to: user.email,
@@ -840,6 +847,8 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 
       let remaining = quantity;
       let realizedPnLThisSell = 0;
+      const holdingsToDelete = [];
+      const holdingsToUpdate = [];
 
       for (let h of holdings) {
         if (remaining <= 0) break;
@@ -849,31 +858,46 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
         remaining -= qtyFromThis;
 
         if (h.qty <= qtyFromThis) {
-          await HoldingsModel.deleteOne({
-            _id: h._id,
-          });
+          holdingsToDelete.push(h._id);
         } else {
           h.qty -= qtyFromThis;
-          await h.save();
+          holdingsToUpdate.push(h);
         }
       }
 
       let remainingPos = quantity;
+      const positionsToDelete = [];
+      const positionsToUpdate = [];
 
       for (let p of positions) {
         if (remainingPos <= 0) break;
 
         if (p.qty <= remainingPos) {
           remainingPos -= p.qty;
-
-          await PositionsModel.deleteOne({
-            _id: p._id,
-          });
+          positionsToDelete.push(p._id);
         } else {
           p.qty -= remainingPos;
           remainingPos = 0;
-          await p.save();
+          positionsToUpdate.push(p);
         }
+      }
+
+      // Execute DB deletions and updates in parallel
+      const dbOps = [];
+      if (holdingsToDelete.length > 0) {
+        dbOps.push(HoldingsModel.deleteMany({ _id: { $in: holdingsToDelete } }));
+      }
+      for (let i = 0; i < holdingsToUpdate.length; i++) {
+        dbOps.push(holdingsToUpdate[i].save());
+      }
+      if (positionsToDelete.length > 0) {
+        dbOps.push(PositionsModel.deleteMany({ _id: { $in: positionsToDelete } }));
+      }
+      for (let i = 0; i < positionsToUpdate.length; i++) {
+        dbOps.push(positionsToUpdate[i].save());
+      }
+      if (dbOps.length > 0) {
+        await Promise.all(dbOps);
       }
 
       const proceeds = quantity * orderPrice;
@@ -970,25 +994,32 @@ app.put("/holdings/gtt/:id", authMiddleware, async (req, res) => {
 
 app.get("/leaderboard", authMiddleware, async (req, res) => {
   try {
-    const users = await UserModel.find().select("name wallet _id");
-    const holdings = await HoldingsModel.find();
+    const [users, holdings] = await Promise.all([
+      UserModel.find().select("name wallet _id").lean(),
+      HoldingsModel.find().select("user name price qty").lean(),
+    ]);
 
-    const board = users.map((u) => {
-      const userHoldings = holdings.filter(
-        (h) => String(h.user) === String(u._id),
-      );
+    // O(H) single pass to aggregate holdings value per user
+    const holdingsValueByUser = new Map();
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
+      const uid = String(h.user);
+      const live = liveMarket.getLivePrice(h.name);
+      const price = live || h.price || 0;
+      const val = price * (h.qty || 0);
+      holdingsValueByUser.set(uid, (holdingsValueByUser.get(uid) || 0) + val);
+    }
 
-      const holdingsValue = userHoldings.reduce((sum, h) => {
-        const live = liveMarket.getLivePrice(h.name);
-        const price = live || h.price;
-        return sum + price * h.qty;
-      }, 0);
-
-      return {
+    // O(U) single pass to compute total portfolio value per user
+    const board = new Array(users.length);
+    for (let i = 0; i < users.length; i++) {
+      const u = users[i];
+      const holdingsValue = holdingsValueByUser.get(String(u._id)) || 0;
+      board[i] = {
         name: u.name,
-        portfolioValue: Number((u.wallet + holdingsValue).toFixed(2)),
+        portfolioValue: Number(((u.wallet || 0) + holdingsValue).toFixed(2)),
       };
-    });
+    }
 
     board.sort((a, b) => b.portfolioValue - a.portfolioValue);
 
@@ -1031,28 +1062,34 @@ app.get("/system/announcement", (req, res) => {
 // ADMIN COMMAND CENTER (Protected by authMiddleware & adminMiddleware)
 // ==========================================
 
-// 1. Get detailed user list with portfolio metrics & status
+// 1. Get detailed user list with portfolio metrics & status - O(U + H) optimized
 app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const users = await UserModel.find().select("-password").sort({ createdAt: -1 });
-    const holdings = await HoldingsModel.find();
+    const [users, holdings] = await Promise.all([
+      UserModel.find().select("-password").sort({ createdAt: -1 }).lean(),
+      HoldingsModel.find().lean(),
+    ]);
 
-    const data = users.map((u) => {
-      const userHoldings = holdings.filter(
-        (h) => String(h.user) === String(u._id),
-      );
+    // O(H) single pass to aggregate user portfolio stats
+    const statsByUser = new Map();
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
+      const uid = String(h.user);
+      const live = liveMarket.getLivePrice(h.name);
+      const price = live || h.price || 0;
+      const cur = statsByUser.get(uid) || { investment: 0, holdingsValue: 0, count: 0 };
+      cur.investment += (h.avg || 0) * (h.qty || 0);
+      cur.holdingsValue += price * (h.qty || 0);
+      cur.count += 1;
+      statsByUser.set(uid, cur);
+    }
 
-      const investment = userHoldings.reduce(
-        (sum, h) => sum + h.avg * h.qty,
-        0,
-      );
-
-      const holdingsValue = userHoldings.reduce((sum, h) => {
-        const live = liveMarket.getLivePrice(h.name);
-        return sum + (live || h.price) * h.qty;
-      }, 0);
-
-      return {
+    // O(U) single pass to build response
+    const data = new Array(users.length);
+    for (let i = 0; i < users.length; i++) {
+      const u = users[i];
+      const st = statsByUser.get(String(u._id)) || { investment: 0, holdingsValue: 0, count: 0 };
+      data[i] = {
         id: u._id,
         name: u.name,
         email: u.email,
@@ -1060,12 +1097,12 @@ app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
         isBlocked: Boolean(u.isBlocked),
         wallet: u.wallet,
         realizedPnL: u.realizedPnL || 0,
-        investment: Number(investment.toFixed(2)),
-        holdingsValue: Number(holdingsValue.toFixed(2)),
-        holdingsCount: userHoldings.length,
+        investment: Number(st.investment.toFixed(2)),
+        holdingsValue: Number(st.holdingsValue.toFixed(2)),
+        holdingsCount: st.count,
         createdAt: u.createdAt || null,
       };
-    });
+    }
 
     res.json(data);
   } catch (err) {
@@ -1073,20 +1110,28 @@ app.get("/admin/users", authMiddleware, adminMiddleware, async (req, res) => {
   }
 });
 
-// 2. Platform statistics & system state
+// 2. Platform statistics & system state - parallelized Promise.all
 app.get("/admin/stats", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const totalUsers = await UserModel.countDocuments();
-    const totalOrders = await OrdersModel.countDocuments();
-    const totalAdmins = await UserModel.countDocuments({ role: "admin" });
-    const users = await UserModel.find().select("wallet");
-    const totalWallet = users.reduce((sum, u) => sum + (u.wallet || 0), 0);
+    const [totalUsers, totalOrders, totalAdmins, users, holdings] = await Promise.all([
+      UserModel.countDocuments(),
+      OrdersModel.countDocuments(),
+      UserModel.countDocuments({ role: "admin" }),
+      UserModel.find().select("wallet").lean(),
+      HoldingsModel.find().select("name price qty").lean(),
+    ]);
 
-    const holdings = await HoldingsModel.find();
-    const totalHoldingsValue = holdings.reduce((sum, h) => {
+    let totalWallet = 0;
+    for (let i = 0; i < users.length; i++) {
+      totalWallet += (users[i].wallet || 0);
+    }
+
+    let totalHoldingsValue = 0;
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
       const live = liveMarket.getLivePrice(h.name);
-      return sum + (live || h.price) * h.qty;
-    }, 0);
+      totalHoldingsValue += (live || h.price || 0) * (h.qty || 0);
+    }
 
     res.json({
       totalUsers,

@@ -1,27 +1,19 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback, useMemo } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { ShowChart, ShieldOutlined } from "@mui/icons-material";
 import { VerticalGraph } from "./VerticalGraph";
 import { getAuthHeader } from "../utils/auth";
-import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
 import GeneralContext from "./GeneralContext";
 import { socket } from "../utils/socket";
 import { sound } from "../utils/sound";
 import ConfirmModal from "./ConfirmModal";
 
-const buildLiveMap = (snapshot) => {
-  const map = {};
-  snapshot.forEach((s) => {
-    map[s.name] = s;
-  });
-  return map;
-};
-
 const Holdings = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
   const [allHoldings, setAllHoldings] = useState([]);
-  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+  const [liveMap, setLiveMap] = useState(getLiveMap);
   const [hover, setHover] = useState(null);
   const [gttModalHolding, setGttModalHolding] = useState(null);
   const [slInput, setSlInput] = useState("");
@@ -47,8 +39,8 @@ const Holdings = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) => {
-      setLiveMap(buildLiveMap(snapshot));
+    const unsubscribe = subscribeToLiveMarket((_arr, map) => {
+      setLiveMap(map);
     });
     return unsubscribe;
   }, []);
@@ -167,17 +159,24 @@ const Holdings = () => {
     }
   };
 
-  const totalInvestment = allHoldings.reduce((acc, h) => acc + h.avg * h.qty, 0);
-  const totalCurrentValue = allHoldings.reduce((acc, h) => {
-    const live = liveMap[h.name];
-    const price = live ? live.price : h.price;
-    return acc + price * h.qty;
-  }, 0);
-  const totalPnL = totalCurrentValue - totalInvestment;
-  const totalPnLPercent = totalInvestment
-    ? ((totalPnL / totalInvestment) * 100).toFixed(2)
-    : "0.00";
-  const isTotalProfit = totalPnL >= 0;
+  const { totalInvestment, totalCurrentValue, totalPnL, totalPnLPercent, isTotalProfit } = useMemo(() => {
+    let inv = 0, cur = 0;
+    for (let i = 0; i < allHoldings.length; i++) {
+      const h = allHoldings[i];
+      const live = liveMap[h.name];
+      const price = live ? live.price : h.price;
+      inv += h.avg * h.qty;
+      cur += price * h.qty;
+    }
+    const pnl = cur - inv;
+    return {
+      totalInvestment: inv,
+      totalCurrentValue: cur,
+      totalPnL: pnl,
+      totalPnLPercent: inv ? ((pnl / inv) * 100).toFixed(2) : "0.00",
+      isTotalProfit: pnl >= 0,
+    };
+  }, [allHoldings, liveMap]);
 
   return (
     <div className="fade-up">

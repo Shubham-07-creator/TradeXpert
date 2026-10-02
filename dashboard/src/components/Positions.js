@@ -1,24 +1,16 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { ShowChart } from "@mui/icons-material";
 import { getAuthHeader } from "../utils/auth";
-import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
 import GeneralContext from "./GeneralContext";
 import ConfirmModal from "./ConfirmModal";
-
-const buildLiveMap = (snapshot) => {
-  const map = {};
-  snapshot.forEach((s) => {
-    map[s.name] = s;
-  });
-  return map;
-};
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
   const [allPositions, setAllPositions] = useState([]);
-  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+  const [liveMap, setLiveMap] = useState(getLiveMap);
   const [hover, setHover] = useState(null);
   const [confirmExitPos, setConfirmExitPos] = useState(null);
   const generalContext = useContext(GeneralContext);
@@ -39,8 +31,8 @@ const Positions = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) => {
-      setLiveMap(buildLiveMap(snapshot));
+    const unsubscribe = subscribeToLiveMarket((_arr, map) => {
+      setLiveMap(map);
     });
     return unsubscribe;
   }, []);
@@ -81,12 +73,16 @@ const Positions = () => {
     }
   };
 
-  const totalPositionsPnL = allPositions.reduce((acc, stock) => {
-    const live = liveMap[stock.name];
-    const price = live ? live.price : stock.price;
-    return acc + (price - stock.avg) * stock.qty;
-  }, 0);
-  const isPositionsProfit = totalPositionsPnL >= 0;
+  const { totalPositionsPnL, isPositionsProfit } = useMemo(() => {
+    let pnl = 0;
+    for (let i = 0; i < allPositions.length; i++) {
+      const stock = allPositions[i];
+      const live = liveMap[stock.name];
+      const price = live ? live.price : stock.price;
+      pnl += (price - stock.avg) * stock.qty;
+    }
+    return { totalPositionsPnL: pnl, isPositionsProfit: pnl >= 0 };
+  }, [allPositions, liveMap]);
 
   return (
     <div className="fade-up">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo } from "react";
 import GeneralContext from "./GeneralContext";
 import { Tooltip, Grow } from "@mui/material";
 import {
@@ -11,52 +11,63 @@ import {
 import { DoughnutChart } from "./DoughnoutChart";
 import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 
+// Constant chart palettes outside component to avoid recreation
+const chartColors = [
+  "rgba(37, 99, 235, 0.85)",  // Cobalt
+  "rgba(16, 185, 129, 0.85)", // Emerald
+  "rgba(99, 102, 241, 0.85)", // Indigo
+  "rgba(245, 158, 11, 0.85)", // Amber
+  "rgba(14, 165, 233, 0.85)", // Sky
+  "rgba(168, 85, 247, 0.85)", // Purple
+  "rgba(244, 63, 94, 0.85)",  // Rose
+];
+
+const chartBorderColors = [
+  "#2563EB",
+  "#10B981",
+  "#6366F1",
+  "#F59E0B",
+  "#0EA5E9",
+  "#A855F7",
+  "#F43F5E",
+];
+
 const WatchList = () => {
   const [search, setSearch] = useState("");
   const [liveStocks, setLiveStocks] = useState(getSnapshot());
 
   useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket(setLiveStocks);
+    const unsubscribe = subscribeToLiveMarket((stocks) => {
+      setLiveStocks(stocks);
+    });
     return unsubscribe;
   }, []);
 
-  const filteredWatchlist = liveStocks.filter((stock) =>
-    stock.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // O(N) single-pass search with pre-computed lowercase query
+  const filteredWatchlist = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return liveStocks;
+    return liveStocks.filter((stock) =>
+      stock.name.toLowerCase().includes(q)
+    );
+  }, [liveStocks, search]);
 
-  // Modern High-End Chart Palette
-  const chartColors = [
-    "rgba(37, 99, 235, 0.85)",  // Cobalt
-    "rgba(16, 185, 129, 0.85)", // Emerald
-    "rgba(99, 102, 241, 0.85)", // Indigo
-    "rgba(245, 158, 11, 0.85)", // Amber
-    "rgba(14, 165, 233, 0.85)", // Sky
-    "rgba(168, 85, 247, 0.85)", // Purple
-    "rgba(244, 63, 94, 0.85)",  // Rose
-  ];
-
-  const chartBorderColors = [
-    "#2563EB",
-    "#10B981",
-    "#6366F1",
-    "#F59E0B",
-    "#0EA5E9",
-    "#A855F7",
-    "#F43F5E",
-  ];
-
-  const chartData = {
-    labels: liveStocks.slice(0, 7).map((stock) => stock.name),
-    datasets: [
-      {
-        label: "Price (₹)",
-        data: liveStocks.slice(0, 7).map((stock) => stock.price),
-        backgroundColor: chartColors,
-        borderColor: chartBorderColors,
-        borderWidth: 1.5,
-      },
-    ],
-  };
+  // Memoized Chart Dataset: O(1) creation only when live price changes
+  const chartData = useMemo(() => {
+    const topStocks = liveStocks.slice(0, 7);
+    return {
+      labels: topStocks.map((stock) => stock.name),
+      datasets: [
+        {
+          label: "Price (₹)",
+          data: topStocks.map((stock) => stock.price),
+          backgroundColor: chartColors,
+          borderColor: chartBorderColors,
+          borderWidth: 1.5,
+        },
+      ],
+    };
+  }, [liveStocks]);
 
   return (
     <aside className="watchlist-container">
@@ -137,7 +148,7 @@ const WatchList = () => {
 
 export default WatchList;
 
-const WatchListItem = ({ stock }) => {
+const WatchListItem = React.memo(({ stock }) => {
   const [showWatchlistActions, setShowWatchlistActions] = useState(false);
   const generalContext = useContext(GeneralContext);
 
@@ -172,7 +183,14 @@ const WatchListItem = ({ stock }) => {
       {showWatchlistActions && <WatchListActions uid={stock.name} />}
     </li>
   );
-};
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.stock.name === nextProps.stock.name &&
+    prevProps.stock.price === nextProps.stock.price &&
+    prevProps.stock.percent === nextProps.stock.percent &&
+    prevProps.stock.isDown === nextProps.stock.isDown
+  );
+});
 
 const WatchListActions = ({ uid }) => {
   const generalContext = useContext(GeneralContext);

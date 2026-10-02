@@ -1,16 +1,8 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import axios from "axios";
 import { DoughnutChart } from "./DoughnoutChart";
 import { getAuthHeader } from "../utils/auth";
-import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
-
-const buildLiveMap = (snapshot) => {
-  const map = {};
-  snapshot.forEach((s) => {
-    map[s.name] = s;
-  });
-  return map;
-};
+import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
 
 // Vibrant, solid neo-broker sector colors (high contrast in both Light & Dark modes)
 const SECTOR_COLORS = [
@@ -30,7 +22,7 @@ const SectorAllocation = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
   const [holdings, setHoldings] = useState([]);
-  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+  const [liveMap, setLiveMap] = useState(getLiveMap);
 
   const fetchHoldings = useCallback(async () => {
     try {
@@ -48,22 +40,23 @@ const SectorAllocation = () => {
   }, [fetchHoldings]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) =>
-      setLiveMap(buildLiveMap(snapshot))
+    const unsubscribe = subscribeToLiveMarket((_arr, map) =>
+      setLiveMap(map)
     );
     return unsubscribe;
   }, []);
 
-  const sectorTotals = {};
-  holdings.forEach((h) => {
-    const live = liveMap[h.name];
-    const sector = live?.sector || "Diversified";
-    const price = live ? live.price : h.price;
-    sectorTotals[sector] = (sectorTotals[sector] || 0) + price * h.qty;
-  });
-
-  const labels = Object.keys(sectorTotals);
-  const values = Object.values(sectorTotals);
+  const { labels, values } = useMemo(() => {
+    const sectorTotals = {};
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
+      const live = liveMap[h.name];
+      const sector = live?.sector || "Diversified";
+      const price = live ? live.price : h.price;
+      sectorTotals[sector] = (sectorTotals[sector] || 0) + price * h.qty;
+    }
+    return { labels: Object.keys(sectorTotals), values: Object.values(sectorTotals) };
+  }, [holdings, liveMap]);
 
   if (labels.length === 0) {
     return (

@@ -14,14 +14,13 @@ const TICKER_DATA = [
   { name: "LT", price: "₹3,450.00", change: "+1.10%", isUp: true },
 ];
 
-function MarketTicker() {
-  // Duplicate for seamless infinite marquee loop
-  const items = [...TICKER_DATA, ...TICKER_DATA];
+const TICKER_ITEMS = [...TICKER_DATA, ...TICKER_DATA];
 
+function MarketTicker() {
   return (
     <div className="market-ticker-bar" title="Live Market Indices">
       <div className="ticker-track">
-        {items.map((item, idx) => (
+        {TICKER_ITEMS.map((item, idx) => (
           <div className="ticker-item" key={idx}>
             <span className="ticker-name">{item.name}</span>
             <span className="ticker-price">{item.price}</span>

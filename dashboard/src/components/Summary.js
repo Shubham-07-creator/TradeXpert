@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import {
@@ -10,20 +10,12 @@ import {
   ArrowForward,
 } from "@mui/icons-material";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
-import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
+import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
 import BenchmarkChart from "./BenchmarkChart";
 import SectorAllocation from "./SectorAllocation";
 import GeneralContext from "./GeneralContext";
 import FundModal from "./FundModal";
 import "./Summary.css";
-
-const buildLiveMap = (snapshot) => {
-  const map = {};
-  snapshot.forEach((s) => {
-    map[s.name] = s;
-  });
-  return map;
-};
 
 const formatINR = (val) => {
   return Number(val || 0).toLocaleString("en-IN", {
@@ -37,7 +29,7 @@ const Summary = () => {
 
   const [holdings, setHoldings] = useState([]);
   const [wallet, setWallet] = useState(0);
-  const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
+  const [liveMap, setLiveMap] = useState(() => getLiveMap());
   const [fundModalOpen, setFundModalOpen] = useState(false);
   const [fundModalMode, setFundModalMode] = useState("DEPOSIT");
 
@@ -63,32 +55,50 @@ const Summary = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) => {
-      setLiveMap(buildLiveMap(snapshot));
+    // O(1) shared live map from liveMarket.js - zero local map allocation
+    const unsubscribe = subscribeToLiveMarket((_stocks, map) => {
+      if (map) setLiveMap(map);
     });
     return unsubscribe;
   }, []);
 
-  // Financial Calculations
-  const investment = holdings.reduce((sum, h) => sum + h.avg * h.qty, 0);
-  const currentValue = holdings.reduce((sum, h) => {
-    const live = liveMap[h.name];
-    const price = live ? live.price : h.price;
-    return sum + price * h.qty;
-  }, 0);
+  // Optimized O(H) Single-Pass Financial Aggregation
+  const {
+    investment,
+    currentValue,
+    unrealizedPnL,
+    unrealizedPnLPercent,
+    isProfit,
+    totalPortfolio,
+    cashRatio,
+    stocksRatio,
+  } = useMemo(() => {
+    let inv = 0;
+    let val = 0;
+    for (let i = 0; i < holdings.length; i++) {
+      const h = holdings[i];
+      inv += h.avg * h.qty;
+      const live = liveMap[h.name];
+      const price = live ? live.price : h.price;
+      val += price * h.qty;
+    }
 
-  const unrealizedPnL = currentValue - investment;
-  const unrealizedPnLPercent = investment
-    ? ((unrealizedPnL / investment) * 100).toFixed(2)
-    : "0.00";
-  const isProfit = unrealizedPnL >= 0;
+    const pnl = val - inv;
+    const pnlPct = inv ? ((pnl / inv) * 100).toFixed(2) : "0.00";
+    const port = wallet + val;
+    const cRatio = port > 0 ? Math.min(100, Math.max(0, Math.round((wallet / port) * 100))) : 100;
 
-  const totalPortfolio = wallet + currentValue;
-  const cashRatio =
-    totalPortfolio > 0
-      ? Math.min(100, Math.max(0, Math.round((wallet / totalPortfolio) * 100)))
-      : 100;
-  const stocksRatio = 100 - cashRatio;
+    return {
+      investment: inv,
+      currentValue: val,
+      unrealizedPnL: pnl,
+      unrealizedPnLPercent: pnlPct,
+      isProfit: pnl >= 0,
+      totalPortfolio: port,
+      cashRatio: cRatio,
+      stocksRatio: 100 - cRatio,
+    };
+  }, [holdings, liveMap, wallet]);
 
   const openDeposit = () => {
     setFundModalMode("DEPOSIT");

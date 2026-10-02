@@ -254,21 +254,30 @@ const AdminPanel = () => {
     }
   };
 
-  // Filtered Users
+  // Filtered Users - Optimized with precomputed lowercase and early exits
   const filteredUsers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const hasSearch = q.length > 0;
+    const filterRole = roleFilter !== "ALL";
+    const filterStatus = statusFilter !== "ALL";
+
+    if (!hasSearch && !filterRole && !filterStatus) {
+      return users;
+    }
+
     return users.filter((u) => {
-      const matchSearch =
-        u.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        u.email?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchRole =
-        roleFilter === "ALL" || (roleFilter === "admin" ? u.role === "admin" : u.role !== "admin");
-
-      const matchStatus =
-        statusFilter === "ALL" ||
-        (statusFilter === "active" ? !u.isBlocked : Boolean(u.isBlocked));
-
-      return matchSearch && matchRole && matchStatus;
+      if (filterRole && (roleFilter === "admin" ? u.role !== "admin" : u.role === "admin")) {
+        return false;
+      }
+      if (filterStatus && (statusFilter === "active" ? u.isBlocked : !u.isBlocked)) {
+        return false;
+      }
+      if (hasSearch) {
+        const nameMatch = u.name && u.name.toLowerCase().includes(q);
+        const emailMatch = u.email && u.email.toLowerCase().includes(q);
+        if (!nameMatch && !emailMatch) return false;
+      }
+      return true;
     });
   }, [users, searchQuery, roleFilter, statusFilter]);
 

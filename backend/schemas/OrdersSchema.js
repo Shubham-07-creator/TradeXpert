@@ -23,4 +23,7 @@ const OrdersSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+OrdersSchema.index({ user: 1, createdAt: -1 });
+OrdersSchema.index({ status: 1 });
+
 module.exports = { OrdersSchema };

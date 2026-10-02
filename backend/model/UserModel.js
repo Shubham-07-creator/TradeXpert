@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
   resetPasswordExpires: { type: Date, default: null },
 }, { timestamps: true });
 
+userSchema.index({ googleId: 1 }, { sparse: true });
+userSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+
 const UserModel = mongoose.model("User", userSchema);
 
 module.exports = { UserModel };

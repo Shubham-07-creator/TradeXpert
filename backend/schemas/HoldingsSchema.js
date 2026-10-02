@@ -12,4 +12,9 @@ const HoldingsSchema = new Schema({
     target: { type: Number, default: null },
 });
 
+HoldingsSchema.index({ user: 1 });
+HoldingsSchema.index({ user: 1, name: 1 });
+HoldingsSchema.index({ stopLoss: 1 });
+HoldingsSchema.index({ target: 1 });
+
 module.exports = { HoldingsSchema };

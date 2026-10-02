@@ -10,30 +10,35 @@ import { socket } from "./socket";
 // underneath changed.
 
 let stocksState = {};
+let stocksArray = [];
 let niftyState = { price: 0, percent: "+0.00%", changePercent: 0 };
 let marketHaltedState = false;
 
-// Seed with the static list so the UI has something to render before
-// the first "market:update" event arrives from the server.
+// Seed with the static list in O(N) single pass
 baseWatchlist.forEach((stock) => {
-  stocksState[stock.name] = {
+  const item = {
     name: stock.name,
     sector: stock.sector || "Other",
     price: stock.price,
     percent: stock.percent,
     isDown: stock.isDown,
   };
+  stocksState[stock.name] = item;
+  stocksArray.push(item);
 });
 
 const listeners = new Set();
 const haltListeners = new Set();
 
 socket.on("market:update", (snapshot) => {
-  const map = {};
   if (snapshot.stocks) {
-    snapshot.stocks.forEach((s) => {
+    const list = snapshot.stocks;
+    stocksArray = list;
+    const map = {};
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i];
       map[s.name] = s;
-    });
+    }
     stocksState = map;
   }
   if (snapshot.nifty) {
@@ -44,8 +49,7 @@ socket.on("market:update", (snapshot) => {
     haltListeners.forEach((cb) => cb(marketHaltedState));
   }
 
-  const out = getSnapshot();
-  listeners.forEach((cb) => cb(out));
+  listeners.forEach((cb) => cb(stocksArray, stocksState));
 });
 
 socket.on("market:circuit-breaker", (data) => {
@@ -55,7 +59,11 @@ socket.on("market:circuit-breaker", (data) => {
   }
 });
 
-export const getSnapshot = () => Object.values(stocksState);
+// O(1) cached snapshot (no Object.values allocation)
+export const getSnapshot = () => stocksArray;
+
+// O(1) cached live map
+export const getLiveMap = () => stocksState;
 
 export const getNifty = () => niftyState;
 

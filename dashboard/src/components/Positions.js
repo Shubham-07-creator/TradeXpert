@@ -23,18 +23,7 @@ const Positions = () => {
   const [confirmExitPos, setConfirmExitPos] = useState(null);
   const generalContext = useContext(GeneralContext);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) => {
-      setLiveMap(buildLiveMap(snapshot));
-    });
-    return unsubscribe;
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       const res = await axios.get(`${API}/allPositions`, {
         headers: getAuthHeader(),
@@ -43,7 +32,18 @@ const Positions = () => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [API]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) => {
+      setLiveMap(buildLiveMap(snapshot));
+    });
+    return unsubscribe;
+  }, []);
 
   const handleSell = async (stock) => {
     const live = liveMap[stock.name];
@@ -64,12 +64,12 @@ const Positions = () => {
       const gain = res.data.realizedPnL || 0;
       const gainText =
         gain >= 0
-          ? `Square off ${stock.name} ✅ — Profit ₹${gain.toFixed(2)}`
-          : `Square off ${stock.name} ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
+          ? `Squared off ${stock.name} — Profit ₹${gain.toFixed(2)}`
+          : `Squared off ${stock.name} — Loss ₹${Math.abs(gain).toFixed(2)}`;
 
       toast.success(gainText, {
         style: {
-          background: gain >= 0 ? "#00D09C" : "#EF4444",
+          background: gain >= 0 ? "var(--color-profit)" : "var(--color-loss)",
           color: "#fff",
           fontWeight: "600",
         },
@@ -77,7 +77,7 @@ const Positions = () => {
 
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Square off failed ❌");
+      toast.error(err.response?.data?.message || "Square off failed");
     }
   };
 
@@ -233,7 +233,11 @@ const Positions = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">📊</div>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-faint)", marginBottom: "12px" }}>
+              <line x1="18" y1="20" x2="18" y2="10" />
+              <line x1="12" y1="20" x2="12" y2="4" />
+              <line x1="6" y1="20" x2="6" y2="14" />
+            </svg>
             <h4 className="empty-state-title">No Open Positions</h4>
             <p className="empty-state-text">
               You don't have any open intraday positions today. Any MIS or
@@ -248,7 +252,6 @@ const Positions = () => {
         isOpen={!!confirmExitPos}
         title={`Square off ${confirmExitPos?.name}?`}
         message={`Are you sure you want to exit your ${confirmExitPos?.product || "MIS"} position of ${confirmExitPos?.qty} shares of ${confirmExitPos?.name} at current LTP of ₹${(liveMap[confirmExitPos?.name]?.price || confirmExitPos?.price || 0).toFixed(2)}?`}
-        icon="⚡"
         confirmText="Square Off"
         cancelText="Cancel"
         isDanger={true}

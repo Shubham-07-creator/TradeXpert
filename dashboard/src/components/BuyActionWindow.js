@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
+import ReactDOM from "react-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import GeneralContext from "./GeneralContext";
@@ -133,7 +134,7 @@ const BuyActionWindow = ({ uid, type }) => {
           `Bought ${qty} shares of ${uid} at ₹${Number(marketPrice).toFixed(2)} ✅`,
           {
             style: {
-              background: "#00D09C",
+              background: "var(--color-profit)",
               color: "#fff",
               fontWeight: "600",
             },
@@ -143,7 +144,7 @@ const BuyActionWindow = ({ uid, type }) => {
 
       closeWindow();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Order execution failed ❌");
+      toast.error(err.response?.data?.message || "Order execution failed");
     } finally {
       setLoading(false);
     }
@@ -151,7 +152,7 @@ const BuyActionWindow = ({ uid, type }) => {
 
   const isBuy = type === "BUY";
 
-  return (
+  const modalContent = (
     <div className="buy-modal-overlay" onClick={closeWindow}>
       <div
         className="buy-modal-card"
@@ -166,7 +167,7 @@ const BuyActionWindow = ({ uid, type }) => {
               {isBuy ? "BUY" : "SELL"} {uid}
             </h3>
             <p className="buy-stock-sub">
-              NSE • {orderType === "LIMIT" ? "Limit Order 🎯" : "Market Order ⚡"}
+              NSE • {orderType === "LIMIT" ? "Limit Order" : "Market Order"}
             </p>
           </div>
           <span
@@ -427,6 +428,8 @@ const BuyActionWindow = ({ uid, type }) => {
       </div>
     </div>
   );
+
+  return ReactDOM.createPortal(modalContent, document.body);
 };
 
 export default BuyActionWindow;

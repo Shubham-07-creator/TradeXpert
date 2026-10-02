@@ -55,9 +55,9 @@ const AdminWalletModal = ({ isOpen, user, onClose, onSubmit, loading }) => {
       <div className="admin-wallet-card" onClick={(e) => e.stopPropagation()}>
         <div className="admin-wallet-header">
           <div>
-            <h3 className="admin-wallet-title">Adjust Virtual Capital 💰</h3>
+            <h3 className="admin-wallet-title">Adjust Virtual Capital</h3>
             <p className="admin-wallet-subtitle">
-              Modify funds for <span className="highlight-trader">{user.name}</span> ({user.email})
+              Modify balance for <span className="highlight-trader">{user.name}</span> ({user.email})
             </p>
           </div>
           <button
@@ -78,7 +78,7 @@ const AdminWalletModal = ({ isOpen, user, onClose, onSubmit, loading }) => {
               ₹{currentWallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </span>
           </div>
-          <div className="balance-arrow">➔</div>
+          <div className="balance-arrow">→</div>
           <div className="balance-col">
             <span className="balance-label">Projected Balance</span>
             <span className={`balance-val projected ${type === "CREDIT" ? "up" : "down"}`}>
@@ -95,14 +95,14 @@ const AdminWalletModal = ({ isOpen, user, onClose, onSubmit, loading }) => {
               className={`type-btn ${type === "CREDIT" ? "active-credit" : ""}`}
               onClick={() => setType("CREDIT")}
             >
-              ➕ Credit Funds (Add)
+              Credit Funds (Add)
             </button>
             <button
               type="button"
               className={`type-btn ${type === "DEBIT" ? "active-debit" : ""}`}
               onClick={() => setType("DEBIT")}
             >
-              ➖ Debit Funds (Deduct)
+              Debit Funds (Deduct)
             </button>
           </div>
 

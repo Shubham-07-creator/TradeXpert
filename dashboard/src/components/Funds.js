@@ -69,10 +69,10 @@ const Funds = () => {
         { headers: getAuthHeader() }
       );
       sound.playTradeChime();
-      toast.success(`+₹${amount.toLocaleString("en-IN")} added to your virtual wallet! 💳`);
+      toast.success(`+₹${amount.toLocaleString("en-IN")} added to your virtual wallet.`);
       fetchData();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add funds ❌");
+      toast.error(err.response?.data?.message || "Failed to add funds");
     }
   };
 
@@ -99,22 +99,23 @@ const Funds = () => {
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <button
             onClick={openDepositModal}
             style={{
-              background: "var(--gradient-profit)",
+              background: "var(--color-primary)",
               color: "#fff",
               border: "none",
-              padding: "9px 18px",
+              padding: "8px 16px",
               borderRadius: "var(--radius-md)",
-              fontSize: "0.85rem",
-              fontWeight: "700",
+              fontSize: "0.82rem",
+              fontWeight: "600",
               cursor: "pointer",
-              boxShadow: "var(--shadow-glow-profit)",
+              boxShadow: "var(--shadow-glow-primary)",
               display: "inline-flex",
               alignItems: "center",
               gap: "6px",
+              transition: "all 0.15s ease",
             }}
           >
             + Add Funds
@@ -125,11 +126,12 @@ const Funds = () => {
               background: "var(--color-bg-card)",
               color: "var(--color-text-strong)",
               border: "1px solid var(--color-border)",
-              padding: "9px 18px",
+              padding: "8px 16px",
               borderRadius: "var(--radius-md)",
-              fontSize: "0.85rem",
+              fontSize: "0.82rem",
               fontWeight: "600",
               cursor: "pointer",
+              transition: "all 0.15s ease",
             }}
           >
             Withdraw
@@ -141,64 +143,54 @@ const Funds = () => {
       <div
         className="stat-card"
         style={{
-          background: "linear-gradient(135deg, rgba(56, 126, 209, 0.08) 0%, rgba(0, 208, 156, 0.08) 100%)",
+          background: "var(--color-bg-card)",
           border: "1px solid var(--color-border)",
-          padding: "28px",
-          marginBottom: "24px",
+          padding: "24px",
+          marginBottom: "20px",
           borderRadius: "var(--radius-lg)",
         }}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
           <div>
-            <span className="stat-card-label" style={{ color: "var(--color-primary)" }}>
+            <span className="stat-card-label" style={{ color: "var(--color-text-muted)" }}>
               Net Portfolio Worth
             </span>
             <h1
               style={{
-                fontSize: "2.8rem",
+                fontSize: "2.4rem",
                 fontWeight: "800",
                 color: "var(--color-text-strong)",
-                margin: "4px 0 8px 0",
-                letterSpacing: "-0.5px",
+                margin: "4px 0 6px 0",
+                letterSpacing: "-0.02em",
               }}
             >
               ₹{totalPortfolioValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
             </h1>
-            <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--color-text-muted)" }}>
+            <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--color-text-muted)" }}>
               Available Cash + Current Market Value of Holdings
             </p>
           </div>
 
           {/* Quick preset add buttons */}
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: "700", color: "var(--color-text-faint)", textTransform: "uppercase" }}>
+            <span style={{ fontSize: "0.72rem", fontWeight: "700", color: "var(--color-text-faint)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
               Quick Cash Deposit
             </span>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "6px" }}>
               {[10000, 50000, 100000].map((amt) => (
                 <button
                   key={amt}
                   onClick={() => handleQuickAdd(amt)}
                   style={{
-                    background: "var(--color-bg-card)",
+                    background: "var(--color-bg-subtle)",
                     border: "1px solid var(--color-border)",
                     color: "var(--color-primary)",
-                    padding: "6px 14px",
+                    padding: "6px 12px",
                     borderRadius: "var(--radius-sm)",
-                    fontSize: "0.82rem",
-                    fontWeight: "700",
+                    fontSize: "0.78rem",
+                    fontWeight: "600",
                     cursor: "pointer",
-                    transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-2px)";
-                    e.currentTarget.style.borderColor = "var(--color-primary)";
-                    e.currentTarget.style.boxShadow = "var(--shadow-sm)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "none";
-                    e.currentTarget.style.borderColor = "var(--color-border)";
-                    e.currentTarget.style.boxShadow = "none";
+                    transition: "all 0.15s ease",
                   }}
                   title={`Instantly add ₹${amt.toLocaleString("en-IN")}`}
                 >
@@ -236,7 +228,7 @@ const Funds = () => {
           >
             {isUnrealizedProfit ? "+" : ""}₹{unrealizedPnL.toFixed(2)}
           </div>
-          <div className="stat-card-sub">{isUnrealizedProfit ? "🟢 Current unrealized gain" : "🔴 Current unrealized loss"}</div>
+          <div className="stat-card-sub">{isUnrealizedProfit ? "Current unrealized gain" : "Current unrealized loss"}</div>
         </div>
 
         <div className="stat-card">

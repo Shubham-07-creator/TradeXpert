@@ -22,7 +22,7 @@ const Home = () => {
       }
     };
     init();
-  }, [FRONTEND]);
+  }, []);
 
   if (!ready || !isLoggedIn()) {
     return null;

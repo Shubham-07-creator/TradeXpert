@@ -14,6 +14,7 @@ import { getSnapshot, subscribeToLiveMarket } from "../utils/liveMarket";
 const WatchList = () => {
   const [search, setSearch] = useState("");
   const [liveStocks, setLiveStocks] = useState(getSnapshot());
+  const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToLiveMarket(setLiveStocks);
@@ -24,25 +25,25 @@ const WatchList = () => {
     stock.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Modern Neo-Broker Chart Colors matching Option 1
+  // Modern High-End Chart Palette
   const chartColors = [
-    "rgba(56, 126, 209, 0.8)",  // Royal Blue
-    "rgba(0, 208, 156, 0.8)",   // Mint Emerald
-    "rgba(79, 147, 230, 0.8)",  // Sky Blue
-    "rgba(37, 99, 235, 0.8)",   // Deep Blue
-    "rgba(16, 185, 129, 0.8)",  // Bright Emerald
-    "rgba(99, 102, 241, 0.8)",  // Indigo
-    "rgba(245, 158, 11, 0.8)",  // Amber
+    "rgba(37, 99, 235, 0.85)",  // Cobalt
+    "rgba(16, 185, 129, 0.85)", // Emerald
+    "rgba(99, 102, 241, 0.85)", // Indigo
+    "rgba(245, 158, 11, 0.85)", // Amber
+    "rgba(14, 165, 233, 0.85)", // Sky
+    "rgba(168, 85, 247, 0.85)", // Purple
+    "rgba(244, 63, 94, 0.85)",  // Rose
   ];
 
   const chartBorderColors = [
-    "#387ED1",
-    "#00D09C",
-    "#4F93E6",
     "#2563EB",
     "#10B981",
     "#6366F1",
     "#F59E0B",
+    "#0EA5E9",
+    "#A855F7",
+    "#F43F5E",
   ];
 
   const chartData = {
@@ -53,7 +54,7 @@ const WatchList = () => {
         data: liveStocks.slice(0, 7).map((stock) => stock.price),
         backgroundColor: chartColors,
         borderColor: chartBorderColors,
-        borderWidth: 2,
+        borderWidth: 1.5,
       },
     ],
   };
@@ -62,10 +63,10 @@ const WatchList = () => {
     <aside className="watchlist-container">
       {/* Search Input Bar */}
       <div className="search-container">
-        <SearchIcon className="search-icon" style={{ fontSize: "1.1rem" }} />
+        <SearchIcon className="search-icon" style={{ fontSize: "1.05rem" }} />
         <input
           type="text"
-          placeholder="Search stocks (e.g. RELIANCE, INFY, TCS)"
+          placeholder="Search stocks (e.g. RELIANCE, TCS)"
           className="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -75,7 +76,7 @@ const WatchList = () => {
             onClick={() => setSearch("")}
             style={{
               position: "absolute",
-              right: "26px",
+              right: "24px",
               background: "transparent",
               border: "none",
               color: "var(--color-text-faint)",
@@ -86,11 +87,11 @@ const WatchList = () => {
             }}
             title="Clear search"
           >
-            <CloseIcon style={{ fontSize: "1rem" }} />
+            <CloseIcon style={{ fontSize: "0.95rem" }} />
           </button>
         ) : (
           <span className="counts">
-            {filteredWatchlist.length}/{liveStocks.length}
+            {filteredWatchlist.length} stocks
           </span>
         )}
       </div>
@@ -102,9 +103,43 @@ const WatchList = () => {
         ))}
       </ul>
 
-      {/* Visual Market Weight Doughnut Chart */}
-      <div style={{ padding: "16px", borderTop: "1px solid var(--color-border)" }}>
-        <DoughnutChart data={chartData} />
+      {/* Collapsible Market Distribution Footer */}
+      <div
+        style={{
+          borderTop: "1px solid var(--color-border)",
+          background: "var(--color-bg-card)",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setShowChart(!showChart)}
+          style={{
+            width: "100%",
+            padding: "8px 16px",
+            background: "transparent",
+            border: "none",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            fontSize: "0.74rem",
+            fontWeight: "700",
+            color: "var(--color-text-muted)",
+            textTransform: "uppercase",
+            letterSpacing: "0.04em",
+            cursor: "pointer",
+          }}
+        >
+          <span>Market Weighting</span>
+          <span style={{ fontSize: "0.8rem", color: "var(--color-text-faint)" }}>
+            {showChart ? "✕ Close" : "📊 View"}
+          </span>
+        </button>
+
+        {showChart && (
+          <div style={{ padding: "12px 16px 16px" }}>
+            <DoughnutChart data={chartData} />
+          </div>
+        )}
       </div>
     </aside>
   );

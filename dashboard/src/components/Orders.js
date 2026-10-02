@@ -45,10 +45,10 @@ const Orders = () => {
     const handleOrderExecuted = (data) => {
       fetchOrders(page);
       toast.success(
-        `Limit Order Filled: ${data.mode} ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)} 🎉`,
+        `Limit Order Filled: ${data.mode} ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
         {
           style: {
-            background: "#00D09C",
+            background: "var(--color-profit)",
             color: "#fff",
             fontWeight: "600",
           },
@@ -60,10 +60,10 @@ const Orders = () => {
       fetchOrders(page);
       const isSL = data.type === "STOP_LOSS";
       toast(
-        `${isSL ? "🛑 Stop-Loss Triggered" : "🎉 Target Achieved"}: Auto-sold ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
+        `${isSL ? "Stop-Loss Triggered" : "Target Achieved"}: Auto-sold ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
         {
           style: {
-            background: isSL ? "#EF4444" : "#00D09C",
+            background: isSL ? "var(--color-loss)" : "var(--color-profit)",
             color: "#fff",
             fontWeight: "600",
           },
@@ -90,10 +90,10 @@ const Orders = () => {
         { headers: getAuthHeader() }
       );
 
-      toast.success(res.data.message || "Limit order cancelled ✅");
+      toast.success(res.data.message || "Limit order cancelled");
       fetchOrders(page);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to cancel order ❌");
+      toast.error(err.response?.data?.message || "Failed to cancel order");
     } finally {
       setCancellingId(null);
     }
@@ -306,7 +306,13 @@ const Orders = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">📋</div>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-faint)", marginBottom: "12px" }}>
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
             <h4 className="empty-state-title">
               {filter === "OPEN"
                 ? "No Open Limit Orders"
@@ -316,7 +322,7 @@ const Orders = () => {
             </h4>
             <p className="empty-state-text">
               {filter === "OPEN"
-                ? "You don't have any pending limit orders at the moment. Place a Limit Order from the watchlist to see it here!"
+                ? "You don't have any pending limit orders at the moment. Place a Limit Order from the watchlist to see it here."
                 : "Select a stock from the watchlist and place your first trade to populate your order log."}
             </p>
           </div>

@@ -60,10 +60,10 @@ const Holdings = () => {
       fetchData();
       const isSL = data.type === "STOP_LOSS";
       toast(
-        `${isSL ? "🛑 Stop-Loss Triggered" : "🎉 Target Achieved"}: Auto-sold ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
+        `${isSL ? "Stop-Loss Triggered" : "Target Achieved"}: Auto-sold ${data.qty}x ${data.name} at ₹${Number(data.price).toFixed(2)}`,
         {
           style: {
-            background: isSL ? "#EF4444" : "#00D09C",
+            background: isSL ? "var(--color-loss)" : "var(--color-profit)",
             color: "#fff",
             fontWeight: "600",
           },
@@ -97,12 +97,12 @@ const Holdings = () => {
       const gain = res.data.realizedPnL || 0;
       const gainText =
         gain >= 0
-          ? `Sold ${stock.name} ✅ — Profit ₹${gain.toFixed(2)}`
-          : `Sold ${stock.name} ✅ — Loss ₹${Math.abs(gain).toFixed(2)}`;
+          ? `Sold ${stock.name} — Profit ₹${gain.toFixed(2)}`
+          : `Sold ${stock.name} — Loss ₹${Math.abs(gain).toFixed(2)}`;
 
       toast.success(gainText, {
         style: {
-          background: gain >= 0 ? "#00D09C" : "#EF4444",
+          background: gain >= 0 ? "var(--color-profit)" : "var(--color-loss)",
           color: "#fff",
           fontWeight: "600",
         },
@@ -219,7 +219,9 @@ const Holdings = () => {
             >
               {isTotalProfit ? "+" : ""}₹{totalPnL.toFixed(2)} ({isTotalProfit ? "+" : ""}{totalPnLPercent}%)
             </div>
-            <div className="stat-card-sub">{isTotalProfit ? "🟢 Portfolio in profit" : "🔴 Portfolio in loss"}</div>
+            <div className="stat-card-sub">
+              {isTotalProfit ? "Positive portfolio return" : "Negative portfolio return"}
+            </div>
           </div>
         </div>
       )}
@@ -406,11 +408,13 @@ const Holdings = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">💼</div>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-faint)", marginBottom: "12px" }}>
+              <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+            </svg>
             <h4 className="empty-state-title">No Holdings Yet</h4>
             <p className="empty-state-text">
-              You haven't bought any delivery stocks yet. Search stocks in the
-              watchlist on the left and click <b>BUY</b> to build your portfolio!
+              You haven't bought any delivery stocks yet. Select stocks from the watchlist to build your portfolio.
             </p>
           </div>
         )}

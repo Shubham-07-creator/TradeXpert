@@ -29,7 +29,6 @@ const AdminPanel = () => {
     isOpen: false,
     title: "",
     message: "",
-    icon: "⚠️",
     confirmText: "Confirm",
     isDanger: false,
     onConfirm: () => {},
@@ -67,7 +66,7 @@ const AdminPanel = () => {
       setStats(statsRes.data || null);
       setError("");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to load admin console data ❌");
+      setError(err.response?.data?.message || "Failed to load admin console data");
     } finally {
       setLoading(false);
     }
@@ -82,11 +81,11 @@ const AdminPanel = () => {
         { amount, type, reason },
         { headers: getAuthHeader() }
       );
-      showToast(res.data.message || "Wallet updated successfully! 💰");
+      showToast(res.data.message || "Wallet updated successfully");
       setWalletModalUser(null);
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || "Failed to adjust wallet ❌", "error");
+      showToast(err.response?.data?.message || "Failed to adjust wallet", "error");
     } finally {
       setWalletActionLoading(false);
     }
@@ -99,10 +98,9 @@ const AdminPanel = () => {
       isOpen: true,
       title: willBlock ? `Suspend ${user.name}?` : `Reactivate ${user.name}?`,
       message: willBlock
-        ? `Suspending will immediately block ${user.name} (${user.email}) from logging in and executing trades.`
-        : `This will restore normal trading privileges for ${user.name}.`,
-      icon: willBlock ? "🚫" : "✅",
-      confirmText: willBlock ? "Suspend Trader" : "Reactivate Account",
+        ? `Suspending will immediately revoke trading and login access for ${user.name} (${user.email}).`
+        : `This will restore full trading privileges for ${user.name}.`,
+      confirmText: willBlock ? "Suspend Account" : "Reactivate Account",
       isDanger: willBlock,
       onConfirm: async () => {
         try {
@@ -114,7 +112,7 @@ const AdminPanel = () => {
           showToast(res.data.message || "Account status updated");
           fetchData();
         } catch (err) {
-          showToast(err.response?.data?.message || "Failed to update user status ❌", "error");
+          showToast(err.response?.data?.message || "Failed to update user status", "error");
         } finally {
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
         }
@@ -127,13 +125,12 @@ const AdminPanel = () => {
     const newRole = user.role === "admin" ? "user" : "admin";
     setConfirmDialog({
       isOpen: true,
-      title: `Change role for ${user.name}?`,
+      title: `Update role for ${user.name}?`,
       message: `Set ${user.name}'s role to ${newRole.toUpperCase()}? ${
         newRole === "admin"
-          ? "This will grant complete administrative access across the platform."
+          ? "This grants complete administrative privileges across the broker platform."
           : "Administrative privileges will be revoked."
       }`,
-      icon: "👑",
       confirmText: `Set to ${newRole.toUpperCase()}`,
       isDanger: newRole === "user",
       onConfirm: async () => {
@@ -146,7 +143,7 @@ const AdminPanel = () => {
           showToast(res.data.message || "Role updated successfully");
           fetchData();
         } catch (err) {
-          showToast(err.response?.data?.message || "Failed to update role ❌", "error");
+          showToast(err.response?.data?.message || "Failed to update role", "error");
         } finally {
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
         }
@@ -159,9 +156,8 @@ const AdminPanel = () => {
     setConfirmDialog({
       isOpen: true,
       title: `Reset Portfolio for ${user.name}?`,
-      message: `This will erase all ${user.holdingsCount} stock positions, cancel all open limit orders, and reset virtual wallet cash back to ₹1,00,000. This action is irreversible.`,
-      icon: "🔄",
-      confirmText: "Reset to Default ₹1,00,000",
+      message: `This will clear all ${user.holdingsCount} stock positions, cancel open limit orders, and reset the virtual wallet to ₹1,00,000. This action cannot be undone.`,
+      confirmText: "Reset to ₹1,00,000",
       isDanger: true,
       onConfirm: async () => {
         try {
@@ -170,10 +166,10 @@ const AdminPanel = () => {
             {},
             { headers: getAuthHeader() }
           );
-          showToast(res.data.message || "Portfolio reset completed! 🔄");
+          showToast(res.data.message || "Portfolio reset completed");
           fetchData();
         } catch (err) {
-          showToast(err.response?.data?.message || "Failed to reset portfolio ❌", "error");
+          showToast(err.response?.data?.message || "Failed to reset portfolio", "error");
         } finally {
           setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
         }
@@ -194,7 +190,7 @@ const AdminPanel = () => {
       showToast(res.data.message);
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || "Failed to toggle circuit breaker ❌", "error");
+      showToast(err.response?.data?.message || "Failed to toggle circuit breaker", "error");
     } finally {
       setMarketActionLoading(false);
     }
@@ -212,7 +208,7 @@ const AdminPanel = () => {
       showToast(res.data.message);
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || "Failed to apply market simulation ❌", "error");
+      showToast(err.response?.data?.message || "Failed to apply market simulation", "error");
     } finally {
       setMarketActionLoading(false);
     }
@@ -222,7 +218,7 @@ const AdminPanel = () => {
   const handleSendBroadcast = async (e) => {
     e.preventDefault();
     if (!broadcastMessage.trim()) {
-      showToast("Please enter announcement message", "error");
+      showToast("Please enter an announcement message", "error");
       return;
     }
     try {
@@ -236,7 +232,7 @@ const AdminPanel = () => {
       setBroadcastMessage("");
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || "Failed to send broadcast ❌", "error");
+      showToast(err.response?.data?.message || "Failed to send broadcast", "error");
     } finally {
       setBroadcastLoading(false);
     }
@@ -252,7 +248,7 @@ const AdminPanel = () => {
       showToast(res.data.message);
       fetchData();
     } catch (err) {
-      showToast(err.response?.data?.message || "Failed to clear broadcast ❌", "error");
+      showToast(err.response?.data?.message || "Failed to clear broadcast", "error");
     } finally {
       setBroadcastLoading(false);
     }
@@ -280,13 +276,12 @@ const AdminPanel = () => {
     return (
       <div className="fade-up">
         <div className="section-header">
-          <h2 className="page-title">Admin Command Center 🛡️</h2>
-          <p className="page-subtitle">Connecting to broker admin console...</p>
+          <h2 className="page-title">Admin Command Center</h2>
+          <p className="page-subtitle">Connecting to broker console...</p>
         </div>
-        <div className="empty-state" style={{ padding: "60px 20px" }}>
-          <div className="empty-state-icon" style={{ animation: "pulseCritical 1.5s infinite" }}>⏳</div>
-          <h4 className="empty-state-title">Loading Admin Console</h4>
-          <p className="empty-state-text">Fetching platform statistics, liquidity, and registered traders...</p>
+        <div className="empty-state">
+          <div className="empty-state-title">Loading Admin Console</div>
+          <p className="empty-state-text">Fetching platform metrics and registered traders...</p>
         </div>
       </div>
     );
@@ -299,8 +294,7 @@ const AdminPanel = () => {
           <h2 className="page-title">Admin Management</h2>
         </div>
         <div className="empty-state">
-          <div className="empty-state-icon">🔒</div>
-          <h4 className="empty-state-title">Access Restricted</h4>
+          <div className="empty-state-title">Access Restricted</div>
           <p className="empty-state-text">{error}</p>
         </div>
       </div>
@@ -315,7 +309,7 @@ const AdminPanel = () => {
       {/* Toast Notification */}
       {toast && (
         <div className={`admin-floating-toast ${toast.type === "error" ? "error" : "success"}`}>
-          <span>{toast.type === "error" ? "⚠️" : "✅"}</span>
+          <span className={`toast-indicator ${toast.type === "error" ? "red" : "green"}`} />
           <span>{toast.message}</span>
           <button className="toast-dismiss" onClick={() => setToast(null)}>✕</button>
         </div>
@@ -326,32 +320,40 @@ const AdminPanel = () => {
         <div className="admin-header-main">
           <div className="admin-title-badge-row">
             <h2 className="admin-page-title">Admin Command Center</h2>
-            <span className="admin-shield-badge">SUPERUSER 🛡️</span>
+            <span className="admin-shield-badge">SUPERUSER</span>
             {isHalted && (
-              <span className="admin-halt-badge">🛑 CIRCUIT BREAKER ACTIVE</span>
+              <span className="admin-halt-badge">
+                <span className="status-dot red" /> CIRCUIT BREAKER ACTIVE
+              </span>
             )}
             {activeAnnouncement && (
-              <span className="admin-broadcast-active-badge">📢 BROADCAST LIVE</span>
+              <span className="admin-broadcast-active-badge">
+                <span className="status-dot amber" /> BROADCAST ACTIVE
+              </span>
             )}
           </div>
           <p className="admin-page-subtitle">
-            Comprehensive broker governance: manage trader balances, enforce compliance, inject simulated market volatility, and broadcast real-time announcements.
+            Unified broker governance: manage trader balances, enforce compliance, simulate market shocks, and broadcast system announcements.
           </p>
         </div>
 
         <button className="admin-refresh-btn" onClick={fetchData} title="Refresh Live Admin Data">
-          🔄 Refresh
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 4 23 10 17 10" />
+            <polyline points="1 20 1 14 7 14" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+          <span>Refresh</span>
         </button>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Modern Segmented Tab Navigation (Linear Style) */}
       <div className="admin-tabs-nav">
         <button
           className={`admin-tab-btn ${activeTab === "users" ? "active" : ""}`}
           onClick={() => setActiveTab("users")}
         >
-          <span className="tab-icon">👥</span>
-          <span>Trader Operations</span>
+          <span>Traders</span>
           <span className="tab-counter-pill">{users.length}</span>
         </button>
 
@@ -359,8 +361,7 @@ const AdminPanel = () => {
           className={`admin-tab-btn ${activeTab === "market" ? "active" : ""}`}
           onClick={() => setActiveTab("market")}
         >
-          <span className="tab-icon">⚡</span>
-          <span>Market Simulator & Circuit Breaker</span>
+          <span>Market Controls</span>
           {isHalted && <span className="tab-pulse-dot" />}
         </button>
 
@@ -368,17 +369,15 @@ const AdminPanel = () => {
           className={`admin-tab-btn ${activeTab === "broadcast" ? "active" : ""}`}
           onClick={() => setActiveTab("broadcast")}
         >
-          <span className="tab-icon">📢</span>
-          <span>Global Broadcaster</span>
-          {activeAnnouncement && <span className="tab-counter-pill pulse">1</span>}
+          <span>Broadcaster</span>
+          {activeAnnouncement && <span className="tab-counter-pill pulse">Active</span>}
         </button>
 
         <button
           className={`admin-tab-btn ${activeTab === "liquidity" ? "active" : ""}`}
           onClick={() => setActiveTab("liquidity")}
         >
-          <span className="tab-icon">📊</span>
-          <span>Platform Financials</span>
+          <span>Financials</span>
         </button>
       </div>
 
@@ -388,7 +387,10 @@ const AdminPanel = () => {
           {/* Controls Bar: Search & Filter */}
           <div className="trader-controls-bar">
             <div className="trader-search-wrap">
-              <span className="search-icon">🔍</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="search-icon">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
               <input
                 type="text"
                 placeholder="Search traders by name or email..."
@@ -410,7 +412,7 @@ const AdminPanel = () => {
                 className="admin-select"
               >
                 <option value="ALL">All Roles</option>
-                <option value="user">Traders (User)</option>
+                <option value="user">Traders</option>
                 <option value="admin">Administrators</option>
               </select>
 
@@ -420,8 +422,8 @@ const AdminPanel = () => {
                 className="admin-select"
               >
                 <option value="ALL">All Status</option>
-                <option value="active">Active Traders</option>
-                <option value="suspended">Suspended Accounts</option>
+                <option value="active">Active</option>
+                <option value="suspended">Suspended</option>
               </select>
             </div>
           </div>
@@ -436,20 +438,19 @@ const AdminPanel = () => {
                     <th>Email</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th>Virtual Cash</th>
+                    <th>Available Cash</th>
                     <th>Invested Capital</th>
                     <th>Holdings Value</th>
-                    <th style={{ textAlign: "right" }}>Admin Actions</th>
+                    <th style={{ textAlign: "right" }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.length === 0 ? (
                     <tr>
                       <td colSpan="8" style={{ textAlign: "center", padding: "36px" }}>
-                        <div className="empty-state-icon">🔍</div>
-                        <div style={{ fontWeight: "700", marginTop: "8px" }}>No matching traders found</div>
-                        <div style={{ color: "var(--color-text-faint)", fontSize: "0.85rem" }}>
-                          Try adjusting your search query or filters.
+                        <div style={{ fontWeight: "600", color: "var(--color-text-strong)" }}>No matching traders found</div>
+                        <div style={{ color: "var(--color-text-faint)", fontSize: "0.82rem", marginTop: "4px" }}>
+                          Try adjusting search query or filters.
                         </div>
                       </td>
                     </tr>
@@ -463,7 +464,7 @@ const AdminPanel = () => {
                                 className={`user-avatar-circle ${
                                   u.role === "admin" ? "admin-avatar" : ""
                                 }`}
-                                style={{ width: "32px", height: "32px", fontSize: "0.8rem" }}
+                                style={{ width: "30px", height: "30px", fontSize: "0.74rem" }}
                               >
                                 {u.name ? u.name.substring(0, 2).toUpperCase() : "TR"}
                               </div>
@@ -471,11 +472,11 @@ const AdminPanel = () => {
                                 <div className="trader-name-row">
                                   <span className="trader-name">{u.name}</span>
                                   {u.role === "admin" && (
-                                    <span className="admin-crown-badge">ADMIN</span>
+                                    <span className="admin-crown-badge">Admin</span>
                                   )}
                                 </div>
                                 <span className="trader-positions-pill">
-                                  {u.holdingsCount} stock positions
+                                  {u.holdingsCount} positions
                                 </span>
                               </div>
                             </div>
@@ -488,9 +489,9 @@ const AdminPanel = () => {
                               type="button"
                               className={`role-chip ${u.role === "admin" ? "role-admin" : "role-user"}`}
                               onClick={() => toggleUserRole(u)}
-                              title="Click to toggle Role"
+                              title="Click to toggle role"
                             >
-                              {u.role === "admin" ? "👑 Admin" : "Trader"}
+                              {u.role === "admin" ? "Admin" : "Trader"}
                             </button>
                           </td>
 
@@ -499,13 +500,14 @@ const AdminPanel = () => {
                               type="button"
                               className={`status-chip ${u.isBlocked ? "status-blocked" : "status-active"}`}
                               onClick={() => toggleUserStatus(u)}
-                              title={u.isBlocked ? "Click to Reactivate" : "Click to Suspend"}
+                              title={u.isBlocked ? "Click to reactivate" : "Click to suspend"}
                             >
-                              {u.isBlocked ? "🚫 Suspended" : "🟢 Active"}
+                              <span className={`status-dot ${u.isBlocked ? "red" : "green"}`} />
+                              <span>{u.isBlocked ? "Suspended" : "Active"}</span>
                             </button>
                           </td>
 
-                          <td style={{ fontWeight: "800", color: "var(--color-primary)" }}>
+                          <td style={{ fontWeight: "700", color: "var(--color-primary)" }}>
                             ₹{u.wallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
                           </td>
 
@@ -513,7 +515,7 @@ const AdminPanel = () => {
                             ₹{u.investment.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
                           </td>
 
-                          <td style={{ fontWeight: "700" }}>
+                          <td style={{ fontWeight: "600" }}>
                             ₹{u.holdingsValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
                           </td>
 
@@ -523,18 +525,18 @@ const AdminPanel = () => {
                                 type="button"
                                 className="action-btn-chip adjust-wallet"
                                 onClick={() => setWalletModalUser(u)}
-                                title="Add or Deduct Virtual Capital"
+                                title="Adjust Virtual Capital"
                               >
-                                💰 Funds
+                                Adjust Funds
                               </button>
 
                               <button
                                 type="button"
                                 className="action-btn-chip reset-portfolio"
                                 onClick={() => handleResetPortfolio(u)}
-                                title="Reset Portfolio & Wipe Holdings to ₹1,00,000"
+                                title="Reset Portfolio to ₹1,00,000"
                               >
-                                🔄 Reset
+                                Reset
                               </button>
 
                               <button
@@ -543,7 +545,7 @@ const AdminPanel = () => {
                                 onClick={() => toggleUserStatus(u)}
                                 title={u.isBlocked ? "Reactivate Trader" : "Suspend Trader"}
                               >
-                                {u.isBlocked ? "🟢 Enable" : "🚫 Block"}
+                                {u.isBlocked ? "Reactivate" : "Suspend"}
                               </button>
                             </div>
                           </td>
@@ -558,18 +560,17 @@ const AdminPanel = () => {
         </div>
       )}
 
-      {/* TAB 2: LIVE MARKET SIMULATOR & CIRCUIT BREAKER */}
+      {/* TAB 2: LIVE MARKET CONTROLS & CIRCUIT BREAKER */}
       {activeTab === "market" && (
         <div className="admin-tab-content">
           <div className="market-controls-grid">
             {/* Circuit Breaker Card */}
             <div className="control-card circuit-breaker-card">
               <div className="control-card-header">
-                <div className="control-card-icon">{isHalted ? "🛑" : "🟢"}</div>
                 <div>
                   <h3 className="control-card-title">Live Market Circuit Breaker</h3>
                   <p className="control-card-desc">
-                    Globally halts or resumes live price ticking across all connected traders and freezes limit execution engines.
+                    Globally halts or resumes live price updates across all connected clients and suspends automated order execution.
                   </p>
                 </div>
               </div>
@@ -577,7 +578,8 @@ const AdminPanel = () => {
               <div className="control-state-banner">
                 <span className="state-label">Market Engine Status:</span>
                 <span className={`state-status-pill ${isHalted ? "halted" : "ticking"}`}>
-                  {isHalted ? "🛑 HALTED (TRADING FROZEN)" : "🟢 RUNNING (REAL-TIME TICKS)"}
+                  <span className={`status-dot ${isHalted ? "red" : "green"}`} />
+                  <span>{isHalted ? "HALTED (FROZEN)" : "RUNNING (LIVE TICKS)"}</span>
                 </span>
               </div>
 
@@ -591,8 +593,8 @@ const AdminPanel = () => {
                   {marketActionLoading
                     ? "Updating Engine..."
                     : isHalted
-                    ? "🟢 Lift Circuit Breaker (Resume Trading)"
-                    : "🛑 Trip Circuit Breaker (Freeze All Trading)"}
+                    ? "Lift Circuit Breaker (Resume Trading)"
+                    : "Trip Circuit Breaker (Halt Trading)"}
                 </button>
               </div>
             </div>
@@ -600,17 +602,16 @@ const AdminPanel = () => {
             {/* Macro Shock Simulator Card */}
             <div className="control-card shock-simulator-card">
               <div className="control-card-header">
-                <div className="control-card-icon">⚡</div>
                 <div>
-                  <h3 className="control-card-title">Macro Market Volatility Injector</h3>
+                  <h3 className="control-card-title">Macro Volatility Simulator</h3>
                   <p className="control-card-desc">
-                    Simulate real-world market movements to test user portfolios, stop-loss triggers, and margin calls.
+                    Inject sudden macro shocks to stress-test trader portfolios and verify trigger execution.
                   </p>
                 </div>
               </div>
 
               <div className="shock-intensity-selector">
-                <label className="admin-form-label">Shock Intensity: {shockPercent}%</label>
+                <label className="admin-form-label">Shock Magnitude: {shockPercent}%</label>
                 <div className="preset-intensity-chips">
                   {[1.0, 2.5, 5.0, 10.0].map((pct) => (
                     <button
@@ -632,7 +633,7 @@ const AdminPanel = () => {
                   onClick={() => handleMarketShock("BULL")}
                   disabled={marketActionLoading}
                 >
-                  🚀 Inject Bull Surge (+{shockPercent}%)
+                  Trigger Bull Surge (+{shockPercent}%)
                 </button>
 
                 <button
@@ -641,7 +642,7 @@ const AdminPanel = () => {
                   onClick={() => handleMarketShock("BEAR")}
                   disabled={marketActionLoading}
                 >
-                  📉 Trigger Market Flash Drop (-{shockPercent}%)
+                  Simulate Market Drop (-{shockPercent}%)
                 </button>
 
                 <button
@@ -650,7 +651,7 @@ const AdminPanel = () => {
                   onClick={() => handleMarketShock("RESET")}
                   disabled={marketActionLoading}
                 >
-                  🔄 Reset Prices to Base Seed
+                  Reset Prices to Base
                 </button>
               </div>
             </div>
@@ -665,39 +666,38 @@ const AdminPanel = () => {
             {/* Broadcast Form */}
             <div className="control-card">
               <div className="control-card-header">
-                <div className="control-card-icon">📢</div>
                 <div>
-                  <h3 className="control-card-title">Send Live Global Announcement</h3>
+                  <h3 className="control-card-title">Push System Announcement</h3>
                   <p className="control-card-desc">
-                    Broadcast an alert banner across all connected web clients instantly via Socket.io.
+                    Broadcast a global notification banner across all active trader screens in real-time.
                   </p>
                 </div>
               </div>
 
               <form onSubmit={handleSendBroadcast} className="broadcast-form">
                 <div className="admin-form-group">
-                  <label className="admin-form-label">Announcement Severity Level</label>
+                  <label className="admin-form-label">Severity Level</label>
                   <div className="severity-toggle-group">
                     <button
                       type="button"
                       className={`severity-btn info ${broadcastLevel === "info" ? "active" : ""}`}
                       onClick={() => setBroadcastLevel("info")}
                     >
-                      ℹ️ Informational (Blue)
+                      Informational (Blue)
                     </button>
                     <button
                       type="button"
                       className={`severity-btn warning ${broadcastLevel === "warning" ? "active" : ""}`}
                       onClick={() => setBroadcastLevel("warning")}
                     >
-                      ⚠️ Market Warning (Amber)
+                      Notice (Amber)
                     </button>
                     <button
                       type="button"
                       className={`severity-btn critical ${broadcastLevel === "critical" ? "active" : ""}`}
                       onClick={() => setBroadcastLevel("critical")}
                     >
-                      🚨 Critical Alert (Red)
+                      Critical (Red)
                     </button>
                   </div>
                 </div>
@@ -715,13 +715,10 @@ const AdminPanel = () => {
 
                 {/* Live Preview */}
                 <div className="broadcast-live-preview-box">
-                  <div className="preview-label">Live Preview (How users will see it):</div>
+                  <div className="preview-label">Live Preview:</div>
                   <div className={`system-broadcast-bar broadcast-${broadcastLevel}`}>
                     <div className="broadcast-content">
-                      <span className="broadcast-icon">
-                        {broadcastLevel === "critical" ? "🚨" : broadcastLevel === "info" ? "ℹ️" : "📢"}
-                      </span>
-                      <span className="broadcast-tag">SYSTEM NOTICE</span>
+                      <span className="broadcast-tag">NOTICE</span>
                       <span className="broadcast-message">
                         {broadcastMessage || "Enter a message to preview live banner..."}
                       </span>
@@ -735,7 +732,7 @@ const AdminPanel = () => {
                     className="btn-broadcast-submit"
                     disabled={broadcastLoading || !broadcastMessage.trim()}
                   >
-                    {broadcastLoading ? "Broadcasting..." : "📢 Push Broadcast to All Traders"}
+                    {broadcastLoading ? "Broadcasting..." : "Push Live Announcement"}
                   </button>
                 </div>
               </form>
@@ -743,9 +740,9 @@ const AdminPanel = () => {
 
             {/* Current Active Announcement Card */}
             <div className="control-card active-broadcast-monitor">
-              <h3 className="control-card-title">Currently Active Broadcast</h3>
+              <h3 className="control-card-title">Active Announcement</h3>
               <p className="control-card-desc">
-                Status of the banner currently displaying to all connected traders.
+                Current banner displaying across connected trader screens.
               </p>
 
               {activeAnnouncement ? (
@@ -767,15 +764,14 @@ const AdminPanel = () => {
                     onClick={handleClearBroadcast}
                     disabled={broadcastLoading}
                   >
-                    🗑️ Clear Active Broadcast Banner
+                    Clear Active Banner
                   </button>
                 </div>
               ) : (
                 <div className="no-active-broadcast">
-                  <div className="empty-state-icon">💤</div>
-                  <div style={{ fontWeight: "700", marginTop: "6px" }}>No Broadcast Banner Active</div>
-                  <div style={{ color: "var(--color-text-faint)", fontSize: "0.82rem" }}>
-                    Traders are currently experiencing uninterrupted trading.
+                  <div style={{ fontWeight: "600", color: "var(--color-text-strong)" }}>No Active Banner</div>
+                  <div style={{ color: "var(--color-text-faint)", fontSize: "0.82rem", marginTop: "4px" }}>
+                    Traders are currently experiencing standard uninterrupted trading.
                   </div>
                 </div>
               )}
@@ -797,13 +793,13 @@ const AdminPanel = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-card-label">Total Transactions Logged</div>
+              <div className="stat-card-label">Total Executed Orders</div>
               <div className="stat-card-value">{stats.totalOrders}</div>
-              <div className="stat-card-sub">Executed orders recorded</div>
+              <div className="stat-card-sub">Completed transactions logged</div>
             </div>
 
             <div className="stat-card">
-              <div className="stat-card-label">Total Liquid Cash Available</div>
+              <div className="stat-card-label">Total Liquid Cash</div>
               <div className="stat-card-value" style={{ color: "var(--color-primary)" }}>
                 ₹{stats.totalWallet.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
               </div>
@@ -811,11 +807,11 @@ const AdminPanel = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-card-label">Total Active Portfolio Holdings</div>
+              <div className="stat-card-label">Total Active Holdings</div>
               <div className="stat-card-value" style={{ color: "var(--color-profit)" }}>
                 ₹{stats.totalHoldingsValue.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
               </div>
-              <div className="stat-card-sub">Current market value in positions</div>
+              <div className="stat-card-sub">Current portfolio market value</div>
             </div>
 
             <div className="stat-card">
@@ -829,15 +825,15 @@ const AdminPanel = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-card-label">Simulation Engine State</div>
+              <div className="stat-card-label">Simulation Engine</div>
               <div
                 className="stat-card-value"
-                style={{ color: isHalted ? "var(--color-loss)" : "var(--color-profit)", fontSize: "1.4rem" }}
+                style={{ color: isHalted ? "var(--color-loss)" : "var(--color-profit)", fontSize: "1.35rem" }}
               >
                 {isHalted ? "HALTED" : "HEALTHY"}
               </div>
               <div className="stat-card-sub">
-                {isHalted ? "Circuit breaker active" : "Socket ticker broadcasting normally"}
+                {isHalted ? "Circuit breaker active" : "Real-time ticker operational"}
               </div>
             </div>
           </div>
@@ -858,7 +854,6 @@ const AdminPanel = () => {
         isOpen={confirmDialog.isOpen}
         title={confirmDialog.title}
         message={confirmDialog.message}
-        icon={confirmDialog.icon}
         confirmText={confirmDialog.confirmText}
         isDanger={confirmDialog.isDanger}
         onConfirm={confirmDialog.onConfirm}

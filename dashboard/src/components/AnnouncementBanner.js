@@ -43,23 +43,23 @@ const AnnouncementBanner = () => {
       ? "broadcast-info"
       : "broadcast-warning";
 
-  const getIcon = () => {
+  const getTag = () => {
     switch (announcement.level) {
       case "critical":
-        return "🚨";
+        return "CRITICAL";
       case "info":
-        return "ℹ️";
+        return "INFO";
       case "warning":
       default:
-        return "📢";
+        return "NOTICE";
     }
   };
 
   return (
     <div className={`system-broadcast-bar ${levelClass}`}>
       <div className="broadcast-content">
-        <span className="broadcast-icon">{getIcon()}</span>
-        <span className="broadcast-tag">SYSTEM NOTICE</span>
+        <span className={`status-dot ${announcement.level === "critical" ? "red" : announcement.level === "info" ? "green" : "amber"}`} />
+        <span className="broadcast-tag">{getTag()}</span>
         <span className="broadcast-message">{announcement.message}</span>
       </div>
       <button

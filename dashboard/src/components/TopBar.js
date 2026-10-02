@@ -36,37 +36,29 @@ const TopBar = () => {
     <header className="topbar-container">
       <div className="indices-container">
         <div className="index-box" title="National Stock Exchange Nifty 50 Index">
-          <div className="index-header">
-            <span className="index-name">NIFTY 50</span>
-            <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
-              {niftyPercent}
-            </span>
-          </div>
-          <div className="index-data">
-            <span className="index-points">
-              {Number(niftyPrice).toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
-          </div>
+          <span className="index-name">NIFTY 50</span>
+          <span className="index-points">
+            {Number(niftyPrice).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+          <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
+            {niftyPercent}
+          </span>
         </div>
 
         <div className="index-box" title="Bombay Stock Exchange SENSEX Index">
-          <div className="index-header">
-            <span className="index-name">SENSEX</span>
-            <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
-              {formattedSensexPercent}
-            </span>
-          </div>
-          <div className="index-data">
-            <span className="index-points">
-              {Number(sensexPrice).toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
-          </div>
+          <span className="index-name">SENSEX</span>
+          <span className="index-points">
+            {Number(sensexPrice).toLocaleString("en-IN", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+          <span className={`index-percent ${isNiftyDown ? "down" : "up"}`}>
+            {formattedSensexPercent}
+          </span>
         </div>
 
         {isHalted && (
@@ -75,20 +67,27 @@ const TopBar = () => {
               display: "flex",
               alignItems: "center",
               gap: "6px",
-              background: "rgba(239, 68, 68, 0.12)",
-              border: "1px solid rgba(239, 68, 68, 0.35)",
+              background: "var(--color-loss-soft)",
+              border: "1px solid var(--color-loss-border)",
               color: "var(--color-loss)",
-              padding: "4px 12px",
+              padding: "3px 10px",
               borderRadius: "var(--radius-pill)",
-              fontSize: "0.75rem",
+              fontSize: "0.72rem",
               fontWeight: "700",
               letterSpacing: "0.04em",
-              animation: "pulseCritical 2s infinite",
             }}
             title="Trading has been halted by Admin Circuit Breaker"
           >
-            <span style={{ fontSize: "0.85rem" }}>🛑</span>
-            <span>CIRCUIT BREAKER: HALTED</span>
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "var(--color-loss)",
+                display: "inline-block",
+              }}
+            />
+            <span>HALTED</span>
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { DoughnutChart } from "./DoughnoutChart";
 import { getAuthHeader } from "../utils/auth";
@@ -32,18 +32,7 @@ const SectorAllocation = () => {
   const [holdings, setHoldings] = useState([]);
   const [liveMap, setLiveMap] = useState(() => buildLiveMap(getSnapshot()));
 
-  useEffect(() => {
-    fetchHoldings();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = subscribeToLiveMarket((snapshot) =>
-      setLiveMap(buildLiveMap(snapshot))
-    );
-    return unsubscribe;
-  }, []);
-
-  const fetchHoldings = async () => {
+  const fetchHoldings = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/allHoldings`, {
         headers: getAuthHeader(),
@@ -52,7 +41,18 @@ const SectorAllocation = () => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [API]);
+
+  useEffect(() => {
+    fetchHoldings();
+  }, [fetchHoldings]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToLiveMarket((snapshot) =>
+      setLiveMap(buildLiveMap(snapshot))
+    );
+    return unsubscribe;
+  }, []);
 
   const sectorTotals = {};
   holdings.forEach((h) => {
@@ -68,7 +68,12 @@ const SectorAllocation = () => {
   if (labels.length === 0) {
     return (
       <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>
-        <div style={{ fontSize: "2rem", marginBottom: "8px" }}>🥧</div>
+        <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center", color: "var(--color-text-muted)" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21.21 15.89A10 10 0 1 1 8 2.83" />
+            <path d="M22 12A10 10 0 0 0 12 2v10z" />
+          </svg>
+        </div>
         <p style={{ margin: 0, fontWeight: "700", fontSize: "0.92rem", color: "var(--color-text-strong)" }}>
           Sector Diversification
         </p>

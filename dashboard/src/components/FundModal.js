@@ -46,12 +46,12 @@ const FundModal = ({ isOpen, onClose, initialMode = "DEPOSIT", walletBalance = 0
     e.preventDefault();
 
     if (!numAmount || numAmount <= 0) {
-      toast.error("Please enter a valid amount ❌");
+      toast.error("Please enter a valid amount");
       return;
     }
 
     if (!isDeposit && numAmount > walletBalance) {
-      toast.error(`Insufficient balance. You can withdraw up to ₹${walletBalance.toLocaleString("en-IN")} ❌`);
+      toast.error(`Insufficient balance. Maximum withdrawable: ₹${walletBalance.toLocaleString("en-IN")}`);
       return;
     }
 
@@ -68,19 +68,15 @@ const FundModal = ({ isOpen, onClose, initialMode = "DEPOSIT", walletBalance = 0
       sound.playTradeChime();
 
       if (isDeposit) {
-        toast.success(`₹${numAmount.toLocaleString("en-IN")} added to your virtual wallet! ✅`, {
-          icon: "💳",
-        });
+        toast.success(`₹${numAmount.toLocaleString("en-IN")} added to wallet successfully`);
       } else {
-        toast.success(`₹${numAmount.toLocaleString("en-IN")} withdrawn successfully! ✅`, {
-          icon: "🏧",
-        });
+        toast.success(`₹${numAmount.toLocaleString("en-IN")} withdrawn successfully`);
       }
 
       if (onSuccess) onSuccess();
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Transaction failed ❌");
+      toast.error(err.response?.data?.message || "Transaction failed");
     } finally {
       setLoading(false);
     }

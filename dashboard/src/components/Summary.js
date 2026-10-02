@@ -106,10 +106,10 @@ const Summary = () => {
       <div className="summary-top-bar">
         <div>
           <h2 className="summary-user-title">
-            Welcome back, {user?.name || "Trader"} 👋
+            Welcome back, {user?.name || "Trader"}
           </h2>
           <p className="summary-user-subtitle">
-            Live Portfolio Overview &amp; Market Snapshot
+            Portfolio performance &amp; market snapshot
           </p>
         </div>
 

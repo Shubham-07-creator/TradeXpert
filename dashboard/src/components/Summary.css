@@ -1,9 +1,9 @@
-/* Streamlined, Minimalist Neo-Broker Summary Styles */
+/* MAANG-Grade Minimalist Summary Styles (Linear / Apple Stocks / Stripe standard) */
 
 .summary-container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 /* Header & Quick Action Row */
@@ -12,85 +12,84 @@
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 4px;
+  gap: 14px;
+  margin-bottom: 2px;
 }
 
 .summary-user-title {
   margin: 0;
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: var(--color-text-strong);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
 }
 
 .summary-user-subtitle {
-  margin: 3px 0 0 0;
-  font-size: 0.85rem;
+  margin: 2px 0 0 0;
+  font-size: 0.82rem;
   color: var(--color-text-muted);
 }
 
 .summary-actions-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-summary-outline {
   background: var(--color-bg-card);
   border: 1px solid var(--color-border);
   color: var(--color-text-strong);
-  padding: 8px 16px;
+  padding: 7px 14px;
   border-radius: var(--radius-md);
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm);
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-xs);
 }
 
 .btn-summary-outline:hover {
-  background: var(--color-bg-base);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  transform: translateY(-2px);
+  background: var(--color-bg-subtle);
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
 }
 
 .btn-summary-addfunds {
-  background: var(--gradient-primary);
+  background: var(--color-primary);
   color: #fff;
   border: none;
-  padding: 8px 18px;
+  padding: 7px 16px;
   border-radius: var(--radius-md);
-  font-size: 0.84rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   box-shadow: var(--shadow-glow-primary);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
 }
 
 .btn-summary-addfunds:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.08);
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
 }
 
 /* Subtle Slim Asset Bar */
 .summary-slim-asset-bar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: -6px;
-  margin-bottom: 4px;
+  gap: 6px;
+  margin-top: -4px;
+  margin-bottom: 2px;
 }
 
 .summary-slim-bar-track {
-  height: 6px;
+  height: 5px;
   border-radius: var(--radius-pill);
   background: var(--color-bg-subtle);
   display: flex;
@@ -98,46 +97,46 @@
 }
 
 .summary-slim-segment.cash {
-  background: #387ED1;
-  transition: width 0.4s ease;
+  background: var(--color-primary);
+  transition: width 0.35s ease;
 }
 
 .summary-slim-segment.stocks {
-  background: #10B981;
-  transition: width 0.4s ease;
+  background: var(--color-profit);
+  transition: width 0.35s ease;
 }
 
 .summary-slim-bar-legend {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
-  font-size: 0.76rem;
+  gap: 14px;
+  font-size: 0.74rem;
   color: var(--color-text-muted);
 }
 
 .summary-legend-chip {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .summary-legend-chip .dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
 
 .summary-legend-chip .dot.cash {
-  background: #387ED1;
+  background: var(--color-primary);
 }
 
 .summary-legend-chip .dot.stocks {
-  background: #10B981;
+  background: var(--color-profit);
 }
 
 /* Table Header inside Card */
 .summary-table-header {
-  padding: 18px 24px;
+  padding: 14px 20px;
   border-bottom: 1px solid var(--color-border);
   display: flex;
   align-items: center;
@@ -146,17 +145,18 @@
 
 .summary-view-all-link {
   color: var(--color-primary);
-  font-size: 0.82rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 4px;
   text-decoration: none;
-  transition: gap 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .summary-view-all-link:hover {
-  gap: 7px;
+  color: var(--color-primary-dark);
+  gap: 6px;
 }
 
 /* Stock Row Micro Styles */
@@ -167,36 +167,53 @@
 }
 
 .summary-stock-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
   background: var(--color-primary-light);
   color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 0.78rem;
+  font-weight: 700;
+  font-size: 0.74rem;
 }
 
 .btn-table-chart {
-  background: var(--color-bg-base);
+  background: var(--color-bg-subtle);
   border: 1px solid var(--color-border);
-  color: var(--color-primary);
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  padding: 4px 8px;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-weight: 700;
-  font-size: 0.76rem;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: 3px;
+  font-weight: 600;
+  font-size: 0.74rem;
+  transition: all 0.15s ease;
 }
 
 .btn-table-chart:hover {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Empty State Button */
+.btn-empty-action {
   background: var(--color-primary);
   color: #fff;
-  border-color: var(--color-primary);
-  transform: translateY(-1px);
+  border: none;
+  padding: 8px 18px;
+  border-radius: var(--radius-md);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: var(--shadow-glow-primary);
+}
+
+.btn-empty-action:hover {
+  background: var(--color-primary-dark);
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
 
@@ -7,13 +7,7 @@ const Leaderboard = () => {
   const [board, setBoard] = useState([]);
   const user = getCurrentUser();
 
-  useEffect(() => {
-    fetchBoard();
-    const interval = setInterval(fetchBoard, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchBoard = async () => {
+  const fetchBoard = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/leaderboard`, {
         headers: getAuthHeader(),
@@ -22,21 +16,58 @@ const Leaderboard = () => {
     } catch (err) {
       console.log(err);
     }
-  };
+  }, [API]);
+
+  useEffect(() => {
+    fetchBoard();
+    const interval = setInterval(fetchBoard, 5000);
+    return () => clearInterval(interval);
+  }, [fetchBoard]);
 
   const getRankBadge = (rank) => {
-    if (rank === 0) return <span style={{ fontSize: "1.2rem" }}>🥇</span>;
-    if (rank === 1) return <span style={{ fontSize: "1.2rem" }}>🥈</span>;
-    if (rank === 2) return <span style={{ fontSize: "1.2rem" }}>🥉</span>;
+    const isTop3 = rank < 3;
+    const colors = [
+      { bg: "rgba(234, 179, 8, 0.12)", text: "#CA8A04", border: "rgba(234, 179, 8, 0.3)" }, // Gold
+      { bg: "rgba(148, 163, 184, 0.12)", text: "#64748B", border: "rgba(148, 163, 184, 0.3)" }, // Silver
+      { bg: "rgba(217, 119, 6, 0.12)", text: "#B45309", border: "rgba(217, 119, 6, 0.3)" }, // Bronze
+    ];
+
+    if (isTop3) {
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "28px",
+            height: "28px",
+            borderRadius: "6px",
+            fontSize: "0.78rem",
+            fontWeight: "800",
+            backgroundColor: colors[rank].bg,
+            color: colors[rank].text,
+            border: `1px solid ${colors[rank].border}`,
+          }}
+        >
+          {String(rank + 1).padStart(2, "0")}
+        </span>
+      );
+    }
+
     return (
       <span
         style={{
-          fontWeight: "700",
-          fontSize: "0.85rem",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "28px",
+          height: "28px",
+          fontWeight: "600",
+          fontSize: "0.8rem",
           color: "var(--color-text-muted)",
         }}
       >
-        #{rank + 1}
+        {String(rank + 1).padStart(2, "0")}
       </span>
     );
   };
@@ -46,9 +77,9 @@ const Leaderboard = () => {
       {/* Header */}
       <div className="section-header">
         <div>
-          <h2 className="page-title">Trader Leaderboard 🏆</h2>
+          <h2 className="page-title">Trader Leaderboard</h2>
           <p className="page-subtitle">
-            Top portfolios ranked by live portfolio value across TradeXpert traders.
+            Top portfolios ranked by live portfolio value across all registered accounts
           </p>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -153,7 +184,16 @@ const Leaderboard = () => {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">🏆</div>
+            <div className="empty-state-icon">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                <path d="M4 22h16" />
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+              </svg>
+            </div>
             <h4 className="empty-state-title">Leaderboard Empty</h4>
             <p className="empty-state-text">
               Rankings will populate as traders execute orders and build their portfolios.

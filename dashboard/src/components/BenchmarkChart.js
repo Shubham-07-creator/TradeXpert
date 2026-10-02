@@ -92,12 +92,16 @@ const BenchmarkChart = ({ portfolioValue }) => {
   if (!baseline.current || history.length < 2) {
     return (
       <div style={{ padding: "32px 16px", textAlign: "center", color: "var(--color-text-muted)" }}>
-        <div style={{ fontSize: "2rem", marginBottom: "8px" }}>📈</div>
+        <div style={{ marginBottom: "8px", display: "flex", justifyContent: "center", color: "var(--color-text-muted)" }}>
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </div>
         <p style={{ margin: 0, fontWeight: "700", fontSize: "0.92rem", color: "var(--color-text-strong)" }}>
           Portfolio vs NIFTY Comparison is syncing...
         </p>
         <p style={{ margin: "4px 0 0 0", fontSize: "0.8rem", color: "var(--color-text-muted)" }}>
-          Buy a stock from the watchlist to watch your portfolio track live against NIFTY 50.
+          Execute orders from the watchlist to track live portfolio performance against NIFTY 50.
         </p>
       </div>
     );

@@ -41,7 +41,7 @@ function Awards() {
                       <i className={item.icon}></i>
                     </div>
                     <div>
-                      <div className="fw-bold text-dark small">{item.title}</div>
+                      <div className="fw-bold asset-title small">{item.title}</div>
                       <div className="text-muted" style={{ fontSize: "0.78rem" }}>{item.desc}</div>
                     </div>
                   </div>

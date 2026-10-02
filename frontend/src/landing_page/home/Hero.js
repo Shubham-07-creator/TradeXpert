@@ -75,7 +75,7 @@ function Hero() {
               <div className="floating-card floating-card-top shadow-md">
                 <div className="d-flex align-items-center gap-2">
                   <span className="live-dot"></span>
-                  <span className="fw-bold text-dark" style={{ fontSize: "0.85rem" }}>NIFTY 50</span>
+                  <span className="fw-bold hero-badge-title" style={{ fontSize: "0.85rem" }}>NIFTY 50</span>
                   <span className="text-success fw-bold" style={{ fontSize: "0.85rem" }}>24,850.20 (+0.45%)</span>
                 </div>
               </div>
@@ -92,7 +92,7 @@ function Hero() {
               <div className="floating-card floating-card-bottom shadow-md">
                 <div className="d-flex align-items-center gap-2">
                   <i className="fa-solid fa-shield-halved text-primary"></i>
-                  <span className="fw-semibold text-dark" style={{ fontSize: "0.82rem" }}>GTT Stop-Loss &amp; Target Auto-Trigger</span>
+                  <span className="fw-semibold hero-badge-title" style={{ fontSize: "0.82rem" }}>GTT Stop-Loss &amp; Target Auto-Trigger</span>
                 </div>
               </div>
             </div>

@@ -43,7 +43,7 @@ function Pricing() {
                 </div>
 
                 <div className="d-flex align-items-baseline gap-2 mb-2">
-                  <span className="display-3 fw-bold text-dark pricing-number">₹0</span>
+                  <span className="display-3 fw-bold pricing-number">₹0</span>
                   <span className="text-muted fw-semibold">/ executed delivery</span>
                 </div>
 
@@ -52,19 +52,19 @@ function Pricing() {
                 </p>
 
                 <div className="pricing-feature-list border-top pt-3">
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-success"></i>
                     <span>Free Equity Delivery (CNC) investments</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-success"></i>
                     <span>Direct Mutual Funds with zero distributor commissions</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-success"></i>
                     <span>Zero Annual Demat Maintenance Charges (AMC)</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 small">
                     <i className="fa-solid fa-circle-check text-success"></i>
                     <span>Free IPO applications via standard UPI</span>
                   </div>
@@ -96,7 +96,7 @@ function Pricing() {
                 </div>
 
                 <div className="d-flex align-items-baseline gap-2 mb-2">
-                  <span className="display-3 fw-bold text-dark pricing-number">₹20</span>
+                  <span className="display-3 fw-bold pricing-number">₹20</span>
                   <span className="text-muted fw-semibold">/ executed order</span>
                 </div>
 
@@ -105,19 +105,19 @@ function Pricing() {
                 </p>
 
                 <div className="pricing-feature-list border-top pt-3">
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-primary"></i>
                     <span>Flat ₹20 per order for Intraday (MIS)</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-primary"></i>
                     <span>Flat ₹20 per order for all F&amp;O trades</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 mb-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 mb-2 small">
                     <i className="fa-solid fa-circle-check text-primary"></i>
                     <span>Zero charges on unexecuted / cancelled limit orders</span>
                   </div>
-                  <div className="d-flex align-items-center gap-2 small text-dark">
+                  <div className="pricing-feature-item d-flex align-items-center gap-2 small">
                     <i className="fa-solid fa-circle-check text-primary"></i>
                     <span>Comprehensive real-time P&amp;L and margin calculation</span>
                   </div>

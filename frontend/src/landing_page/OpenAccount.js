@@ -40,19 +40,19 @@ function OpenAccount() {
 
             {/* Trust checklist */}
             <div className="open-account-trust-strip d-flex flex-wrap justify-content-center gap-4 pt-3 border-top">
-              <span className="d-flex align-items-center gap-2 small">
+              <span className="open-trust-item d-flex align-items-center gap-2 small">
                 <i className="fa-solid fa-circle-check text-success"></i>
                 <span>₹0 Demat Account Opening</span>
               </span>
-              <span className="d-flex align-items-center gap-2 small">
+              <span className="open-trust-item d-flex align-items-center gap-2 small">
                 <i className="fa-solid fa-circle-check text-success"></i>
                 <span>5-Minute Aadhaar eKYC</span>
               </span>
-              <span className="d-flex align-items-center gap-2 small">
+              <span className="open-trust-item d-flex align-items-center gap-2 small">
                 <i className="fa-solid fa-circle-check text-success"></i>
                 <span>₹0 Free Equity Delivery</span>
               </span>
-              <span className="d-flex align-items-center gap-2 small">
+              <span className="open-trust-item d-flex align-items-center gap-2 small">
                 <i className="fa-solid fa-circle-check text-success"></i>
                 <span>SEBI &amp; NSE Registered</span>
               </span>

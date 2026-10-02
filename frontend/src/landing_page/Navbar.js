@@ -147,7 +147,7 @@ function Navbar() {
                     <Link
                       className="btn px-3 py-1 fw-semibold rounded-pill"
                       style={{
-                        border: "1px solid var(--border-color)",
+                        border: "1px solid var(--border)",
                         color: "var(--ink)",
                         fontSize: "0.9rem",
                       }}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { isAdmin, getCurrentUser } from "../utils/auth";
+import { getMarketInfo, subscribeToMarketInfo, subscribeToMarketHalt } from "../utils/liveMarket";
 import toast from "react-hot-toast";
 import ConfirmModal from "./ConfirmModal";
 
@@ -45,6 +46,23 @@ const Menu = () => {
     }, 400);
   };
 
+  // Market State (Live NSE vs Testing Simulator)
+  const [marketInfo, setMarketInfo] = useState(() => getMarketInfo());
+  const [isHalted, setIsHalted] = useState(false);
+
+  useEffect(() => {
+    const unsubInfo = subscribeToMarketInfo((info) => {
+      if (info) setMarketInfo(info);
+    });
+    const unsubHalt = subscribeToMarketHalt((halted) => {
+      setIsHalted(Boolean(halted));
+    });
+    return () => {
+      unsubInfo();
+      unsubHalt();
+    };
+  }, []);
+
   const getInitials = (name) => {
     if (!name) return "U";
     return name
@@ -57,12 +75,87 @@ const Menu = () => {
 
   return (
     <nav className="menu-container">
-      {/* Brand logo & name */}
+      {/* Brand logo & name + Status badge */}
       <div className="menu-brand-group">
-        <Link to="/" className="d-flex align-items-center gap-2" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <Link to="/" className="d-flex align-items-center gap-2" style={{ display: "flex", alignItems: "center", gap: "8px", textDecoration: "none" }}>
           <img src="/logo2.svg" alt="TradeXpert" className="menu-logo" />
           <span className="menu-brand-title">TradeXpert</span>
         </Link>
+
+        {/* Live Dalal Street vs 24/7 Testing Simulator Pill */}
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            background: marketInfo.isMarketOpen
+              ? "rgba(16, 185, 129, 0.12)"
+              : "rgba(56, 126, 209, 0.12)",
+            border: marketInfo.isMarketOpen
+              ? "1px solid rgba(16, 185, 129, 0.3)"
+              : "1px solid rgba(56, 126, 209, 0.3)",
+            color: marketInfo.isMarketOpen ? "#10b981" : "#387ed1",
+            padding: "3px 10px",
+            borderRadius: "999px",
+            fontSize: "0.72rem",
+            fontWeight: "700",
+            letterSpacing: "0.03em",
+            userSelect: "none",
+            marginLeft: "6px",
+            whiteSpace: "nowrap",
+          }}
+          title={
+            marketInfo.isMarketOpen
+              ? "Live Real-Time Market Feed (NSE / BSE)"
+              : "Market Closed (9:15 AM - 3:30 PM IST). 24/7 Simulator Active with Real Closing Prices."
+          }
+        >
+          <span
+            style={{
+              width: "7px",
+              height: "7px",
+              borderRadius: "50%",
+              background: marketInfo.isMarketOpen ? "#10b981" : "#387ed1",
+              boxShadow: marketInfo.isMarketOpen
+                ? "0 0 8px rgba(16, 185, 129, 0.8)"
+                : "0 0 6px rgba(56, 126, 209, 0.6)",
+              display: "inline-block",
+            }}
+          />
+          <span>{marketInfo.isMarketOpen ? "LIVE NSE" : "SIMULATOR"}</span>
+        </div>
+
+        {isHalted && (
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              background: "var(--color-loss-soft)",
+              border: "1px solid var(--color-loss-border)",
+              color: "var(--color-loss)",
+              padding: "3px 10px",
+              borderRadius: "var(--radius-pill)",
+              fontSize: "0.72rem",
+              fontWeight: "700",
+              letterSpacing: "0.04em",
+              marginLeft: "4px",
+              whiteSpace: "nowrap",
+            }}
+            title="Trading has been halted by Admin Circuit Breaker"
+          >
+            <span
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "var(--color-loss)",
+                display: "inline-block",
+              }}
+            />
+            <span>HALTED</span>
+          </div>
+        )}
       </div>
 
       {/* Navigation links */}

@@ -3,18 +3,13 @@ import Menu from "./Menu";
 import {
   getNifty,
   getSensex,
-  getMarketInfo,
   subscribeToNifty,
   subscribeToSensex,
-  subscribeToMarketInfo,
-  subscribeToMarketHalt,
 } from "../utils/liveMarket";
 
 const TopBar = () => {
   const [nifty, setNifty] = useState(() => getNifty());
   const [sensex, setSensex] = useState(() => getSensex());
-  const [marketInfo, setMarketInfo] = useState(() => getMarketInfo());
-  const [isHalted, setIsHalted] = useState(false);
 
   useEffect(() => {
     const unsubNifty = subscribeToNifty((updatedNifty) => {
@@ -27,20 +22,10 @@ const TopBar = () => {
         setSensex(updatedSensex);
       }
     });
-    const unsubInfo = subscribeToMarketInfo((updatedInfo) => {
-      if (updatedInfo) {
-        setMarketInfo(updatedInfo);
-      }
-    });
-    const unsubHalt = subscribeToMarketHalt((halted) => {
-      setIsHalted(Boolean(halted));
-    });
 
     return () => {
       unsubNifty();
       unsubSensex();
-      unsubInfo();
-      unsubHalt();
     };
   }, []);
 
@@ -86,78 +71,6 @@ const TopBar = () => {
             })}
           </span>
         </div>
-
-        {/* Market Mode Status Badge: LIVE NSE vs SIMULATOR */}
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "6px",
-            background: marketInfo.isMarketOpen
-              ? "rgba(16, 185, 129, 0.12)"
-              : "rgba(56, 126, 209, 0.12)",
-            border: marketInfo.isMarketOpen
-              ? "1px solid rgba(16, 185, 129, 0.3)"
-              : "1px solid rgba(56, 126, 209, 0.3)",
-            color: marketInfo.isMarketOpen ? "#10b981" : "#387ed1",
-            padding: "4px 10px",
-            borderRadius: "999px",
-            fontSize: "0.72rem",
-            fontWeight: "700",
-            letterSpacing: "0.03em",
-            userSelect: "none",
-          }}
-          title={
-            marketInfo.isMarketOpen
-              ? "Live Dalal Street Real Market Feed (NSE / BSE)"
-              : "Market Closed (Trading Hours: 9:15 AM - 3:30 PM IST). Testing Simulator Active around Real Closing Prices."
-          }
-        >
-          <span
-            style={{
-              width: "7px",
-              height: "7px",
-              borderRadius: "50%",
-              background: marketInfo.isMarketOpen ? "#10b981" : "#387ed1",
-              boxShadow: marketInfo.isMarketOpen
-                ? "0 0 8px rgba(16, 185, 129, 0.8)"
-                : "0 0 6px rgba(56, 126, 209, 0.6)",
-              display: "inline-block",
-            }}
-          />
-          <span>{marketInfo.isMarketOpen ? "LIVE NSE" : "SIMULATOR"}</span>
-        </div>
-
-        {/* Circuit Breaker Halt Indicator */}
-        {isHalted && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              background: "var(--color-loss-soft)",
-              border: "1px solid var(--color-loss-border)",
-              color: "var(--color-loss)",
-              padding: "3px 10px",
-              borderRadius: "var(--radius-pill)",
-              fontSize: "0.72rem",
-              fontWeight: "700",
-              letterSpacing: "0.04em",
-            }}
-            title="Trading has been halted by Admin Circuit Breaker"
-          >
-            <span
-              style={{
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                background: "var(--color-loss)",
-                display: "inline-block",
-              }}
-            />
-            <span>HALTED</span>
-          </div>
-        )}
       </div>
 
       <Menu />

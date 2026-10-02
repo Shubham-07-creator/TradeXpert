@@ -103,6 +103,14 @@ app.get("/", (req, res) => {
   res.send("TradeXpert API Running 🚀");
 });
 
+app.get("/market/snapshot", (req, res) => {
+  try {
+    return res.json(liveMarket.getSnapshot());
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to get market snapshot" });
+  }
+});
+
 // ==========================================
 // SIGNUP (rate-limited)
 // ==========================================

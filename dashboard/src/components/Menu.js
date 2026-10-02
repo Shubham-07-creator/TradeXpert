@@ -40,8 +40,9 @@ const Menu = () => {
     window.dispatchEvent(new Event("userChanged"));
     toast.success("Signed out successfully.", { duration: 1500 });
     setTimeout(() => {
-      window.location.href = FRONTEND + "?logout=true";
-    }, 600);
+      const base = (FRONTEND || "http://localhost:3000").replace(/\/+$/, "");
+      window.location.href = `${base}/?logout=true`;
+    }, 400);
   };
 
   const getInitials = (name) => {

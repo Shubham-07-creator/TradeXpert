@@ -4,19 +4,19 @@ import { Link } from "react-router-dom";
 function Hero() {
   return (
     <div className="container">
-      <div className="row p-5 mt-5 mb-5">
-        <h1 className="fs-2 text-center">
+      <div className="row p-3 p-lg-5 mt-3 mt-lg-5 mb-3 mb-lg-5">
+        <h1 className="fs-2 text-center fw-bold" style={{ lineHeight: "1.4" }}>
           We pioneered the discount broking model in India
           <br />
-          Now, we are breaking ground with our technology.
+          <span className="text-gradient-primary">Now, we are breaking ground with our technology.</span>
         </h1>
       </div>
 
       <div
-        className="row p-5 mt-5 border-top"
-        style={{ lineHeight: "1.8", fontSize: "1.2em" }}
+        className="row p-3 p-lg-5 mt-2 mt-lg-4 border-top g-4"
+        style={{ lineHeight: "1.8", fontSize: "1.1em" }}
       >
-        <div className="col-6 p-5">
+        <div className="col-12 col-lg-6 p-2 p-lg-4">
           <p>
             We kick-started operations with the goal of breaking all barriers
             that traders and investors face in India in terms of cost, execution speed,
@@ -33,13 +33,13 @@ function Hero() {
             15% of all Indian retail trading volumes.
           </p>
         </div>
-        <div className="col-6 p-5">
+        <div className="col-12 col-lg-6 p-2 p-lg-4">
           <p>
             In addition, we run a number of popular open online educational and
             community initiatives to empower retail traders and investors.
           </p>
           <p>
-            <Link style={{textDecoration: "none"}}>Rainmatter</Link>, our fintech fund and incubator, has
+            <Link to="/about" style={{ textDecoration: "none" }}>Rainmatter</Link>, our fintech fund and incubator, has
             invested in several fintech startups with the goal of growing the
             Indian capital markets.
           </p>

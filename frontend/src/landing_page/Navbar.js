@@ -102,22 +102,22 @@ function Navbar() {
             <ul className="navbar-nav ms-auto align-items-center gap-2 gap-lg-3">
               {/* COMMON LINKS */}
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/about">
+                <Link className="nav-link fw-semibold" to="/about" onClick={() => setMenuOpen(false)}>
                   About
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/product">
+                <Link className="nav-link fw-semibold" to="/product" onClick={() => setMenuOpen(false)}>
                   Product
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/pricing">
+                <Link className="nav-link fw-semibold" to="/pricing" onClick={() => setMenuOpen(false)}>
                   Pricing
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/support">
+                <Link className="nav-link fw-semibold" to="/support" onClick={() => setMenuOpen(false)}>
                   Support
                 </Link>
               </li>
@@ -152,6 +152,7 @@ function Navbar() {
                         fontSize: "0.9rem",
                       }}
                       to="/login"
+                      onClick={() => setMenuOpen(false)}
                     >
                       Sign In
                     </Link>
@@ -166,6 +167,7 @@ function Navbar() {
                         boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)",
                       }}
                       to="/signup"
+                      onClick={() => setMenuOpen(false)}
                     >
                       Sign Up
                     </Link>

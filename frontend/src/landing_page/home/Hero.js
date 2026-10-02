@@ -49,19 +49,19 @@ function Hero() {
 
             {/* Institutional Stat Metrics */}
             <div className="row pt-4 border-top fade-up stagger-2 g-3">
-              <div className="col-3">
+              <div className="col-6 col-md-3">
                 <h3 className="fw-bold mb-0 hero-stat-val">2M+</h3>
                 <small className="hero-stat-label">Active Traders</small>
               </div>
-              <div className="col-3">
+              <div className="col-6 col-md-3">
                 <h3 className="fw-bold mb-0 hero-stat-val">₹6L Cr+</h3>
                 <small className="hero-stat-label">Turnover</small>
               </div>
-              <div className="col-3">
+              <div className="col-6 col-md-3">
                 <h3 className="fw-bold mb-0 hero-stat-val">&lt;15ms</h3>
                 <small className="hero-stat-label">Order Latency</small>
               </div>
-              <div className="col-3">
+              <div className="col-6 col-md-3">
                 <h3 className="fw-bold mb-0 hero-stat-val">₹0</h3>
                 <small className="hero-stat-label">Free Delivery</small>
               </div>

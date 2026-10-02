@@ -69,10 +69,31 @@ const WatchList = () => {
     };
   }, [liveStocks]);
 
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   return (
-    <aside className="watchlist-container">
-      {/* Search Input Bar */}
-      <div className="search-container">
+    <aside className={`watchlist-container ${isMobileOpen ? "is-mobile-expanded" : ""}`}>
+      {/* Mobile-only toggle header */}
+      <div
+        className="watchlist-mobile-toggle"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        role="button"
+        tabIndex={0}
+      >
+        <div className="d-flex align-items-center gap-2">
+          <span>📊</span>
+          <span className="fw-bold">Watchlist</span>
+          <span className="counts">{filteredWatchlist.length}</span>
+        </div>
+        <div className="d-flex align-items-center gap-1 text-primary fw-semibold" style={{ fontSize: "0.82rem" }}>
+          <span>{isMobileOpen ? "Hide List" : "Search & Trade"}</span>
+          <span>{isMobileOpen ? "▲" : "▼"}</span>
+        </div>
+      </div>
+
+      <div className={`watchlist-content-body ${isMobileOpen ? "show" : ""}`}>
+        {/* Search Input Bar */}
+        <div className="search-container">
         <SearchIcon className="search-icon" style={{ fontSize: "1rem" }} />
         <input
           type="text"
@@ -141,6 +162,7 @@ const WatchList = () => {
           </span>
         </div>
         <DoughnutChart data={chartData} />
+      </div>
       </div>
     </aside>
   );

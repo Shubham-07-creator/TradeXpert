@@ -1659,3 +1659,98 @@ p {
 [data-theme="dark"] .site-footer .footer-divider {
   border-color: #1E293B !important;
 }
+
+/* ============================================================
+   ADVANCED FINTECH MOBILE RESPONSIVENESS (< 768px & < 480px)
+   ============================================================ */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 0 3rem;
+  }
+  
+  .hero-title {
+    font-size: 2.15rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  .hero-lead {
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+  
+  .hero-visual-wrapper {
+    max-width: 100%;
+  }
+  
+  .hero-visual-wrapper img {
+    max-width: 100% !important;
+    height: auto;
+  }
+
+  .floating-card {
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: auto !important;
+    margin: 10px auto !important;
+    max-width: 92% !important;
+  }
+
+  .open-account-card {
+    padding: 36px 18px !important;
+  }
+
+  .open-account-title {
+    font-size: 1.75rem !important;
+  }
+
+  .pricing-card {
+    padding: 24px 18px !important;
+  }
+
+  .bento-card {
+    padding: 20px 16px !important;
+  }
+
+  .awards-section img {
+    max-width: 100% !important;
+  }
+
+  .asset-pill-card {
+    padding: 12px !important;
+  }
+
+  .market-ticker-bar {
+    font-size: 0.72rem;
+    height: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.8rem !important;
+  }
+
+  .hero-stat-val {
+    font-size: 1.35rem !important;
+  }
+
+  .hero-stat-label {
+    font-size: 0.72rem !important;
+  }
+
+  .btn-lg {
+    padding: 10px 20px !important;
+    font-size: 0.95rem !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .open-account-trust-strip {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding-left: 8px;
+  }
+}

@@ -145,7 +145,12 @@ function Navbar() {
                 <div className="d-flex flex-column flex-lg-row gap-2 ms-lg-2 mt-3 mt-lg-0">
                   <li className="nav-item">
                     <Link
-                      className="btn btn-outline-primary px-3 py-1 fw-semibold rounded-pill"
+                      className="btn px-3 py-1 fw-semibold rounded-pill"
+                      style={{
+                        border: "1px solid var(--border-color)",
+                        color: "var(--ink)",
+                        fontSize: "0.9rem",
+                      }}
                       to="/login"
                     >
                       Login
@@ -153,11 +158,12 @@ function Navbar() {
                   </li>
                   <li className="nav-item">
                     <Link
-                      className="btn btn-primary px-3 py-1 fw-semibold rounded-pill shadow-sm"
+                      className="btn px-3 py-1 fw-semibold rounded-pill text-white shadow-sm"
                       style={{
-                        background:
-                          "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
-                        border: "none",
+                        background: "var(--primary)",
+                        border: "1px solid var(--primary)",
+                        fontSize: "0.9rem",
+                        boxShadow: "0 2px 8px rgba(37, 99, 235, 0.25)",
                       }}
                       to="/signup"
                     >
@@ -170,15 +176,15 @@ function Navbar() {
                   <li className="nav-item">
                     <a
                       href={DASHBOARD}
-                      className="btn btn-primary px-4 py-2 fw-semibold rounded-pill shadow-sm hover-scale"
+                      className="btn px-4 py-2 fw-semibold rounded-pill text-white shadow-sm hover-scale"
                       style={{
-                        background:
-                          "linear-gradient(135deg, #387ED1 0%, #00D09C 100%)",
-                        border: "none",
-                        fontSize: "0.95rem",
+                        background: "var(--primary)",
+                        border: "1px solid var(--primary)",
+                        fontSize: "0.92rem",
+                        boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
                       }}
                     >
-                      <i className="fa-solid fa-chart-line me-1"></i> Invest Now
+                      <i className="fa-solid fa-chart-line me-1"></i> Open Terminal
                     </a>
                   </li>
 

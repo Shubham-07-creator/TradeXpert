@@ -18,11 +18,10 @@ function Hero() {
       >
         <div className="col-6 p-5">
           <p>
-            We kick-started operations on the 15th of August, 2010 with the goal
-            of breaking all barriers that traders and investors face in India in
-            terms of cost, support, and technology. We named the company
-            TradeXpert, a combination of Zero and "Rodha", the Sanskrit word for
-            barrier.
+            We kick-started operations with the goal of breaking all barriers
+            that traders and investors face in India in terms of cost, execution speed,
+            support, and technology. We named the platform TradeXpert — built by traders,
+            for traders, combining cutting-edge technology with zero-barrier pricing.
           </p>
           <p>
             Today, our disruptive pricing models and in-house technology have
@@ -56,4 +55,3 @@ function Hero() {
 }
 
 export default Hero;
-<h1>Hero</h1>;

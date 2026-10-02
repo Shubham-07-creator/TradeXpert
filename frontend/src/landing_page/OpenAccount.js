@@ -3,34 +3,64 @@ import { Link } from "react-router-dom";
 
 function OpenAccount() {
   return (
-    <div className="py-5 open-account-section" style={{ background: "linear-gradient(135deg, #1B4D85 0%, #387ED1 50%, #00D09C 100%)", position: "relative", overflow: "hidden" }}>
-      <div className="container py-5 text-center text-white position-relative fade-up" style={{ zIndex: 1 }}>
-        <h1 className="display-4 fw-bold mb-4">Open a TradeXpert Account</h1>
-        <p className="lead mb-5" style={{ opacity: 0.9, maxWidth: "600px", margin: "0 auto" }}>
-          Modern platforms and apps, ₹0 investments, and flat ₹20 intraday and F&O trades. Start your professional trading journey today.
-        </p>
+    <section className="open-account-section py-5 my-4">
+      <div className="container">
+        <div className="open-account-card fade-up">
+          <div className="open-account-content text-center">
+            <span className="badge-fintech mb-3">
+              <span className="live-dot me-2"></span>
+              INSTANT DIGITAL ONBOARDING
+            </span>
 
-        <Link
-          to="/signup"
-          className="btn btn-light btn-lg hover-scale open-account-btn"
-          style={{ 
-            color: "#1B4D85", 
-            fontWeight: "700", 
-            padding: "15px 40px", 
-            borderRadius: "30px",
-            boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
-            textTransform: "uppercase",
-            letterSpacing: "1px"
-          }}
-        >
-          Sign up Now
-        </Link>
+            <h2 className="open-account-title display-5 fw-bold mb-3">
+              Open your free TradeXpert account
+            </h2>
+
+            <p className="open-account-subtitle mb-4">
+              Invest in zero-commission stocks, direct mutual funds, and trade intraday with institutional-grade speed and reliability.
+            </p>
+
+            <div className="d-flex flex-wrap justify-content-center gap-3 mb-4">
+              <Link
+                to="/signup"
+                className="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-sm hover-scale d-inline-flex align-items-center gap-2"
+                style={{ fontSize: "1.05rem" }}
+              >
+                <span>Get Started Now</span>
+                <i className="fa-solid fa-arrow-right"></i>
+              </Link>
+              <Link
+                to="/about"
+                className="btn btn-outline-secondary btn-lg rounded-pill px-4 py-3 fw-semibold hover-scale"
+                style={{ fontSize: "1.05rem" }}
+              >
+                Learn More
+              </Link>
+            </div>
+
+            {/* Trust checklist */}
+            <div className="open-account-trust-strip d-flex flex-wrap justify-content-center gap-4 pt-3 border-top">
+              <span className="d-flex align-items-center gap-2 small">
+                <i className="fa-solid fa-circle-check text-success"></i>
+                <span>₹0 Demat Account Opening</span>
+              </span>
+              <span className="d-flex align-items-center gap-2 small">
+                <i className="fa-solid fa-circle-check text-success"></i>
+                <span>5-Minute Aadhaar eKYC</span>
+              </span>
+              <span className="d-flex align-items-center gap-2 small">
+                <i className="fa-solid fa-circle-check text-success"></i>
+                <span>₹0 Free Equity Delivery</span>
+              </span>
+              <span className="d-flex align-items-center gap-2 small">
+                <i className="fa-solid fa-circle-check text-success"></i>
+                <span>SEBI &amp; NSE Registered</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      {/* Decorative floating elements */}
-      <div className="position-absolute" style={{ top: "10%", left: "5%", width: "100px", height: "100px", background: "rgba(255,255,255,0.1)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }}></div>
-      <div className="position-absolute" style={{ bottom: "10%", right: "10%", width: "150px", height: "150px", background: "rgba(255,255,255,0.05)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }}></div>
-    </div>
+    </section>
   );
 }
 

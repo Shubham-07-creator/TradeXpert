@@ -17,29 +17,44 @@ function Footer() {
               <span className="footer-brand-title ms-2 fs-4">TradeXpert</span>
             </div>
             <p className="text-muted small">
-              © 2010 - 2026, TradeXpert Broking Ltd. All rights reserved.
+              &copy; 2010 - 2026, TradeXpert Broking Ltd. All rights reserved.
             </p>
             <div className="d-flex gap-2 mt-3">
               <a
-                href="#"
+                href="https://twitter.com"
+                target="_blank"
+                rel="noreferrer"
                 className="footer-social-link"
                 title="X / Twitter"
               >
-                𝕏
+                <i className="fa-brands fa-x-twitter"></i>
               </a>
               <a
-                href="#"
+                href="https://facebook.com"
+                target="_blank"
+                rel="noreferrer"
                 className="footer-social-link"
                 title="Facebook"
               >
-                f
+                <i className="fa-brands fa-facebook-f"></i>
               </a>
               <a
-                href="#"
+                href="https://linkedin.com"
+                target="_blank"
+                rel="noreferrer"
                 className="footer-social-link"
                 title="LinkedIn"
               >
-                in
+                <i className="fa-brands fa-linkedin-in"></i>
+              </a>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noreferrer"
+                className="footer-social-link"
+                title="Instagram"
+              >
+                <i className="fa-brands fa-instagram"></i>
               </a>
             </div>
           </div>

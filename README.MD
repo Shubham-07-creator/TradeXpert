@@ -70,7 +70,7 @@ flowchart TD
         TradeEngine["Order Matching & GTT Engine"]
         
         subgraph MarketModule["Market Engine (liveMarket.js)"]
-            YF["Yahoo Finance Sync (NSE Quotes)"]
+            YF["Yahoo Finance Sync Module"]
             QuantSim["Ornstein-Uhlenbeck Quant Simulator"]
             TickGen["Asynchronous Tick Generator (2.5s)"]
         end
@@ -83,19 +83,20 @@ flowchart TD
         YahooAPI[("Yahoo Finance Live Market API")]
     end
 
-    LP -->|HTTP REST Auth| Security
-    DT -->|HTTP REST Orders & Portfolio| Security
-    DT <-->|WebSocket Real-Time Ticks| SocketServer
+    LP -->|"HTTP REST Auth"| Security
+    DT -->|"HTTP REST Orders & Portfolio"| Security
+    DT <-->|"WebSocket Real-Time Ticks"| SocketServer
 
     Security --> Auth
     Auth --> TradeEngine
-    TradeEngine <--> Mongo
+    TradeEngine <-->|"Read & Write Queries"| Mongo
     
-    YF <-->|15s Polling (Market Open)| YahooAPI
+    YF -->|"Batch Quote Ingest"| YahooAPI
+    YahooAPI -->|"Live NSE Rates"| YF
     YF --> QuantSim
     QuantSim --> TickGen
     TickGen --> SocketServer
-    TradeEngine -->|User Trade Demand Boost| QuantSim
+    TradeEngine -->|"User Trade Demand Boost"| QuantSim
 ```
 
 ---

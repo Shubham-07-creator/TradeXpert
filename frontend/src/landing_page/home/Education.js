@@ -25,7 +25,7 @@ function Education() {
             </p>
 
             <div className="row g-4">
-              {/* Varsity Card */}
+              {/* Academy Card */}
               <div className="col-sm-6">
                 <div className="education-card p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
                   <div>
@@ -34,7 +34,7 @@ function Education() {
                         <i className="fa-solid fa-graduation-cap"></i>
                       </div>
                       <span className="badge rounded-pill px-3 py-1 fw-bold small" style={{ background: "rgba(37, 99, 235, 0.1)", color: "#2563EB" }}>
-                        VARSITY
+                        TRADEXPERT ACADEMY
                       </span>
                     </div>
                     <h3 className="fs-5 fw-bold mb-2">Comprehensive Courseware</h3>
@@ -51,7 +51,7 @@ function Education() {
                 </div>
               </div>
 
-              {/* TradingQ&A Card */}
+              {/* TradeXpert Community Card */}
               <div className="col-sm-6">
                 <div className="education-card p-4 rounded-4 h-100 d-flex flex-column justify-content-between">
                   <div>
@@ -63,7 +63,7 @@ function Education() {
                         COMMUNITY
                       </span>
                     </div>
-                    <h3 className="fs-5 fw-bold mb-2">TradingQ&amp;A Community</h3>
+                    <h3 className="fs-5 fw-bold mb-2">TradeXpert Community</h3>
                     <p className="text-muted small mb-3">
                       India's largest active market forum with over 500,000+ traders discussing regulations, strategies, and platform updates.
                     </p>

@@ -130,7 +130,7 @@ function CreateTicket() {
             className="fs-5"
             style={{ textDecoration: "none", lineHeight: "2.5" }}
           >
-            Kite Web and Mobile
+            TradeXpert Web and Mobile
           </a>
           <br />
           <a
@@ -162,7 +162,7 @@ function CreateTicket() {
             className="fs-5"
             style={{ textDecoration: "none", lineHeight: "2.5" }}
           >
-            Kite API
+            TradeXpert API
           </a>
           <br />
           <a
@@ -170,7 +170,7 @@ function CreateTicket() {
             className="fs-5"
             style={{ textDecoration: "none", lineHeight: "2.5" }}
           >
-            Pi and other platforms
+            Desktop and other platforms
           </a>
           <br />
           <a

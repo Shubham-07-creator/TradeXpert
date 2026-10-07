@@ -13,7 +13,7 @@
 [![Security: OWASP Helmet](https://img.shields.io/badge/Security-OWASP_Helmet-10B981?style=flat-square&logo=shield&logoColor=white)](#-security-architecture--hardening-grade-a-9810)
 [![Vulnerabilities](https://img.shields.io/badge/Vulnerabilities-0_Found-brightgreen?style=flat-square)](#)
 
-**A high-performance, full-stack Fintech Paper Trading & Terminal platform inspired by Zerodha Kite and Bloomberg Terminal.**  
+**A high-performance, full-stack Fintech Paper Trading & Terminal platform inspired by modern institutional trading desks and Bloomberg Terminal.**  
 Delivering real-time Dalal Street market feeds, automated Limit & GTT order matching, an asynchronous institutional Quantitative Simulation engine, and bank-grade application security.
 
 [🌐 Live Landing Platform](https://tradexpert-vq6s.onrender.com) • [📊 Trading Terminal](https://tradexpert-dashboard.onrender.com) • [⚡ Backend API](https://tradexpert-backend-q7pf.onrender.com) • [📖 Bug Report](https://github.com/Shubham-07-creator/TradeXpert/issues)
@@ -47,7 +47,7 @@ Delivering real-time Dalal Street market feeds, automated Limit & GTT order matc
 
 Most stock trading academic projects are limited to static hardcoded JSON files, crude random price generators, or lack realistic market mechanics.
 
-**TradeXpert** is engineered to mirror the architecture of modern Indian neo-brokers (Zerodha, Groww) and institutional trading desks:
+**TradeXpert** is engineered to mirror the architecture of modern Indian neo-brokers and institutional trading desks:
 - **Real Market Integration:** Automatically pulls live quotes for **100 NSE Equities** and major benchmark indices (**NIFTY 50** & **SENSEX**) via Yahoo Finance.
 - **24/7 Smart Hybrid Engine:** When Indian markets are open (9:15 AM – 3:30 PM IST), prices mirror Dalal Street. When closed, it switches to a stochastic **Ornstein-Uhlenbeck Quantitative Simulator** so traders can learn, test, and execute orders around real closing prices without the platform freezing.
 - **Real Trading Lifecycle:** Supports **Market Orders**, **Limit Orders** (with automatic margin locking and execution triggers), and **GTT (Good-Till-Triggered) Stop-Loss & Target** conditional execution.

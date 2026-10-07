@@ -30,9 +30,12 @@ function Universe() {
         </div>
 
         <div className="col-12 col-sm-6 col-lg-4 p-3 mt-3 mt-lg-4">
-          <img src="media/images/zerodhaFundhouse.png" className="partner-logo img-fluid" alt="Fundhouse" style={{ maxHeight: "48px" }} />
+          <div className="d-flex align-items-center justify-content-center gap-2" style={{ height: "48px" }}>
+            <img src="media/images/logo2.svg" alt="TradeXpert Capital" style={{ height: "36px" }} />
+            <span className="fw-bold fs-5 text-primary">TradeXpert Capital</span>
+          </div>
           <p className="text-muted mt-2 small">
-            Our asset management venture creating simple index funds.
+            Our asset management venture creating simple index funds and quantitative portfolios.
           </p>
         </div>
 

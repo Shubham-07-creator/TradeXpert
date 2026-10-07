@@ -11,9 +11,9 @@ function ProductsPage() {
     <>
       <Hero />
       <LeftSection
-        imageURL="media/images/kite.png"
-        productName="Kite"
-        productDescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the Kite experience seamlessly on your Android and iOS devices."
+        imageURL="media/images/tradingTerminal.png"
+        productName="TradeXpert Terminal"
+        productDescription="Our ultra-fast flagship trading platform with streaming market data, advanced charts, an elegant UI, and more. Enjoy the TradeXpert experience seamlessly on your Android and iOS devices."
         tryDemo=""
         learnMore=""
         googlePlay=""
@@ -35,14 +35,14 @@ function ProductsPage() {
         appStore=""
       />
       <RightSection
-        imageURL="media/images/kiteconnect.png"
-        productName="Kite Connect API"
+        imageURL="media/images/tradingApi.png"
+        productName="TradeXpert Connect API"
         productDescription="Build powerful trading platforms and experiences with our super simple HTTP/JSON APIs. If you are a startup, build your investment app and showcase it to our clientbase."
         learnMore=""
       />
       <LeftSection
-        imageURL="media/images/varsity.png"
-        productName="Varisity Mobile"
+        imageURL="media/images/academy.png"
+        productName="TradeXpert Academy"
         productDescription="An easy to grasp, collection of stock market lessons with in-depth coverage and illustrations. Content is broken down into bite-size cards to help you learn on the go."
         tryDemo=""
         learnMore=""

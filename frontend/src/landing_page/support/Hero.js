@@ -28,7 +28,7 @@ function Hero() {
               <a href="">Track account opening</a>
               <a href="">Track segment activation</a>
               <a href="">Intraday margins</a>
-              <a href="">Kite user manual</a>
+              <a href="">TradeXpert user manual</a>
             </div>
 
           </div>

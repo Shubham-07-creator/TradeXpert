@@ -120,6 +120,19 @@ app.get("/market/snapshot", (req, res) => {
   }
 });
 
+// Valid Indian States & Union Territories (matches frontend indiaStates.js)
+const VALID_INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal",
+  "Andaman and Nicobar Islands", "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu", "Delhi", "Jammu and Kashmir",
+  "Ladakh", "Lakshadweep", "Puducherry"
+];
+
 // ==========================================
 // SIGNUP (rate-limited)
 // ==========================================
@@ -171,6 +184,34 @@ app.post("/signup", authLimiter, async (req, res) => {
       if (!/^[a-zA-Z\s.'-]{2,50}$/.test(city.toString().trim())) {
         return res.status(400).json({
           message: "City name must contain only letters and spaces (2-50 chars) ❌",
+        });
+      }
+    }
+
+    // State validation (if provided)
+    if (state && !VALID_INDIAN_STATES.includes(state.toString().trim())) {
+      return res.status(400).json({
+        message: "Please select a valid Indian State / Union Territory ❌",
+      });
+    }
+
+    // Date of Birth & Age validation (if provided)
+    if (dob) {
+      const dobDate = new Date(dob);
+      if (isNaN(dobDate.getTime())) {
+        return res.status(400).json({
+          message: "Please provide a valid Date of Birth ❌",
+        });
+      }
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        return res.status(400).json({
+          message: "You must be at least 18 years old to open a trading account ❌",
         });
       }
     }
@@ -619,6 +660,34 @@ app.put("/updateProfile", authMiddleware, async (req, res) => {
       }
     }
 
+    // Validate state if provided
+    if (state && !VALID_INDIAN_STATES.includes(state.toString().trim())) {
+      return res.status(400).json({
+        message: "Please select a valid Indian State / Union Territory ❌",
+      });
+    }
+
+    // Validate DOB & Age if provided
+    if (dob) {
+      const dobDate = new Date(dob);
+      if (isNaN(dobDate.getTime())) {
+        return res.status(400).json({
+          message: "Please provide a valid Date of Birth ❌",
+        });
+      }
+      const today = new Date();
+      let age = today.getFullYear() - dobDate.getFullYear();
+      const m = today.getMonth() - dobDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dobDate.getDate())) {
+        age--;
+      }
+      if (age < 18) {
+        return res.status(400).json({
+          message: "You must be at least 18 years old ❌",
+        });
+      }
+    }
+
     // Validate address if provided
     if (address && address.toString().trim().length < 10) {
       return res.status(400).json({
@@ -636,7 +705,7 @@ app.put("/updateProfile", authMiddleware, async (req, res) => {
         address,
       },
       {
-        new: true,
+        returnDocument: "after",
       },
     ).select("-password");
 
@@ -666,7 +735,7 @@ app.post("/wallet/add", authMiddleware, async (req, res) => {
     const user = await UserModel.findByIdAndUpdate(
       req.userId,
       { $inc: { wallet: amount } },
-      { new: true },
+      { returnDocument: "after" },
     ).select("-password");
 
     res.json({ message: "Funds added ✅", user });

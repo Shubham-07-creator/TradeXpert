@@ -131,7 +131,54 @@ app.post("/signup", authLimiter, async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({
-        message: "Required fields missing ❌",
+        message: "Full Name, Email and Password are required ❌",
+      });
+    }
+
+    // Name format validation
+    if (!/^[a-zA-Z\s.']{2,60}$/.test(name.trim())) {
+      return res.status(400).json({
+        message: "Full name must contain only letters and spaces (2-60 chars) ❌",
+      });
+    }
+
+    // Email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({
+        message: "Please provide a valid email address ❌",
+      });
+    }
+
+    // Password length validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long ❌",
+      });
+    }
+
+    // Phone format validation (if provided)
+    if (phone) {
+      const cleanPhone = phone.toString().replace(/[\s+-]/g, "");
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return res.status(400).json({
+          message: "Please enter a valid 10-digit Indian mobile number ❌",
+        });
+      }
+    }
+
+    // City format validation (if provided)
+    if (city) {
+      if (!/^[a-zA-Z\s.'-]{2,50}$/.test(city.toString().trim())) {
+        return res.status(400).json({
+          message: "City name must contain only letters and spaces (2-50 chars) ❌",
+        });
+      }
+    }
+
+    // Address validation (if provided)
+    if (address && address.toString().trim().length < 10) {
+      return res.status(400).json({
+        message: "Residential address must be at least 10 characters long ❌",
       });
     }
 
@@ -139,7 +186,7 @@ app.post("/signup", authLimiter, async (req, res) => {
 
     if (existing) {
       return res.status(400).json({
-        message: "User already exists ❌",
+        message: "User already exists with this email address ❌",
       });
     }
 
@@ -552,6 +599,32 @@ app.get("/profile", authMiddleware, async (req, res) => {
 app.put("/updateProfile", authMiddleware, async (req, res) => {
   try {
     const { phone, dob, city, state, address } = req.body;
+
+    // Validate phone if provided
+    if (phone) {
+      const cleanPhone = phone.toString().replace(/[\s+-]/g, "");
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        return res.status(400).json({
+          message: "Please enter a valid 10-digit Indian mobile number ❌",
+        });
+      }
+    }
+
+    // Validate city if provided
+    if (city) {
+      if (!/^[a-zA-Z\s.'-]{2,50}$/.test(city.toString().trim())) {
+        return res.status(400).json({
+          message: "City name must contain only letters and spaces (2-50 chars) ❌",
+        });
+      }
+    }
+
+    // Validate address if provided
+    if (address && address.toString().trim().length < 10) {
+      return res.status(400).json({
+        message: "Address must be at least 10 characters long ❌",
+      });
+    }
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.userId,

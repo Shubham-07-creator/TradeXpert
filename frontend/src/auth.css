@@ -458,6 +458,56 @@
   gap: 14px;
 }
 
+/* Input Validation States */
+.auth-input-group.has-error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+}
+
+.auth-input-group.has-error .auth-input-icon {
+  color: #EF4444 !important;
+}
+
+.auth-input-group.has-success {
+  border-color: #10B981 !important;
+}
+
+.auth-field-error {
+  color: #EF4444;
+  font-size: 0.76rem;
+  font-weight: 500;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Auth Select Field */
+.auth-select-field {
+  flex: 1;
+  border: none !important;
+  background: transparent !important;
+  padding: 10px 0;
+  font-size: 0.95rem;
+  color: var(--ink) !important;
+  font-family: inherit;
+  outline: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.auth-select-field option {
+  background-color: var(--card-bg, #ffffff);
+  color: var(--ink, #0f172a);
+  padding: 8px;
+}
+
+[data-theme="dark"] .auth-select-field option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
 /* Mobile Responsive */
 @media (max-width: 991px) {
   .auth-aside { display: none; }

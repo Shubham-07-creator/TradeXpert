@@ -8,14 +8,14 @@ function Footer() {
         <div className="row fade-up stagger-1">
           {/* Brand Column */}
           <div className="col-lg-3 col-md-6 mb-4">
-            <div className="d-flex align-items-center mb-3">
+            <Link to="/" className="d-flex align-items-center mb-3 text-decoration-none">
               <img
                 src="/media/images/logo2.svg"
                 alt="TradeXpert Logo"
                 style={{ width: "38px" }}
               />
               <span className="footer-brand-title ms-2 fs-4">TradeXpert</span>
-            </div>
+            </Link>
             <p className="text-muted small">
               &copy; 2010 - 2026, TradeXpert Broking Ltd. All rights reserved.
             </p>
@@ -79,14 +79,14 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#calculators" className="footer-link">
+                <Link to="/#calculators" className="footer-link">
                   Calculators
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/about" className="footer-link">
                   Careers
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -106,19 +106,19 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#faq" className="footer-link">
+                <Link to="/support#faq" className="footer-link">
                   FAQs
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/support" className="footer-link">
                   File a Complaint
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/support" className="footer-link">
                   Market Status
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -143,14 +143,14 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/signup" className="footer-link">
                   Virtual Trading
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/pricing" className="footer-link">
                   Referral Program
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -160,14 +160,14 @@ function Footer() {
             <h6 className="footer-heading">Trading Tools</h6>
             <ul className="list-unstyled">
               <li>
-                <a href="#calculators" className="footer-link">
+                <Link to="/#calculators" className="footer-link">
                   Brokerage Calculator
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#calculators" className="footer-link">
+                <Link to="/#calculators" className="footer-link">
                   SIP Calculator
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/pricing" className="footer-link">
@@ -175,14 +175,14 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/support" className="footer-link">
                   Market Holidays
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="footer-link">
+                <Link to="/product" className="footer-link">
                   API Documentation
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

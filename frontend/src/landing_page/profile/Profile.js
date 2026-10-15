@@ -3,13 +3,14 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import { API_URL, getStoredUser, goToDashboard } from "../../utils/storage";
+import { INDIAN_STATES } from "../../utils/indiaStates";
 import "./profile.css";
 
 const FIELDS = [
   { name: "phone", label: "Phone Number", icon: "fa-solid fa-phone" },
   { name: "dob", label: "Date of Birth", icon: "fa-regular fa-calendar" },
   { name: "city", label: "City", icon: "fa-solid fa-city" },
-  { name: "state", label: "State", icon: "fa-solid fa-map-location-dot" },
+  { name: "state", label: "State", icon: "fa-solid fa-map-location-dot", isSelect: true },
   {
     name: "address",
     label: "Permanent Address",
@@ -44,9 +45,14 @@ function Profile() {
           </div>
           <h2>Access Your Profile</h2>
           <p>Please sign in to your account to view and manage your profile details.</p>
-          <Link to="/login" className="btn-custom-primary" style={{ display: "inline-block", textDecoration: "none" }}>
-            Sign In Now
-          </Link>
+          <div className="d-flex justify-content-center gap-3 mt-3">
+            <Link to="/" className="btn-custom-outline" style={{ textDecoration: "none" }}>
+              <i className="fa-solid fa-house me-1"></i> Back to Home
+            </Link>
+            <Link to="/login" className="btn-custom-primary" style={{ textDecoration: "none" }}>
+              Sign In Now
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -61,7 +67,64 @@ function Profile() {
     setEditMode(false);
   };
 
+  const validateProfile = () => {
+    // 1. Phone validation
+    if (user.phone) {
+      const cleanPhone = user.phone.toString().replace(/[\s+-]/g, "");
+      if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+        toast.error("Please enter a valid 10-digit Indian mobile number ❌");
+        return false;
+      }
+    }
+
+    // 2. City validation
+    if (user.city) {
+      const cleanCity = user.city.toString().trim();
+      if (!/^[a-zA-Z\s.'-]{2,50}$/.test(cleanCity)) {
+        toast.error("City must contain only letters and spaces (no numbers or symbols) ❌");
+        return false;
+      }
+    }
+
+    // 3. State validation
+    if (user.state) {
+      const cleanState = user.state.toString().trim();
+      if (!INDIAN_STATES.includes(cleanState)) {
+        toast.error("Please select a valid State from the list ❌");
+        return false;
+      }
+    }
+
+    // 4. Address validation
+    if (user.address) {
+      const cleanAddr = user.address.toString().trim();
+      if (cleanAddr.length < 10) {
+        toast.error("Address must be at least 10 characters long ❌");
+        return false;
+      }
+      if (!/[a-zA-Z]/.test(cleanAddr)) {
+        toast.error("Address must contain valid street, building or locality details ❌");
+        return false;
+      }
+    }
+
+    // 5. DOB validation
+    if (user.dob) {
+      const birth = new Date(user.dob);
+      const today = new Date();
+      const age = (today - birth) / (365.25 * 24 * 60 * 60 * 1000);
+      if (isNaN(age) || age < 18) {
+        toast.error("Account holder must be at least 18 years old ❌");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleSave = async () => {
+    if (!validateProfile()) return;
+
     try {
       setLoading(true);
 
@@ -116,10 +179,19 @@ function Profile() {
               </div>
 
               <div className="profile-head-actions">
+                <Link
+                  to="/"
+                  className="btn-custom-outline"
+                  title="Return to TradeXpert Home"
+                >
+                  <i className="fa-solid fa-house"></i> Home
+                </Link>
+
                 <button
                   type="button"
                   className="btn-custom-outline"
                   onClick={() => goToDashboard()}
+                  title="Open Pro Trading Terminal"
                 >
                   <i className="fa-solid fa-chart-line"></i> Dashboard
                 </button>
@@ -136,7 +208,7 @@ function Profile() {
               </div>
             </div>
 
-            {/* User Details (100% on the card surface, zero banner overlap!) */}
+            {/* User Details */}
             <div className="profile-id">
               <h1>{user.name}</h1>
               <div className="profile-email-badge">
@@ -205,14 +277,30 @@ function Profile() {
                     <label htmlFor={`p-${f.name}`}>{f.label}</label>
 
                     {editMode ? (
-                      <input
-                        id={`p-${f.name}`}
-                        name={f.name}
-                        type={f.name === "dob" ? "date" : "text"}
-                        value={user[f.name] || ""}
-                        placeholder={`Enter your ${f.label.toLowerCase()}`}
-                        onChange={handleChange}
-                      />
+                      f.isSelect ? (
+                        <select
+                          id={`p-${f.name}`}
+                          name={f.name}
+                          value={user[f.name] || ""}
+                          onChange={handleChange}
+                        >
+                          <option value="">-- Select State --</option>
+                          {INDIAN_STATES.map((st) => (
+                            <option key={st} value={st}>
+                              {st}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          id={`p-${f.name}`}
+                          name={f.name}
+                          type={f.name === "dob" ? "date" : "text"}
+                          value={user[f.name] || ""}
+                          placeholder={`Enter your ${f.label.toLowerCase()}`}
+                          onChange={handleChange}
+                        />
+                      )
                     ) : (
                       <p>{user[f.name] || "Not provided"}</p>
                     )}

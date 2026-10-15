@@ -16,16 +16,44 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const validate = () => {
+    const errs = {};
+    if (!email || !email.trim()) {
+      errs.email = "Email address is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      errs.email = "Please enter a valid email address";
+    }
+
+    if (!password) {
+      errs.password = "Password is required";
+    } else if (password.length < 6) {
+      errs.password = "Password must be at least 6 characters";
+    }
+    return errs;
+  };
+
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
+
+    setTouched({ email: true, password: true });
+    const errs = validate();
+    setErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      toast.error(errs.email || errs.password || "Please check your inputs ⚠️");
+      return;
+    }
+
     try {
       setLoading(true);
 
       const res = await axios.post(`${API}/login`, {
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -51,11 +79,15 @@ function Login() {
           codeRes.data.code,
         )}`;
       } catch (codeErr) {
-        // Code generation failed — fallback: redirect without code
         window.location.href = DASHBOARD;
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Sign in failed ❌");
+      const serverMsg = err.response?.data?.message || "Sign in failed ❌";
+      toast.error(serverMsg);
+      setErrors((prev) => ({
+        ...prev,
+        server: serverMsg,
+      }));
     } finally {
       setLoading(false);
     }
@@ -80,12 +112,14 @@ function Login() {
 
         {/* Header */}
         <div className="text-center mb-4">
-          <img
-            src="/media/images/logo2.svg"
-            alt="TradeXpert"
-            style={{ width: "48px", transition: "transform 0.3s ease" }}
-            className="mb-2 logo-hover"
-          />
+          <Link to="/" title="Back to TradeXpert Home">
+            <img
+              src="/media/images/logo2.svg"
+              alt="TradeXpert"
+              style={{ width: "48px", transition: "transform 0.3s ease" }}
+              className="mb-2 logo-hover"
+            />
+          </Link>
           <h2 className="fw-bold mb-1" style={{ color: "var(--ink)", letterSpacing: "-0.03em" }}>
             Welcome Back
           </h2>
@@ -100,17 +134,31 @@ function Login() {
         </div>
 
         <div className="auth-divider">
-          <span>or continue with email</span>
+          <span>or sign in with credentials</span>
         </div>
 
         {/* Credentials Form */}
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} noValidate>
+          {errors.server && (
+            <div
+              className="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mb-3 rounded-3"
+              role="alert"
+            >
+              <i className="fa-solid fa-circle-exclamation flex-shrink-0"></i>
+              <span>{errors.server}</span>
+            </div>
+          )}
+
           {/* Email Address */}
           <div className="field mb-3">
             <label className="fw-semibold small mb-1" style={{ color: "var(--ink-secondary)" }}>
-              Email Address
+              Email Address <span className="text-danger">*</span>
             </label>
-            <div className="auth-input-group">
+            <div
+              className={`auth-input-group ${
+                touched.email && errors.email ? "has-error" : ""
+              }`}
+            >
               <span className="auth-input-icon">
                 <i className="fas fa-envelope"></i>
               </span>
@@ -119,17 +167,27 @@ function Login() {
                 placeholder="name@example.com"
                 className="auth-input-field"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors((prev) => ({ ...prev, email: "" }));
+                }}
+                onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
                 required
               />
             </div>
+            {touched.email && errors.email && (
+              <div className="auth-field-error">
+                <i className="fa-solid fa-circle-exclamation"></i>
+                <span>{errors.email}</span>
+              </div>
+            )}
           </div>
 
           {/* Password */}
           <div className="field mb-4">
             <div className="d-flex justify-content-between align-items-center mb-1">
               <label className="fw-semibold small mb-0" style={{ color: "var(--ink-secondary)" }}>
-                Password
+                Password <span className="text-danger">*</span>
               </label>
               <Link
                 to="/forgot-password"
@@ -139,7 +197,11 @@ function Login() {
                 Forgot Password?
               </Link>
             </div>
-            <div className="auth-input-group">
+            <div
+              className={`auth-input-group ${
+                touched.password && errors.password ? "has-error" : ""
+              }`}
+            >
               <span className="auth-input-icon">
                 <i className="fas fa-lock"></i>
               </span>
@@ -148,7 +210,11 @@ function Login() {
                 placeholder="Enter your password"
                 className="auth-input-field"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors((prev) => ({ ...prev, password: "" }));
+                }}
+                onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
                 required
               />
               <button
@@ -160,13 +226,19 @@ function Login() {
                 <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
               </button>
             </div>
+            {touched.password && errors.password && (
+              <div className="auth-field-error">
+                <i className="fa-solid fa-circle-exclamation"></i>
+                <span>{errors.password}</span>
+              </div>
+            )}
           </div>
 
-          {/* Shimmer Submit Button */}
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="btn-auth-shimmer mt-2"
+            className="btn-auth-shimmer"
           >
             {loading ? (
               <>
@@ -183,15 +255,25 @@ function Login() {
         </form>
 
         <p className="text-center mt-4 text-muted small mb-0">
-          New to TradeXpert?{" "}
+          Don't have an account?{" "}
           <span
             className="fw-bold"
             style={{ color: "var(--primary)", cursor: "pointer", transition: "color 0.2s ease" }}
             onClick={() => navigate("/signup")}
           >
-            Create free account &rarr;
+            Create one free &rarr;
           </span>
         </p>
+
+        <div className="text-center mt-3">
+          <Link
+            to="/"
+            className="text-decoration-none small text-muted hover-primary"
+            style={{ fontSize: "0.82rem" }}
+          >
+            <i className="fa-solid fa-arrow-left me-1"></i> Back to Homepage
+          </Link>
+        </div>
       </div>
     </AuthShell>
   );

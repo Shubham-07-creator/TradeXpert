@@ -284,7 +284,8 @@
   word-break: break-word;
 }
 
-.info-text input {
+.info-text input,
+.info-text select {
   width: 100%;
   border: 1px solid var(--border, #E2E8F0);
   border-radius: 8px;
@@ -297,9 +298,15 @@
   transition: all 0.2s ease;
 }
 
-.info-text input:focus {
+.info-text input:focus,
+.info-text select:focus {
   border-color: var(--primary, #387ED1);
   box-shadow: 0 0 0 3px rgba(56, 126, 209, 0.15);
+}
+
+[data-theme="dark"] .info-text select option {
+  background-color: #1e293b;
+  color: #f8fafc;
 }
 
 /* Actions at Bottom */

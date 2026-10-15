@@ -15,6 +15,7 @@ import { AuthProvider } from "./context/AuthContext";
 import HomePage from "./landing_page/home/HomePage";
 import Navbar from "./landing_page/Navbar";
 import Footer from "./landing_page/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy-loaded routes for optimal initial page-load speed
 const Login = React.lazy(() => import("./landing_page/login/Login"));
@@ -101,6 +102,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <BrowserRouter>
+          <ScrollToTop />
           <Navbar />
           <Toaster position="top-right" />
           <AnimatedRoutes />

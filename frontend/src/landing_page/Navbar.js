@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import MarketTicker from "./MarketTicker";
 import { DASHBOARD_URL } from "../utils/storage";
 
 function Navbar() {
+  const location = useLocation();
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
@@ -102,22 +103,47 @@ function Navbar() {
             <ul className="navbar-nav ms-auto align-items-center gap-2 gap-lg-3">
               {/* COMMON LINKS */}
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/about" onClick={() => setMenuOpen(false)}>
+                <Link
+                  className={`nav-link fw-semibold ${location.pathname === "/" ? "active text-primary fw-bold" : ""}`}
+                  to="/"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Home
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link
+                  className={`nav-link fw-semibold ${location.pathname === "/about" ? "active text-primary fw-bold" : ""}`}
+                  to="/about"
+                  onClick={() => setMenuOpen(false)}
+                >
                   About
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/product" onClick={() => setMenuOpen(false)}>
+                <Link
+                  className={`nav-link fw-semibold ${location.pathname === "/product" ? "active text-primary fw-bold" : ""}`}
+                  to="/product"
+                  onClick={() => setMenuOpen(false)}
+                >
                   Product
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/pricing" onClick={() => setMenuOpen(false)}>
+                <Link
+                  className={`nav-link fw-semibold ${location.pathname === "/pricing" ? "active text-primary fw-bold" : ""}`}
+                  to="/pricing"
+                  onClick={() => setMenuOpen(false)}
+                >
                   Pricing
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link fw-semibold" to="/support" onClick={() => setMenuOpen(false)}>
+                <Link
+                  className={`nav-link fw-semibold ${location.pathname === "/support" ? "active text-primary fw-bold" : ""}`}
+                  to="/support"
+                  onClick={() => setMenuOpen(false)}
+                >
                   Support
                 </Link>
               </li>

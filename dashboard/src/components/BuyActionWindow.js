@@ -26,8 +26,19 @@ const BuyActionWindow = ({ uid, type }) => {
   const [target, setTarget] = useState("");
 
   const [loading, setLoading] = useState(false);
+  const [wallet, setWallet] = useState(null);
 
   const { closeWindow } = useContext(GeneralContext);
+
+  // Sync wallet balance
+  useEffect(() => {
+    axios
+      .get(`${API}/profile`, { headers: getAuthHeader() })
+      .then((res) => {
+        if (res.data?.wallet !== undefined) setWallet(res.data.wallet);
+      })
+      .catch((err) => console.log(err));
+  }, [API]);
 
   // Sync with live price
   useEffect(() => {
@@ -80,6 +91,11 @@ const BuyActionWindow = ({ uid, type }) => {
 
     if (orderType === "LIMIT" && (!limitPrice || Number(limitPrice) <= 0)) {
       toast.error("Please enter a valid limit price ❌");
+      return;
+    }
+
+    if (type === "BUY" && wallet !== null && marginRequired > wallet) {
+      toast.error(`Insufficient margin. Required ₹${marginRequired.toFixed(2)}, Available ₹${Number(wallet).toFixed(2)} ❌`);
       return;
     }
 
@@ -388,17 +404,31 @@ const BuyActionWindow = ({ uid, type }) => {
           </div>
 
           {/* Live Margin Calculation */}
-          <div className="margin-info-box">
-            <span className="margin-label">
-              {orderType === "LIMIT" ? "Margin Required (Limit):" : "Margin Required (Market):"}
-            </span>
-            <span className="margin-amount">
-              ₹
-              {marginRequired.toLocaleString("en-IN", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </span>
+          <div className="margin-info-box" style={{ flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", flexWrap: "wrap", gap: "6px" }}>
+              <div>
+                <span className="margin-label">
+                  {orderType === "LIMIT" ? "Margin Required (Limit):" : "Margin Required (Market):"}
+                </span>
+                <span className="margin-amount" style={{ marginLeft: "6px" }}>
+                  ₹
+                  {marginRequired.toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </span>
+              </div>
+              {wallet !== null && (
+                <div style={{ fontSize: "0.78rem", color: "var(--color-text-muted)" }}>
+                  Available Cash: <b style={{ color: isBuy && wallet < marginRequired ? "var(--color-loss)" : "var(--color-primary)" }}>₹{Number(wallet).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</b>
+                </div>
+              )}
+            </div>
+            {wallet !== null && isBuy && wallet < marginRequired && (
+              <div style={{ color: "var(--color-loss)", fontSize: "0.74rem", fontWeight: "600" }}>
+                ⚠️ Insufficient available cash for this order quantity.
+              </div>
+            )}
           </div>
 
           {/* Actions */}

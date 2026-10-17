@@ -10,6 +10,7 @@ import { sound } from "../utils/sound";
 
 const Positions = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
+  const [loading, setLoading] = useState(true);
   const [allPositions, setAllPositions] = useState([]);
   const [liveMap, setLiveMap] = useState(getLiveMap);
   const [hover, setHover] = useState(null);
@@ -24,6 +25,9 @@ const Positions = () => {
       setAllPositions(res.data || []);
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load active intraday positions");
+    } finally {
+      setLoading(false);
     }
   }, [API]);
 
@@ -111,9 +115,21 @@ const Positions = () => {
 
       {/* Positions Table */}
       <div className="table-card">
-        {allPositions.length > 0 ? (
-          <div className="table-responsive">
-            <table className="order-table">
+        {loading ? (
+          <div style={{ padding: "28px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+            </div>
+          </div>
+        ) : allPositions.length > 0 ? (
+          <>
+            <div className="mobile-table-hint">
+              <span>⟵ Swipe table horizontally for full figures • Swipe page vertically to scroll ⟶</span>
+            </div>
+            <div className="table-responsive">
+              <table className="order-table">
               <thead>
                 <tr>
                   <th>Product</th>
@@ -230,6 +246,7 @@ const Positions = () => {
               </tbody>
             </table>
           </div>
+          </>
         ) : (
           <div className="empty-state">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-faint)", marginBottom: "12px" }}>

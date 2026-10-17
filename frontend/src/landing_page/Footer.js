@@ -188,6 +188,16 @@ function Footer() {
           </div>
         </div>
 
+        {/* SEBI Regulatory Advisory Box */}
+        <div className="p-3 my-3 rounded-2" style={{ background: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <span className="badge bg-warning text-dark fw-bold" style={{ fontSize: "0.68rem" }}>SEBI RISK DISCLOSURE ON DERIVATIVES</span>
+          </div>
+          <p className="mb-0 text-muted" style={{ fontSize: "0.76rem", lineHeight: "1.5" }}>
+            9 out of 10 individual traders in equity Futures and Options Segment incurred net losses. On average, loss makers registered net trading loss close to ₹50,000. Over and above the net trading losses, loss makers expended an additional 28% in transaction costs. TradeXpert provides virtual paper trading tools with zero risk to personal capital for educational excellence.
+          </p>
+        </div>
+
         {/* Legal Disclaimer Section */}
         <div className="footer-divider border-top my-4 pt-4 footer-legal-text fade-up stagger-2">
           <p>

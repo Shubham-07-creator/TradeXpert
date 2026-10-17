@@ -9,8 +9,18 @@ import {
   ShowChart,
   ArrowForward,
 } from "@mui/icons-material";
+import toast from "react-hot-toast";
 import { getAuthHeader, getCurrentUser } from "../utils/auth";
-import { getLiveMap, subscribeToLiveMarket } from "../utils/liveMarket";
+import {
+  getLiveMap,
+  getNifty,
+  getSensex,
+  getMarketInfo,
+  subscribeToLiveMarket,
+  subscribeToNifty,
+  subscribeToSensex,
+  subscribeToMarketInfo,
+} from "../utils/liveMarket";
 import BenchmarkChart from "./BenchmarkChart";
 import SectorAllocation from "./SectorAllocation";
 import GeneralContext from "./GeneralContext";
@@ -27,9 +37,13 @@ const formatINR = (val) => {
 const Summary = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
 
+  const [loading, setLoading] = useState(true);
   const [holdings, setHoldings] = useState([]);
   const [wallet, setWallet] = useState(0);
   const [liveMap, setLiveMap] = useState(() => getLiveMap());
+  const [marketInfo, setMarketInfo] = useState(() => getMarketInfo());
+  const [nifty, setNifty] = useState(() => getNifty());
+  const [sensex, setSensex] = useState(() => getSensex());
   const [fundModalOpen, setFundModalOpen] = useState(false);
   const [fundModalMode, setFundModalMode] = useState("DEPOSIT");
 
@@ -47,6 +61,9 @@ const Summary = () => {
       setWallet(profileRes.data.wallet || 0);
     } catch (err) {
       console.log("Error loading summary:", err);
+      toast.error("Failed to load account overview");
+    } finally {
+      setLoading(false);
     }
   }, [API]);
 
@@ -55,11 +72,26 @@ const Summary = () => {
   }, [fetchData]);
 
   useEffect(() => {
-    // O(1) shared live map from liveMarket.js - zero local map allocation
-    const unsubscribe = subscribeToLiveMarket((_stocks, map) => {
+    // O(1) shared live map from liveMarket.js
+    const unsubMarket = subscribeToLiveMarket((_stocks, map) => {
       if (map) setLiveMap(map);
     });
-    return unsubscribe;
+    const unsubNifty = subscribeToNifty((data) => {
+      if (data) setNifty(data);
+    });
+    const unsubSensex = subscribeToSensex((data) => {
+      if (data) setSensex(data);
+    });
+    const unsubInfo = subscribeToMarketInfo((data) => {
+      if (data) setMarketInfo(data);
+    });
+
+    return () => {
+      unsubMarket();
+      unsubNifty();
+      unsubSensex();
+      unsubInfo();
+    };
   }, []);
 
   // Optimized O(H) Single-Pass Financial Aggregation
@@ -140,6 +172,35 @@ const Summary = () => {
             <Payments style={{ fontSize: "1rem" }} />
             + Add Funds
           </button>
+        </div>
+      </div>
+
+      {/* 1.1 Market Trend & Pulse Bar */}
+      <div className="summary-market-pulse">
+        <div className="pulse-left">
+          <span className={`pulse-status-badge ${marketInfo.isMarketOpen ? "live" : "sim"}`}>
+            <span className="pulse-dot"></span>
+            {marketInfo.isMarketOpen ? "NSE Live Market Open" : "24/7 Simulator Active"}
+          </span>
+          <span className="pulse-desc">
+            {marketInfo.marketStatus || "Real-time Quant Order Matching Engine"}
+          </span>
+        </div>
+        <div className="pulse-indices">
+          <div className="pulse-index-item">
+            <span className="pulse-index-label">NIFTY 50</span>
+            <span className="pulse-index-price">₹{Number(nifty?.price || 22421.95).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+            <span className={`pulse-index-badge ${nifty?.isDown ? "down" : "up"}`}>
+              {nifty?.percent || "+0.00%"}
+            </span>
+          </div>
+          <div className="pulse-index-item">
+            <span className="pulse-index-label">SENSEX</span>
+            <span className="pulse-index-price">₹{Number(sensex?.price || 71909.7).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+            <span className={`pulse-index-badge ${sensex?.isDown ? "down" : "up"}`}>
+              {sensex?.percent || "+0.00%"}
+            </span>
+          </div>
         </div>
       </div>
 
@@ -229,9 +290,20 @@ const Summary = () => {
           </Link>
         </div>
 
-        {holdings.length > 0 ? (
-          <div className="table-responsive">
-            <table className="order-table">
+        {loading ? (
+          <div style={{ padding: "28px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <div className="skeleton-shimmer" style={{ height: "36px", borderRadius: "6px" }}></div>
+              <div className="skeleton-shimmer" style={{ height: "36px", borderRadius: "6px" }}></div>
+            </div>
+          </div>
+        ) : holdings.length > 0 ? (
+          <>
+            <div className="mobile-table-hint">
+              <span>⟵ Swipe table horizontally • Swipe page vertically to scroll ⟶</span>
+            </div>
+            <div className="table-responsive">
+              <table className="order-table">
               <thead>
                 <tr>
                   <th>Instrument</th>
@@ -300,6 +372,7 @@ const Summary = () => {
               </tbody>
             </table>
           </div>
+          </>
         ) : (
           <div className="empty-state" style={{ padding: "36px 20px" }}>
             <div className="empty-state-icon">
@@ -314,6 +387,18 @@ const Summary = () => {
             </p>
           </div>
         )}
+      </div>
+
+      {/* 4.1 SEBI Compliance & Risk Disclosure Alert */}
+      <div className="sebi-risk-card">
+        <div className="sebi-risk-header">
+          <span className="sebi-badge">SEBI Risk Disclosure</span>
+          <span className="sebi-subtitle">Investments &amp; Derivatives Regulatory Advisory</span>
+        </div>
+        <p className="sebi-risk-text">
+          <b>Risk Warning on Trading:</b> 9 out of 10 individual traders in equity Futures and Options Segment incurred net losses, with average loss close to ₹50,000. 
+          TradeXpert provides an institutional paper trading environment with <b>₹1,00,000 risk-free virtual funds</b> to help you learn and test strategies safely before deploying real capital.
+        </p>
       </div>
 
       {/* 5. Analytics Charts Row */}

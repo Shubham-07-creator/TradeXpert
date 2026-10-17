@@ -12,6 +12,7 @@ import ConfirmModal from "./ConfirmModal";
 
 const Holdings = () => {
   const API = process.env.REACT_APP_API_URL || "http://localhost:3002";
+  const [loading, setLoading] = useState(true);
   const [allHoldings, setAllHoldings] = useState([]);
   const [liveMap, setLiveMap] = useState(getLiveMap);
   const [hover, setHover] = useState(null);
@@ -31,6 +32,9 @@ const Holdings = () => {
       setAllHoldings(res.data || []);
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load portfolio holdings");
+    } finally {
+      setLoading(false);
     }
   }, [API]);
 
@@ -227,9 +231,21 @@ const Holdings = () => {
 
       {/* Holdings Table */}
       <div className="table-card">
-        {allHoldings.length > 0 ? (
-          <div className="table-responsive">
-            <table className="order-table">
+        {loading ? (
+          <div style={{ padding: "28px 20px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+              <div className="skeleton-shimmer" style={{ height: "38px", borderRadius: "6px" }}></div>
+            </div>
+          </div>
+        ) : allHoldings.length > 0 ? (
+          <>
+            <div className="mobile-table-hint">
+              <span>⟵ Swipe table horizontally for full figures • Swipe page vertically to scroll ⟶</span>
+            </div>
+            <div className="table-responsive">
+              <table className="order-table">
               <thead>
                 <tr>
                   <th>Instrument</th>
@@ -405,6 +421,7 @@ const Holdings = () => {
               </tbody>
             </table>
           </div>
+          </>
         ) : (
           <div className="empty-state">
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-faint)", marginBottom: "12px" }}>
